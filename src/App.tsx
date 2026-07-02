@@ -17,6 +17,7 @@ import ChatDetail from "@/pages/ChatDetail"
 import ProfilePage from "@/pages/Profile"
 import WikiPage from "@/pages/Wiki"
 import NewsPage from "@/pages/News"
+import KanbanPage from "@/pages/Kanban"
 import Login from "@/pages/Login"
 import Register from "@/pages/Register"
 import NotFound from "@/pages/NotFound"
@@ -47,6 +48,7 @@ export default function App() {
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/wiki" element={<WikiPage />} />
                   <Route path="/news" element={<NewsPage />} />
+                  <Route path="/kanban" element={<KanbanPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </AppLayout>

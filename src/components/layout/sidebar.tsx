@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { Ticket, LayoutDashboard, Users, PlusCircle, Calendar, BarChart3, FileText, MessageCircle, User, HelpCircle, LogOut, BookOpen, Newspaper, Shield } from "lucide-react"
+import { Ticket, LayoutDashboard, Users, PlusCircle, Calendar, BarChart3, FileText, MessageCircle, User, HelpCircle, LogOut, BookOpen, Newspaper, Shield, Columns3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 
@@ -7,6 +7,7 @@ const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Дашборд", roles: ["admin", "senior_agent", "agent"] },
   { to: "/chats", icon: MessageCircle, label: "Чаты", roles: ["admin", "senior_agent", "agent"] },
   { to: "/tickets", icon: Ticket, label: "Тикеты", roles: ["admin", "senior_agent", "agent"] },
+  { to: "/kanban", icon: Columns3, label: "Канбан", roles: ["admin", "senior_agent", "agent"] },
   { to: "/employees", icon: Users, label: "Сотрудники", roles: ["admin", "senior_agent"] },
   { to: "/calendar", icon: Calendar, label: "Календарь", roles: ["admin", "senior_agent", "agent"] },
   { to: "/polls", icon: BarChart3, label: "Опросы", roles: ["admin", "senior_agent", "agent"] },

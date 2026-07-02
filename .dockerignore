@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+*.md
+.DS_Store
+Thumbs.db
+запустить-все.bat
+запустить.bat
+start.bat
+start-services.bat
+zapusk.bat
+laragon
+server/node_modules
+server/.env

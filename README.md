@@ -8,7 +8,7 @@
 
 **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui + Recharts  
 **Backend:** Express + MySQL + JWT (helmet, rate-limit)  
-**Среда:** Node.js 18+, MySQL (через Laragon)
+**Среда:** Node.js 18+, MySQL (через Laragon) или Docker
 
 ---
 
@@ -28,7 +28,30 @@
 
 ---
 
-## Быстрый старт
+## Docker (production)
+
+```bash
+# .env файл для Docker
+set DB_PASSWORD=mysecret
+set JWT_SECRET=my-jwt-secret
+
+# Сборка и запуск
+docker compose up -d --build
+
+# → Frontend: http://localhost
+# → API:      http://localhost:4000
+# → MySQL:    localhost:3307 (root / mysecret)
+
+# Остановка
+docker compose down
+
+# Полная перезагрузка (включая БД)
+docker compose down -v && docker compose up -d --build
+```
+
+---
+
+## Быстрый старт (локально)
 
 **1. Импорт БД**
 ```bash
@@ -76,4 +99,4 @@ cd server && npm run dev  # API → http://localhost:4000
 
 ## Что дальше
 
-См. раздел «Что осталось» в [`Что сделано.txt`](Что%20сделано.txt) — real-time WebSocket, уведомления, RBAC, экспорт, Docker, тесты и др.
+См. раздел «Что осталось» в [`Что сделано.txt`](Что%20сделано.txt) — RBAC, экспорт, тесты и др.

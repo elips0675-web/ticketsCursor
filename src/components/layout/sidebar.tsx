@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { Ticket, LayoutDashboard, Users, PlusCircle, Calendar, BarChart3, FileText, MessageCircle, User, Settings, HelpCircle, LogOut, BookOpen, Newspaper } from "lucide-react"
+import { Ticket, LayoutDashboard, Users, PlusCircle, Calendar, BarChart3, FileText, MessageCircle, User, HelpCircle, LogOut, BookOpen, Newspaper } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -17,7 +17,6 @@ const navItems = [
 
 const bottomItems = [
   { to: "/profile", icon: User, label: "Профиль" },
-  { to: "/settings", icon: Settings, label: "Настройки" },
   { to: "/login", icon: LogOut, label: "Выйти" },
 ]
 

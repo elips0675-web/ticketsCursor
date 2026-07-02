@@ -1,0 +1,247 @@
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { ChevronLeft, ChevronRight, Plus, Bell, Clock, Trash2 } from "lucide-react"
+import { formatDate } from "@/lib/utils"
+import type { CalendarEvent } from "@/types"
+
+const MONTHS_RU = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Окторябрь", "Ноябрь", "Декабрь"]
+
+const DEMO_EVENTS: CalendarEvent[] = [
+  { id: 1, title: "Релиз v2.1", date: "2026-07-02", time: "14:00", description: "Выпуск обновления системы", creatorId: 1, createdAt: "2026-06-30" },
+  { id: 2, title: "Митинг команды", date: "2026-07-03", time: "10:00", description: "Еженедельный митинг разработки", creatorId: 1, createdAt: "2026-06-30" },
+  { id: 3, title: "Дедлайн по задаче T-42", date: "2026-07-05", time: null, description: "Завершить интеграцию с Telegram", creatorId: 1, createdAt: "2026-06-28" },
+  { id: 4, title: "Планёрка", date: "2026-07-01", time: "11:00", description: "Обсуждение спринта", creatorId: 1, createdAt: "2026-06-25" },
+  { id: 5, title: "Обзор безопасности", date: "2026-07-10", time: "15:00", description: "Аудит безопасности системы", creatorId: 1, createdAt: "2026-06-20" },
+  { id: 6, title: "Встреча с заказчиком", date: "2026-07-02", time: "16:00", description: "Демо нового функционала", creatorId: 1, createdAt: "2026-07-01" },
+]
+
+export default function CalendarPage() {
+  const [date, setDate] = useState(new Date())
+  const [events, setEvents] = useState<CalendarEvent[]>(DEMO_EVENTS)
+  const [selDay, setSelDay] = useState<number | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({ title: "", time: "", description: "" })
+
+  const year = date.getFullYear()
+  const month = date.getMonth()
+
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const offset = firstDay === 0 ? 6 : firstDay - 1
+  const today = new Date()
+
+  const dayEvents = selDay
+    ? events.filter(e => {
+        const d = new Date(e.date)
+        return d.getDate() === selDay && d.getMonth() === month && d.getFullYear() === year
+      })
+    : []
+
+  const isToday = (day: number) =>
+    today.getDate() === day && today.getMonth() === month && today.getFullYear() === year
+
+  const addEvent = () => {
+    if (!form.title.trim() || !selDay) return
+    const dayStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(selDay).padStart(2, "0")}`
+    const newEvent: CalendarEvent = {
+      id: Date.now(),
+      title: form.title,
+      date: dayStr,
+      time: form.time || null,
+      description: form.description || null,
+      creatorId: 1,
+      createdAt: new Date().toISOString(),
+    }
+    setEvents(prev => [...prev, newEvent])
+    setForm({ title: "", time: "", description: "" })
+    setShowAdd(false)
+  }
+
+  const deleteEvent = (id: number) => {
+    setEvents(prev => prev.filter(e => e.id !== id))
+  }
+
+  const prevMonth = () => setDate(new Date(year, month - 1, 1))
+  const nextMonth = () => setDate(new Date(year, month + 1, 1))
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Календарь</h1>
+          <p className="text-sm text-muted-foreground mt-1">События и напоминания</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <Button variant="outline" size="sm" onClick={prevMonth} className="gap-1">
+              <ChevronLeft className="w-4 h-4" />
+              {MONTHS_RU[month - 1] || ""}
+            </Button>
+            <h3 className="font-bold text-lg">{MONTHS_RU[month]} {year}</h3>
+            <Button variant="outline" size="sm" onClick={nextMonth} className="gap-1">
+              {MONTHS_RU[month + 1] || ""}
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="calendar-grid">
+                {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map(d => (
+                  <div key={d} className="calendar-header">{d}</div>
+                ))}
+                {Array.from({ length: offset }).map((_, i) => (
+                  <div key={`e${i}`} className="calendar-day empty"><span className="calendar-date">{""}</span></div>
+                ))}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1
+                  const dayEvts = events.filter(e => {
+                    const d = new Date(e.date)
+                    return d.getDate() === day && d.getMonth() === month && d.getFullYear() === year
+                  })
+                  return (
+                    <div
+                      key={day}
+                      className={`calendar-day${selDay === day ? " selected" : ""}${isToday(day) ? " today" : ""}`}
+                      onClick={() => setSelDay(day)}
+                    >
+                      <span className="calendar-date">{day}</span>
+                      {dayEvts.slice(0, 2).map(e => (
+                        <div key={e.id} className="calendar-event" title={e.title}>{e.title}</div>
+                      ))}
+                      {dayEvts.length > 2 && <div className="calendar-more">+{dayEvts.length - 2}</div>}
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-sm">
+                {selDay ? `${selDay} ${MONTHS_RU[month]}` : "Выберите день"}
+              </CardTitle>
+              {selDay && (
+                <Button size="sm" variant="outline" onClick={() => setShowAdd(true)}>
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  Событие
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              {!selDay && (
+                <p className="text-sm text-muted-foreground text-center py-8">Нажмите на день в календаре</p>
+              )}
+              {selDay && dayEvents.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">Нет событий</p>
+              )}
+              {selDay && dayEvents.map(e => (
+                <div key={e.id} className="border-b last:border-b-0 py-3 group">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        {e.time && (
+                          <Badge variant="secondary" className="text-[9px] gap-1">
+                            <Clock className="w-2.5 h-2.5" />
+                            {e.time}
+                          </Badge>
+                        )}
+                        {!e.time && <Badge variant="secondary" className="text-[9px]">Весь день</Badge>}
+                      </div>
+                      <h4 className="font-bold text-sm">{e.title}</h4>
+                      {e.description && (
+                        <p className="text-xs text-muted-foreground mt-0.5">{e.description}</p>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 shrink-0"
+                      onClick={() => deleteEvent(e.id)}
+                    >
+                      <Trash2 className="w-3 h-3 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Bell className="w-4 h-4 text-primary" />
+                Ближайшие
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {events
+                .filter(e => new Date(e.date) >= today)
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                .slice(0, 3)
+                .map(e => (
+                  <div key={e.id} className="flex items-center gap-3 py-2 border-b last:border-b-0">
+                    <div className="w-1 h-1 rounded-full bg-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold truncate">{e.title}</p>
+                      <p className="text-[10px] text-muted-foreground">{formatDate(e.date)}{e.time ? ` в ${e.time}` : ""}</p>
+                    </div>
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Новое событие</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold">Название</label>
+              <Input
+                value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+                placeholder="Введите название"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold">Время</label>
+              <Input
+                type="time"
+                value={form.time}
+                onChange={e => setForm({ ...form, time: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold">Описание</label>
+              <Textarea
+                value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })}
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAdd(false)}>Отмена</Button>
+            <Button onClick={addEvent} disabled={!form.title.trim()}>Создать</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}

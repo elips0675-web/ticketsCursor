@@ -21,7 +21,6 @@ const navItems = [
 const bottomItems = [
   { to: "/admin", icon: Shield, label: "Администрирование", roles: ["admin"] },
   { to: "/profile", icon: User, label: "Профиль", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/login", icon: LogOut, label: "Выйти", roles: ["admin", "senior_agent", "agent"] },
 ]
 
 export function Sidebar() {
@@ -33,7 +32,7 @@ export function Sidebar() {
 }
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const userRole = user?.role || "agent"
 
   const filterByRole = (items: typeof navItems) => items.filter(i => i.roles.includes(userRole))
@@ -92,6 +91,13 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             {item.label}
           </NavLink>
         ))}
+        <button
+          onClick={() => { logout(); window.location.href = '/login' }}
+          className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+        >
+          <LogOut className="w-4 h-4" />
+          Выйти
+        </button>
         {user && (
           <div className="px-3 py-2 mt-2 text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-bold">
             {user.role === "admin" ? "Администратор" : user.role === "senior_agent" ? "Старший агент" : "Агент"}

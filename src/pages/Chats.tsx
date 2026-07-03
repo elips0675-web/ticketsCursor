@@ -1,36 +1,48 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Search, MessageCircle, Users, Hash } from "lucide-react"
+import { Search, MessageCircle, Users, Hash, Loader2 } from "lucide-react"
 import { formatRelativeTime } from "@/lib/utils"
 import type { ChatRoom } from "@/types"
+import { useAuth } from "@/context/AuthContext"
 
-const DEMO_CHATS: ChatRoom[] = [
-  { id: 1, name: "Общий чат", type: "group", avatar: "", lastMessage: "Коллеги, собрание в 15:00", lastTime: "2026-07-02T14:30:00", unread: 3, members: 15 },
-  { id: 2, name: "Разработка", type: "group", avatar: "", lastMessage: "Пулл-реквест готов к ревью", lastTime: "2026-07-02T12:00:00", unread: 1, members: 8 },
-  { id: 3, name: "IT-поддержка", type: "channel", avatar: "", lastMessage: "Инцидент #42 закрыт", lastTime: "2026-07-02T10:00:00", unread: 0, members: 6 },
-  { id: 4, name: "HR — важное", type: "group", avatar: "", lastMessage: "Новый сотрудник с понедельника", lastTime: "2026-07-01T16:00:00", unread: 0, members: 12 },
-  { id: 5, name: "Алексей Петров", type: "personal", avatar: "", lastMessage: "Ок, сделаю до вечера", lastTime: "2026-07-02T15:00:00", unread: 2 },
-  { id: 6, name: "Мария Иванова", type: "personal", avatar: "", lastMessage: "Спасибо за помощь!", lastTime: "2026-07-02T13:00:00", unread: 0 },
-  { id: 7, name: "Дмитрий Сидоров", type: "personal", avatar: "", lastMessage: "Нужно обсудить задачу", lastTime: "2026-07-01T11:00:00", unread: 1 },
-  { id: 8, name: "Елена Козлова", type: "personal", avatar: "", lastMessage: "Готова презентация", lastTime: "2026-06-30T17:00:00", unread: 0 },
-  { id: 9, name: "Проект Альфа", type: "group", avatar: "", lastMessage: "Дедлайн перенесли", lastTime: "2026-07-01T09:00:00", unread: 0, members: 5 },
-  { id: 10, name: "Бухгалтерия", type: "channel", avatar: "", lastMessage: "Отчёты за квартал", lastTime: "2026-06-29T12:00:00", unread: 0, members: 4 },
-]
+const API = "http://localhost:4000/api"
+
+function mapChatRoom(raw: any): ChatRoom {
+  return {
+    id: raw.id,
+    name: raw.name,
+    type: raw.type,
+    lastMessage: raw.last_message || undefined,
+    lastTime: raw.last_time || undefined,
+    unread: raw.unread || 0,
+    members: raw.member_count || undefined,
+  }
+}
 
 export default function ChatsPage() {
+  const { token } = useAuth()
   const navigate = useNavigate()
+  const [chats, setChats] = useState<ChatRoom[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
 
-  const groups = DEMO_CHATS.filter(c => c.type === "group" || c.type === "channel")
-  const personal = DEMO_CHATS.filter(c => c.type === "personal")
+  useEffect(() => {
+    fetch(`${API}/chats`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => { setChats(data.map(mapChatRoom)); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [token])
 
-  const filterChats = (chats: ChatRoom[]) => {
-    if (!search.trim()) return chats
+  const groups = chats.filter(c => c.type === "group" || c.type === "channel")
+  const personal = chats.filter(c => c.type === "personal")
+
+  const filterChats = (items: ChatRoom[]) => {
+    if (!search.trim()) return items
     const q = search.toLowerCase()
-    return chats.filter(c => c.name.toLowerCase().includes(q) || (c.lastMessage || "").toLowerCase().includes(q))
+    return items.filter(c => c.name.toLowerCase().includes(q) || (c.lastMessage || "").toLowerCase().includes(q))
   }
 
   const filteredGroups = filterChats(groups)
@@ -95,6 +107,11 @@ export default function ChatsPage() {
         />
       </div>
 
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
       <div className="space-y-1">
         {filteredGroups.length > 0 && (
           <div>
@@ -125,6 +142,7 @@ export default function ChatsPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   )
 }

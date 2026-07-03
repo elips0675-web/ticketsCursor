@@ -6,31 +6,41 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { User, Mail, Phone, Briefcase, MapPin, FileText, Settings, Camera, Save, Monitor } from "lucide-react"
+import { User, Mail, Phone, Briefcase, MapPin, FileText, Settings, Camera, Save, Monitor, Loader2 } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
-const DEMO_USER = {
-  id: 1,
-  name: "Алексей Петров",
-  email: "alexey@example.com",
-  phone: "+7 (995) 123-45-67",
-  role: "admin",
-  department: "IT",
-  title: "Системный администратор",
-  bio: "Отвечаю за IT-инфраструктуру, серверы и тикет-систему. Люблю автоматизацию и порядок.",
-  online: true,
-}
-
-const DEMO_FILES = [
-  { id: 1, name: "Скрипт деплоя.sh", size: "2.4 KB", date: "2026-07-01" },
-  { id: 2, name: "Инструкция по VPN.pdf", size: "1.2 MB", date: "2026-06-28" },
-  { id: 3, name: "Логотип.png", size: "345 KB", date: "2026-06-25" },
-]
+const API = "http://localhost:4000/api"
 
 export default function ProfilePage() {
+  const { user: authUser, token } = useAuth()
+  const [employee, setEmployee] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
-  const [user, setUser] = useState(DEMO_USER)
-  const [form, setForm] = useState({ ...DEMO_USER })
+  const [form, setForm] = useState({ name: "", email: "", phone: "", title: "", bio: "" })
   const [sysInfo, setSysInfo] = useState({ computerName: "", userAccount: "" })
+
+  useEffect(() => {
+    const saved = localStorage.getItem("sysInfo")
+    if (saved) { setSysInfo(JSON.parse(saved)); return }
+    fetch(`${API}/system-info`).then(r => r.ok && r.json()).then(data => {
+      if (data) {
+        setSysInfo({ computerName: data.computerName, userAccount: data.userAccount })
+        localStorage.setItem("sysInfo", JSON.stringify({ computerName: data.computerName, userAccount: data.userAccount }))
+      }
+    }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch(`${API}/employees`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        const me = data.find((e: any) => e.id === authUser?.id) || {}
+        setEmployee(me)
+        setForm({ name: me.name || "", email: me.email || "", phone: me.phone || "", title: me.title || "", bio: me.bio || "" })
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [token, authUser])
 
   const updateSysInfo = () => {
     const name = (document.getElementById("sys-computer") as HTMLInputElement)?.value || ""
@@ -39,29 +49,26 @@ export default function ProfilePage() {
     localStorage.setItem("sysInfo", JSON.stringify({ computerName: name, userAccount: account }))
   }
 
-  useEffect(() => {
-    const saved = localStorage.getItem("sysInfo")
-    if (saved) { setSysInfo(JSON.parse(saved)); return }
-    fetch("/api/system-info").then(r => r.ok && r.json()).then(data => {
-      if (data) {
-        setSysInfo({ computerName: data.computerName, userAccount: data.userAccount })
-        localStorage.setItem("sysInfo", JSON.stringify({ computerName: data.computerName, userAccount: data.userAccount }))
-      }
-    }).catch(() => {})
-  }, [])
-
   const saveProfile = () => {
-    setUser({ ...form })
     setEditing(false)
   }
 
   const cancelEdit = () => {
-    setForm({ ...user })
     setEditing(false)
   }
 
-  const initials = user.name.split(" ").map(n => n[0]).join("")
+  const displayName = employee?.name || authUser?.name || ""
+  const displayRole = employee?.role || authUser?.role || "agent"
+  const initials = displayName.split(" ").map((n: string) => n[0]).join("")
   const roleLabels: Record<string, string> = { agent: "Агент", senior_agent: "Ст. агент", admin: "Администратор" }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -85,7 +92,7 @@ export default function ProfilePage() {
                   <Avatar className="w-16 h-16 ring-2 ring-primary/20">
                     <AvatarFallback className="text-lg bg-primary/10 text-primary">{initials}</AvatarFallback>
                   </Avatar>
-                  {user.online && <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />}
+                  {employee?.online && <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   {editing ? (
@@ -95,9 +102,9 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <>
-                      <h2 className="text-lg font-bold">{user.name}</h2>
-                      <p className="text-sm text-muted-foreground">{user.title}</p>
-                      <Badge variant="secondary" className="mt-2 text-[9px]">{roleLabels[user.role] || user.role} • {user.department}</Badge>
+                      <h2 className="text-lg font-bold">{displayName}</h2>
+                      <p className="text-sm text-muted-foreground">{employee?.title || ""}</p>
+                      <Badge variant="secondary" className="mt-2 text-[9px]">{roleLabels[displayRole] || displayRole} • {employee?.department || ""}</Badge>
                     </>
                   )}
                 </div>
@@ -117,11 +124,11 @@ export default function ProfilePage() {
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center gap-3 py-2 border-b"><Mail className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm font-medium">{user.email}</p></div></div>
-                    <div className="flex items-center gap-3 py-2 border-b"><Phone className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Телефон</p><p className="text-sm font-medium">{user.phone}</p></div></div>
-                    <div className="flex items-center gap-3 py-2 border-b"><Briefcase className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Должность</p><p className="text-sm font-medium">{user.title}</p></div></div>
-                    <div className="flex items-center gap-3 py-2 border-b"><MapPin className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Отдел</p><p className="text-sm font-medium">{user.department}</p></div></div>
-                    {user.bio && <div className="py-2"><p className="text-xs text-muted-foreground mb-1">О себе</p><p className="text-sm">{user.bio}</p></div>}
+                    <div className="flex items-center gap-3 py-2 border-b"><Mail className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm font-medium">{employee?.email || ""}</p></div></div>
+                    <div className="flex items-center gap-3 py-2 border-b"><Phone className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Телефон</p><p className="text-sm font-medium">{employee?.phone || ""}</p></div></div>
+                    <div className="flex items-center gap-3 py-2 border-b"><Briefcase className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Должность</p><p className="text-sm font-medium">{employee?.title || ""}</p></div></div>
+                    <div className="flex items-center gap-3 py-2 border-b"><MapPin className="w-4 h-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Отдел</p><p className="text-sm font-medium">{employee?.department || ""}</p></div></div>
+                    {form.bio && <div className="py-2"><p className="text-xs text-muted-foreground mb-1">О себе</p><p className="text-sm">{form.bio}</p></div>}
                     <div className="flex gap-2 pt-2">
                       <Button variant="outline" onClick={() => setEditing(true)} className="gap-1.5"><Camera className="w-4 h-4" /> Редактировать</Button>
                     </div>
@@ -155,27 +162,11 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle className="text-sm flex items-center gap-2">
                 <FileText className="w-4 h-4 text-primary" />
-                Мои файлы ({DEMO_FILES.length})
+                Мои файлы
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {DEMO_FILES.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">Нет файлов</p>
-              ) : (
-                <div className="space-y-2">
-                  {DEMO_FILES.map(f => (
-                    <div key={f.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <FileText className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold truncate">{f.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{f.size} • {f.date}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <p className="text-sm text-muted-foreground text-center py-8">Нет файлов</p>
             </CardContent>
           </Card>
         </TabsContent>

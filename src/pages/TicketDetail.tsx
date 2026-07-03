@@ -13,19 +13,24 @@ import { Separator } from "@/components/ui/separator"
 import { useTickets } from "@/context/ticket-context"
 import { useAuth } from "@/context/AuthContext"
 import { formatDate, formatTime } from "@/lib/utils"
-import { ArrowLeft, Send, User, MessageSquare, Tag, Lock, ExternalLink, Monitor } from "lucide-react"
+import { ArrowLeft, Send, User, MessageSquare, Tag, Lock, ExternalLink, Monitor, Paperclip, ImageIcon, FileText, Loader2 } from "lucide-react"
 import type { TicketStatus, TicketPriority } from "@/types"
+
+const API = "http://localhost:4000/api"
 
 export default function TicketDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { tickets, employees, updateTicketStatus, updateTicketPriority, assignTicket, addMessage } = useTickets()
-  const { canManage } = useAuth()
+  const { canManage, token } = useAuth()
   const { socket } = useSocket()
   const ticket = tickets.find(t => t.id === Number(id))
 
   const [messageText, setMessageText] = useState("")
   const [isInternal, setIsInternal] = useState(false)
+  const [attachments, setAttachments] = useState<{ url: string; name: string }[]>([])
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }) }, [ticket?.messages])
@@ -51,10 +56,32 @@ export default function TicketDetail() {
   }
 
   const handleSend = () => {
-    if (!messageText.trim()) return
-    addMessage(ticket.id, messageText, isInternal)
+    if (!messageText.trim() && attachments.length === 0) return
+    addMessage(ticket.id, messageText, isInternal, attachments.length > 0 ? attachments : undefined)
     setMessageText("")
     setIsInternal(false)
+    setAttachments([])
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const form = new FormData()
+    form.append("file", file)
+    try {
+      const res = await fetch(`${API}/tickets/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setAttachments(prev => [...prev, { url: data.url, name: data.name }])
+      }
+    } catch { /* ignore */ }
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
   return (
@@ -121,6 +148,17 @@ export default function TicketDetail() {
                         )}
                       </div>
                       <p className="text-sm text-foreground/80">{msg.text}</p>
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {msg.attachments.map((att: any, i: number) => (
+                            <a key={i} href={att.url} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 text-xs bg-muted rounded-md px-2 py-1 hover:bg-muted/80 transition-colors">
+                              {att.url.match(/\.(png|jpg|jpeg|gif|svg)$/i) ? <ImageIcon className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                              {att.name || att.url.split('/').pop()}
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -135,18 +173,35 @@ export default function TicketDetail() {
                   placeholder="Напишите сообщение..."
                   className="min-h-[80px]"
                 />
+                {attachments.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {attachments.map((att, i) => (
+                      <div key={i} className="flex items-center gap-1.5 text-xs bg-muted rounded-md px-2 py-1">
+                        {att.url.match(/\.(png|jpg|jpeg|gif|svg)$/i) ? <ImageIcon className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                        {att.name}
+                        <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-foreground ml-1">&times;</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isInternal}
-                      onChange={e => setIsInternal(e.target.checked)}
-                      className="rounded"
-                    />
-                    <Lock className="w-3 h-3" />
-                    Внутренняя заметка
-                  </label>
-                  <Button size="sm" onClick={handleSend} disabled={!messageText.trim()}>
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isInternal}
+                        onChange={e => setIsInternal(e.target.checked)}
+                        className="rounded"
+                      />
+                      <Lock className="w-3 h-3" />
+                      Внутренняя заметка
+                    </label>
+                    <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload} />
+                    <Button variant="ghost" size="sm" type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                  <Button size="sm" onClick={handleSend} disabled={!messageText.trim() && attachments.length === 0}>
                     <Send className="w-4 h-4 mr-1.5" />
                     Отправить
                   </Button>

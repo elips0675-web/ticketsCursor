@@ -1,4 +1,8 @@
 import { Router } from 'express'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+import multer from 'multer'
 import pool from '../db.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { getIO } from '../socket.js'
@@ -6,6 +10,19 @@ import { sendTicketNotification } from '../email.js'
 import { sendTelegramNotification } from '../telegram.js'
 import { logAudit } from '../audit.js'
 import { createNotification } from './notifications.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const ticketUploads = path.join(__dirname, '..', '..', 'uploads', 'tickets')
+fs.mkdirSync(ticketUploads, { recursive: true })
+
+const storage = multer.diskStorage({
+  destination: ticketUploads,
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, unique + '-' + file.originalname)
+  },
+})
+const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } })
 
 const router = Router()
 
@@ -154,14 +171,24 @@ router.put('/:id/assign', requireRole('admin', 'senior_agent'), async (req, res)
   }
 })
 
+// POST /api/tickets/upload — file upload for messages
+router.post('/upload', upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'No file' })
+  res.json({
+    url: `/uploads/tickets/${req.file.filename}`,
+    name: req.file.originalname,
+    size: req.file.size,
+  })
+})
+
 // POST /api/tickets/:id/messages
 router.post('/:id/messages', async (req, res) => {
-  const { text, isInternal } = req.body
+  const { text, isInternal, attachments } = req.body
   if (!text?.trim()) return res.status(400).json({ message: 'Text required' })
   try {
     const [result] = await pool.query(
-      'INSERT INTO ticket_messages (ticket_id, sender_id, sender_name, text, is_internal, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
-      [req.params.id, req.user.userId, req.user.name || 'User', text, isInternal ? 1 : 0],
+      'INSERT INTO ticket_messages (ticket_id, sender_id, sender_name, text, attachments, is_internal, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+      [req.params.id, req.user.userId, req.user.name || 'User', text, attachments ? JSON.stringify(attachments) : null, isInternal ? 1 : 0],
     )
     const [msg] = await pool.query('SELECT * FROM ticket_messages WHERE id = ?', [result.insertId])
     await pool.query('UPDATE tickets SET updated_at = NOW() WHERE id = ?', [req.params.id])

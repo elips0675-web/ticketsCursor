@@ -12,7 +12,7 @@ interface TicketContextType {
   updateTicketStatus: (id: number, status: TicketStatus) => Promise<void>
   updateTicketPriority: (id: number, priority: TicketPriority) => Promise<void>
   assignTicket: (id: number, employeeId: number) => Promise<void>
-  addMessage: (ticketId: number, text: string, isInternal: boolean) => Promise<void>
+  addMessage: (ticketId: number, text: string, isInternal: boolean, attachments?: { url: string; name: string }[]) => Promise<void>
   createTicket: (data: { title: string; description: string; priority: TicketPriority; category: string; computerName?: string; userAccount?: string }) => Promise<void>
   loading: boolean
 }
@@ -39,7 +39,7 @@ function mapTicket(raw: any): Ticket {
       senderName: m.sender_name,
       senderAvatar: m.sender_avatar || "",
       text: m.text,
-      attachments: [],
+      attachments: m.attachments ? (typeof m.attachments === 'string' ? JSON.parse(m.attachments) : m.attachments) : [],
       createdAt: m.created_at,
       isInternal: !!m.is_internal,
     })) : [],
@@ -135,12 +135,12 @@ export function TicketProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   }, [token, employees])
 
-  const addMessage = useCallback(async (ticketId: number, text: string, isInternal: boolean) => {
+  const addMessage = useCallback(async (ticketId: number, text: string, isInternal: boolean, attachments?: { url: string; name: string }[]) => {
     try {
       const res = await fetch(`${API}/tickets/${ticketId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text, isInternal }),
+        body: JSON.stringify({ text, isInternal, attachments }),
       })
       if (res.ok) {
         const msg = await res.json()
@@ -153,7 +153,7 @@ export function TicketProvider({ children }: { children: ReactNode }) {
             senderName: msg.sender_name,
             senderAvatar: msg.sender_avatar || "",
             text: msg.text,
-            attachments: [],
+            attachments: msg.attachments ? (typeof msg.attachments === 'string' ? JSON.parse(msg.attachments) : msg.attachments) : [],
             createdAt: msg.created_at,
             isInternal: !!msg.is_internal,
           }

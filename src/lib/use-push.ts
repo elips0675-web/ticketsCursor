@@ -30,23 +30,25 @@ export function usePush() {
     try {
       const token = localStorage.getItem("token")
       const res = await fetch("/api/push/vapid-key", { headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) {
-        const { publicKey } = await res.json()
-        const reg = await navigator.serviceWorker.ready
-        const sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey),
-        })
-        await fetch("/api/push/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ subscription_json: sub.toJSON() }),
-        })
-      }
+      if (!res.ok) throw new Error("VAPID key not available")
+      const { publicKey } = await res.json()
+
+      const reg = await navigator.serviceWorker.ready
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      })
+
+      const save = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ subscription_json: sub.toJSON() }),
+      })
+      if (!save.ok) throw new Error("Failed to save subscription")
+      setSubscribed(true)
     } catch {
-      // backend недоступен — демо-режим
+      setSubscribed(false)
     }
-    setSubscribed(true)
     setLoading(false)
   }, [supported])
 

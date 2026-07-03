@@ -19,7 +19,6 @@ export default function AdminPush() {
     setSending(true)
     setSendResult(null)
     const token = localStorage.getItem("token")
-    let ok = false
     try {
       const res = await fetch("/api/push/send", {
         method: "POST",
@@ -29,15 +28,15 @@ export default function AdminPush() {
       if (res.ok) {
         const result = await res.json()
         setSendResult(result)
-        ok = result.sent > 0
+        if (result.sent > 0) {
+          setPushTitle("")
+          setPushBody("")
+          setPushUrl("/")
+        }
       }
     } catch {
-      // backend недоступен
+      // ignore
     }
-    if (!ok) setSendResult({ sent: 1, failed: 0, total: 1 })
-    setPushTitle("")
-    setPushBody("")
-    setPushUrl("/")
     setSending(false)
   }
 

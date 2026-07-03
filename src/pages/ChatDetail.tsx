@@ -131,7 +131,7 @@ export default function ChatDetail() {
   const currentUserId = user?.id ?? 0
 
   return (
-    <><div className="flex flex-col h-[calc(100vh-8rem)] max-w-3xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-4">
         <Button variant="ghost" size="icon" onClick={() => navigate("/chats")} className="rounded-full">
           <ArrowLeft className="w-5 h-5" />
@@ -251,31 +251,30 @@ export default function ChatDetail() {
             </button>
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          <Button variant="ghost" size="icon" onClick={pickImage} className="h-10 w-10 rounded-xl shrink-0 text-muted-foreground hover:text-foreground">
-            <ImagePlus className="w-4 h-4" />
-          </Button>
+        <div className="flex items-center gap-1.5">
           <Input value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") send() }}
             placeholder="Написать сообщение..." className="flex-1 h-10 text-sm"
           />
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          <Button variant="ghost" size="icon" onClick={pickImage} className="h-10 w-10 rounded-xl shrink-0 text-muted-foreground hover:text-foreground" title="Прикрепить изображение">
+            <ImagePlus className="w-4 h-4" />
+          </Button>
           <Button size="icon" onClick={send} disabled={!input.trim() && !imageFile} className="h-10 w-10 rounded-xl shrink-0">
             <Send className="w-4 h-4" />
           </Button>
         </div>
+        {previewImg && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setPreviewImg(null)}>
+            <button onClick={() => setPreviewImg(null)}
+              className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            <img src={previewImg} alt="" className="max-w-full max-h-full object-contain rounded-lg" onClick={e => e.stopPropagation()} />
+          </div>
+        )}
       </div>
     </div>
-
-      {previewImg && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setPreviewImg(null)}>
-          <button onClick={() => setPreviewImg(null)}
-            className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-          <img src={previewImg} alt="" className="max-w-full max-h-full object-contain rounded-lg" onClick={e => e.stopPropagation()} />
-        </div>
-      )}
-    </>
+  )
 }

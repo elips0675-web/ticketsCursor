@@ -16,6 +16,8 @@ const DEMO_NEWS: NewsPost[] = [
   { id: 5, title: "Обновление правил SLA", content: "Обновлены временные рамки для уровней поддержки. Критические инциденты — реакция до 30 минут. Высокий приоритет — до 2 часов. Средний — до 8 часов.", important: false, authorId: 2, authorName: "Мария Иванова", createdAt: "2026-06-15T16:00:00" },
 ]
 
+const PER_PAGE = 6
+
 export default function NewsPage() {
   const { canManage } = useAuth()
   const [search, setSearch] = useState("")
@@ -24,6 +26,7 @@ export default function NewsPage() {
   const [newTitle, setNewTitle] = useState("")
   const [newContent, setNewContent] = useState("")
   const [newImportant, setNewImportant] = useState(false)
+  const [page, setPage] = useState(1)
 
   const filtered = useMemo(() => {
     let items = DEMO_NEWS
@@ -34,6 +37,10 @@ export default function NewsPage() {
     }
     return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   }, [search, showImportant])
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE)
+  const paged = filtered.slice(0, page * PER_PAGE)
+  const resetPage = () => setPage(1)
 
   const handleCreate = () => {
     if (!newTitle.trim() || !newContent.trim()) return
@@ -89,39 +96,43 @@ export default function NewsPage() {
       <div className="flex gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Поиск новостей..." className="pl-9" />
+          <Input value={search} onChange={e => { setSearch(e.target.value); resetPage() }} placeholder="Поиск новостей..." className="pl-9" />
         </div>
-        <Button variant={showImportant ? "default" : "outline"} size="sm" onClick={() => setShowImportant(!showImportant)} className="gap-2">
+        <Button variant={showImportant ? "default" : "outline"} size="sm" onClick={() => { setShowImportant(!showImportant); resetPage() }} className="gap-2">
           <AlertTriangle className="w-4 h-4" />Важные
         </Button>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
+          <div className="col-span-full text-center py-16 text-muted-foreground">
             <Newspaper className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p className="font-bold text-sm">Новости не найдены</p>
           </div>
         )}
-        {filtered.map(n => (
-          <div key={n.id} className="rounded-xl border bg-card p-5 space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  {n.important && <Pin className="w-4 h-4 text-destructive shrink-0" />}
-                  <h3 className="font-bold text-sm">{n.title}</h3>
-                </div>
-                <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
-                  <span className="flex items-center gap-1"><User className="w-3 h-3" />{n.authorName}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(n.createdAt).toLocaleDateString()}</span>
-                  {n.important && <Badge className="text-[9px] bg-destructive/10 text-destructive border-0">Важно</Badge>}
-                </div>
-              </div>
+        {paged.map(n => (
+          <div key={n.id} className="rounded-xl border bg-card p-5 flex flex-col">
+            <div className="flex items-center gap-2 mb-2">
+              {n.important && <Pin className="w-4 h-4 text-destructive shrink-0" />}
+              <h3 className="font-bold text-sm leading-snug">{n.title}</h3>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">{n.content}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4 flex-1 mb-4">{n.content}</p>
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground pt-3 border-t">
+              <span className="flex items-center gap-1"><User className="w-3 h-3" />{n.authorName}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(n.createdAt).toLocaleDateString()}</span>
+              {n.important && <Badge className="text-[9px] bg-destructive/10 text-destructive border-0 ml-auto">Важно</Badge>}
+            </div>
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && page < totalPages && (
+        <div className="flex justify-center pt-2">
+          <Button variant="outline" onClick={() => setPage(p => p + 1)}>
+            Показать ещё
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

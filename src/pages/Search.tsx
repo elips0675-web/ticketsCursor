@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search as SearchIcon, Ticket, User, BookOpen, Newspaper, MessageCircle, FileText, Loader2, ArrowRight, ExternalLink } from "lucide-react"
+import { Search as SearchIcon, Ticket, User, BookOpen, Newspaper, MessageCircle, FileText, Loader2, ExternalLink } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/context/AuthContext"
 import { cn } from "@/lib/utils"
 
@@ -61,7 +60,7 @@ export default function SearchPage() {
   const total = Object.values(results).reduce((a, b) => a + b.length, 0)
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold mb-1">Глобальный поиск</h1>
         <p className="text-muted-foreground text-sm">Поиск по тикетам, сотрудникам, базе знаний, новостям, чатам и файлам</p>
@@ -128,14 +127,15 @@ function Section({ title, icon: Icon, results, href, label, meta }: {
         <h2 className="font-semibold text-sm">{title}</h2>
         <span className="text-xs text-muted-foreground">({results.length})</span>
       </div>
-      <div className="space-y-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {results.map((r: any) => (
           <button
             key={r.id}
             onClick={() => navigate(href(r))}
-            className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-muted text-left transition-colors text-sm group"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-card hover:shadow-md transition-all text-left group"
           >
-            <span className="font-medium truncate flex-1">{label(r)}</span>
+            <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="font-medium text-sm truncate flex-1">{label(r)}</span>
             <div className="flex items-center gap-2 shrink-0">
               {meta(r)}
               <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />

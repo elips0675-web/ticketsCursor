@@ -33,7 +33,7 @@ const DEMO_POLLS: Poll[] = [
 export default function PollsPage() {
   const [polls, setPolls] = useState<Poll[]>(DEMO_POLLS)
   const [showNew, setShowNew] = useState(false)
-  const [expanded, setExpanded] = useState<number | null>(null)
+  const [voting, setVoting] = useState<number | null>(null)
   const [form, setForm] = useState({ title: "", description: "", options: ["", ""], multipleChoice: false })
 
   const createPoll = () => {
@@ -130,67 +130,70 @@ export default function PollsPage() {
         </Card>
       )}
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {polls.map(poll => {
-          const isExpanded = expanded === poll.id
+          const open = voting === poll.id
           const hasVoted = (poll.myVotes?.length || 0) > 0
           return (
-            <Card key={poll.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setExpanded(isExpanded ? null : poll.id)}>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+            <Card key={poll.id} className="flex flex-col">
+              <CardContent className="p-5 flex-1 flex flex-col">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                       <BarChart3 className="w-4 h-4 text-primary" />
-                      <h3 className="font-bold text-sm">{poll.title}</h3>
                     </div>
-                    {poll.description && <p className="text-xs text-muted-foreground mt-1">{poll.description}</p>}
-                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground mt-2">
-                      <span>{poll.options.length} вариантов</span>
-                      <span>{poll.totalVotes} голосов</span>
-                      {hasVoted && (
-                        <Badge variant="secondary" className="text-[9px] gap-0.5">
-                          <CheckCheck className="w-2.5 h-2.5" /> Вы проголосовали
-                        </Badge>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-sm leading-tight truncate">{poll.title}</h3>
+                      {poll.description && (
+                        <p className="text-[11px] text-muted-foreground truncate mt-0.5">{poll.description}</p>
                       )}
                     </div>
                   </div>
-                </div>
 
-                {isExpanded && (
-                  <div className="mt-4 pt-4 border-t space-y-2">
+                  <div className="mt-3 space-y-2">
                     {poll.options.map(opt => {
                       const pct = calcPct(opt.votesCount, poll.totalVotes || 1)
                       const isSelected = poll.myVotes?.includes(opt.id)
                       return (
                         <div
                           key={opt.id}
-                          onClick={e => { e.stopPropagation(); if (!hasVoted) vote(poll.id, opt.id) }}
-                          className={`relative overflow-hidden rounded-lg p-3 transition-all ${hasVoted ? (isSelected ? "ring-2 ring-primary bg-primary/5" : "bg-muted/30") : "bg-muted/50 hover:bg-primary/10 cursor-pointer"}`}
+                          onClick={() => vote(poll.id, opt.id)}
+                          className={`relative overflow-hidden rounded-lg p-2.5 transition-all ${hasVoted ? (isSelected ? "ring-2 ring-primary bg-primary/5" : "bg-muted/30") : "cursor-pointer hover:bg-primary/10 bg-muted/50"}`}
                         >
                           {hasVoted && (
-                            <div className="absolute inset-0 bg-primary/10 transition-all" style={{ width: `${pct}%` }} />
+                            <div className="absolute inset-0 bg-primary/5 transition-all" style={{ width: `${pct}%` }} />
                           )}
-                          <div className="relative z-10 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {hasVoted && isSelected && <CheckCheck className="w-3.5 h-3.5 text-primary" />}
-                              <span className="text-sm font-medium">{opt.text}</span>
+                          <div className="relative z-10 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              {hasVoted && isSelected && <CheckCheck className="w-3 h-3 text-primary shrink-0" />}
+                              <span className={`text-sm truncate ${isSelected ? "font-bold" : ""}`}>{opt.text}</span>
                             </div>
                             {hasVoted && (
-                              <span className="text-sm font-bold text-muted-foreground">{opt.votesCount} ({pct}%)</span>
+                              <span className="text-xs font-bold text-muted-foreground shrink-0">{pct}%</span>
                             )}
                           </div>
                         </div>
                       )
                     })}
-                    {poll.options.length === 0 && <p className="text-sm text-muted-foreground">Нет вариантов</p>}
                   </div>
-                )}
+                </div>
+
+                <div className="flex items-center justify-between mt-4 pt-3 border-t text-[10px] text-muted-foreground">
+                  <span>{poll.options.length} вар. · {poll.totalVotes} гол.</span>
+                  {hasVoted ? (
+                    <Badge variant="secondary" className="text-[9px] gap-0.5">
+                      <CheckCheck className="w-2.5 h-2.5" /> Проголосовал
+                    </Badge>
+                  ) : (
+                    <span className="text-primary font-medium">Нажмите, чтобы выбрать</span>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )
         })}
         {polls.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
+          <div className="col-span-full text-center py-16 text-muted-foreground">
             <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p className="font-bold text-sm">Опросов пока нет</p>
           </div>

@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: tickets-api
+    env: node
+    buildCommand: npm ci --omit=dev
+    startCommand: node src/index.js
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: servicedesk
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://tickets-git-master-vadims-projects-74cb21aa.vercel.app
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:admin@servicedesk.local

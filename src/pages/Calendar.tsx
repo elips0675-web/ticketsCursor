@@ -9,7 +9,7 @@ import { ChevronLeft, ChevronRight, Plus, Bell, Clock, Trash2 } from "lucide-rea
 import { formatDate } from "@/lib/utils"
 import type { CalendarEvent } from "@/types"
 
-const MONTHS_RU = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Окторябрь", "Ноябрь", "Декабрь"]
+const MONTHS_RU = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
 
 const DEMO_EVENTS: CalendarEvent[] = [
   { id: 1, title: "Релиз v2.1", date: "2026-07-02", time: "14:00", description: "Выпуск обновления системы", creatorId: 1, createdAt: "2026-06-30" },
@@ -83,11 +83,11 @@ export default function CalendarPage() {
           <div className="flex items-center justify-between">
             <Button variant="outline" size="sm" onClick={prevMonth} className="gap-1">
               <ChevronLeft className="w-4 h-4" />
-              {MONTHS_RU[month - 1] || ""}
+              <span className="hidden sm:inline">{MONTHS_RU[month - 1] || ""}</span>
             </Button>
-            <h3 className="font-bold text-lg">{MONTHS_RU[month]} {year}</h3>
+            <h3 className="font-bold text-base sm:text-lg">{MONTHS_RU[month]} {year}</h3>
             <Button variant="outline" size="sm" onClick={nextMonth} className="gap-1">
-              {MONTHS_RU[month + 1] || ""}
+              <span className="hidden sm:inline">{MONTHS_RU[month + 1] || ""}</span>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

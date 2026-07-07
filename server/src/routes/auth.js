@@ -46,7 +46,7 @@ router.post('/register', authenticateToken, requireRole('admin'), registerValida
   try {
     const [existing] = await pool.query('SELECT id FROM employees WHERE email = ?', [email])
     if (existing.length > 0) {
-      return res.status(409).json({ error: 'Пользователь с таким email уже существует' })
+      return res.status(409).json({ message: 'Пользователь с таким email уже существует' })
     }
     const hash = await bcrypt.hash(password, 10)
     const [result] = await pool.query(
@@ -60,12 +60,15 @@ router.post('/register', authenticateToken, requireRole('admin'), registerValida
     })
   } catch (err) {
     console.error('Register error:', err)
-    res.status(500).json({ error: 'Ошибка регистрации' })
+    res.status(500).json({ message: 'Ошибка регистрации' })
   }
 })
 
-// Dev auto-login
-router.post('/dev-login', async (req, res) => {
+// Dev auto-login (only in non-production)
+router.post('/dev-login', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ message: 'Not found' })
+  }
   const token = jwt.sign({ userId: 1, role: 'admin' }, JWT_SECRET, { expiresIn: '24h' })
   res.json({ token, employee: { id: 1, name: 'Алексей Петров', email: 'alexey@example.com', role: 'admin' } })
 })

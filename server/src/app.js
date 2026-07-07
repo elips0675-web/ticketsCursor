@@ -22,6 +22,8 @@ import swaggerUi from 'swagger-ui-express'
 import swaggerSpec from './swagger.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import jwt from 'jsonwebtoken'
+import { JWT_SECRET, authenticateToken } from './middleware.js'
 import multer from 'multer'
 import knex from 'knex'
 import knexConfig from '../knexfile.js'
@@ -47,7 +49,19 @@ app.use(helmet())
 app.use(express.json())
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
+const uploadsDir = path.join(__dirname, '..', 'uploads')
+app.use('/uploads', (req, res, next) => {
+  const authHeader = req.headers.authorization
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : req.query.token
+  if (!token) return res.status(401).json({ message: 'Unauthorized' })
+  try {
+    jwt.verify(token, JWT_SECRET)
+    if (req.query.token) delete req.query.token
+    express.static(uploadsDir)(req, res, next)
+  } catch {
+    res.status(403).json({ message: 'Invalid token' })
+  }
+})
 
 app.use('/api/auth', authLimiter, authRouter)
 app.use('/api/tickets', apiLimiter, ticketsRouter)
@@ -73,7 +87,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-app.get('/api/system-info', (req, res) => {
+app.get('/api/system-info', authenticateToken, (req, res) => {
   res.json({
     computerName: os.hostname(),
     userAccount: `${process.env.USERDOMAIN || os.hostname()}\\${process.env.USERNAME || ''}`,

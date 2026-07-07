@@ -202,7 +202,7 @@ export default function FilesPage() {
       ) : view === "grid" ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {displayFiles.map(f => (
-            <Card key={f.id} className="hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer" onClick={() => f.path && window.open(`${API.replace('/api', '')}${f.path}`, '_blank')}>
+            <Card key={f.id} className="hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer" onClick={() => f.path && window.open(`${API.replace('/api', '')}${f.path}?token=${localStorage.getItem('token')}`, '_blank')}>
               <CardContent className="p-5 text-center">
                 <div className="text-4xl mb-3">
                   {{ img: "🖼️", pdf: "📄", doc: "📝", code: "💻", archive: "🗜️" }[f.type] || "📁"}

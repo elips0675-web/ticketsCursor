@@ -214,29 +214,47 @@
 
 ────────────────────────────────────────────────────────────────────────────
 
-ПЛАН ДОРАБОТКИ
+ПЛАН ДОРАБОТКИ ПО ЭТАПАМ
 
-  P0 — Безопасность (срочно):
+  Этап 13 — Безопасность (P0)
     • Отключить /dev-login в production (NODE_ENV !== 'production')
     • Закрыть /uploads JWT-аутентификацией (middleware на статику)
-    • Client Error Boundary — обернуть <App> в <ErrorBoundary>
+    • Client Error Boundary вокруг <App>
+    • Убрать дублирование { error } / { message } в auth.js (2 места)
+    • /api/system-info — либо убрать, либо защитить auth
 
-  P1 — Инфраструктура и тесты:
-    • Серверная пагинация LIMIT/OFFSET на tickets, news, wiki, files
-    • CREATE INDEX на status, created_at, assigned_to, folder_id, date
-    • CI: npm test для клиента, MySQL для серверных тестов
-    • Docker: multi-stage server, non-root USER, server/.dockerignore
+  Этап 14 — Производительность (P1)
+    • Серверная пагинация LIMIT/OFFSET на tickets, news, wiki, files, polls
+    • CREATE INDEX: tickets(status, created_at, assigned_to, created_by),
+      ticket_messages(ticket_id, created_at), files(folder_id),
+      events(date), notifications(user_id, created_at)
+    • Исправить N+1 в polls.js (Eager load options) и files.js (JOIN вместо 2 запросов)
+    • Client-side → server-side пагинация на Tickets и News (фронт под параметры)
 
-  P2 — UI / Доступность:
+  Этап 15 — Инфраструктура (P1)
+    • Docker: multi-stage для server, non-root USER, server/.dockerignore
+    • CI: добавить npm test для клиента, MySQL service для серверных тестов
+    • Отдельная тестовая БД (DB_NAME=servicedesk_test, поднимается в CI)
+    • VITE_API_URL как ARG в Dockerfile frontend
+
+  Этап 16 — UI / i18n / a11y (P2)
     • i18n — пройти по всем страницам, заменить хардкод на t()
-    • a11y — aria-label на иконки, htmlFor на label, keyboard для карточек
+    • aria-label на иконки (Menu, Logout, Sort, View toggle)
+    • htmlFor/id на все label + input (Login, Register, NewTicket, Files)
+    • keyboard + role="button" + tabIndex на кликабельные карточки
+    • Error messages с role="alert"
+    • Tabs — Radix или aria-атрибуты вручную
+    • Drag-and-drop клавиатурная альтернатива (Files, Kanban)
 
-  P3 — Опционально:
-    • LDAP/AD интеграция для SSO
-    • Redis-кэш для API-ответов
-    • Экспорт данных с других страниц (Wiki, Calendar, Employees)
-    • Отдельная тестовая БД (DB_NAME=servicedesk_test)
-    • Покрытие тестами 80% (c8), MSW на клиенте
+  Этап 17 — Опционально (P3)
+    • LDAP/AD интеграция (passport-ldapauth)
+    • Redis-кэш для API-ответов (GET /api/tickets, /api/employees)
+    • Экспорт данных с других страниц (Wiki, Calendar, Employees, News)
+    • MSW на клиенте для тестов страниц с API
+    • Покрытие тестами 80% (c8), E2E: ticket CRUD, чаты, админка
+    • WebSocket rate-limit (5 msg/sec) + exponential backoff
+    • Очистка уведомлений > 90 дней
+    • Лимит экспорта 10 000 записей
 
 ────────────────────────────────────────────────────────────────────────────
 

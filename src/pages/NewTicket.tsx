@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,8 @@ import { useTickets } from "@/context/ticket-context"
 import { ArrowLeft, Monitor, Send, Terminal } from "lucide-react"
 import type { TicketPriority } from "@/types"
 
+const API = "http://localhost:4000/api"
+
 export default function NewTicket() {
   const navigate = useNavigate()
   const { createTicket } = useTickets()
@@ -18,6 +20,26 @@ export default function NewTicket() {
   const [category, setCategory] = useState("support")
   const [computerName, setComputerName] = useState("")
   const [userAccount, setUserAccount] = useState("")
+
+  useEffect(() => {
+    const saved = localStorage.getItem("sysInfo")
+    if (saved) {
+      const { computerName: cn, userAccount: ua } = JSON.parse(saved)
+      if (cn) setComputerName(cn)
+      if (ua) setUserAccount(ua)
+      return
+    }
+    fetch(`${API}/system-info`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          setComputerName(data.computerName || "")
+          setUserAccount(data.userAccount || "")
+          localStorage.setItem("sysInfo", JSON.stringify({ computerName: data.computerName, userAccount: data.userAccount }))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -111,7 +133,7 @@ export default function NewTicket() {
                 />
               </div>
               <p className="text-[10px] text-muted-foreground">
-                Запустите скрипт <code className="text-primary">scripts\get-system-info.ps1</code> чтобы узнать данные
+                Определено автоматически. Можно изменить вручную.
               </p>
             </div>
 

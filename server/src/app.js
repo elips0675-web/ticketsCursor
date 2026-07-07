@@ -18,6 +18,8 @@ import searchRouter from './routes/search.js'
 import pushRouter from './routes/push.js'
 import authRouter from './routes/auth.js'
 import adminRouter from './routes/admin.js'
+import swaggerUi from 'swagger-ui-express'
+import swaggerSpec from './swagger.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import multer from 'multer'
@@ -49,6 +51,8 @@ app.use('/api/notifications', notificationsRouter)
 app.use('/api/push', pushRouter)
 app.use('/api/search', searchRouter)
 app.use('/api/admin', adminRouter)
+
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }' }))
 
 app.get('/', (req, res) => {
   res.json({ app: 'Service Desk API', version: '1.0.0' })

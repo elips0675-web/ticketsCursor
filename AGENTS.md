@@ -145,8 +145,8 @@ docker compose up -d --build
 # 4. cd .. && npm run dev
 ```
 
-## Опциональные улучшения (не требуются)
-- E2E-тесты (Playwright/Cypress)
-- Swagger/OpenAPI документация
-- Redis для WebSocket state
-- Kubernetes манифесты
+### Этап 12 — Опциональные улучшения
+- **Swagger/OpenAPI**: `GET /api/docs` — swagger-ui-express с полной спецификацией всех эндпоинтов
+- **E2E (Playwright)**: настройка `playwright.config.ts`, тест логина (`e2e/login.spec.ts`), скрипты `npm run test:e2e`
+- **Redis**: Socket.io Redis adapter (`@socket.io/redis-adapter` + `ioredis`), на `REDIS_URL` — адаптер включён, без Redis — fallback на in-memory
+- **Kubernetes**: полные манифесты в `k8s/` (namespace, ConfigMap, Secrets, MySQL + PVC, Redis, API (2 реплики), Frontend (2 реплики), Ingress)

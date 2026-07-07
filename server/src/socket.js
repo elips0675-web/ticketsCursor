@@ -1,4 +1,5 @@
 import { Server } from 'socket.io'
+import { createAdapter } from '@socket.io/redis-adapter'
 import jwt from 'jsonwebtoken'
 import pool from './db.js'
 
@@ -6,10 +7,23 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production'
 
 let io
 
-export function setupSocket(server) {
+export async function setupSocket(server) {
   io = new Server(server, {
     cors: { origin: process.env.CORS_ORIGIN || '*', methods: ['GET', 'POST'] },
   })
+
+  // Redis adapter with fallback to in-memory
+  if (process.env.REDIS_URL) {
+    try {
+      const { default: Redis } = await import('ioredis')
+      const pubClient = new Redis(process.env.REDIS_URL)
+      const subClient = pubClient.duplicate()
+      io.adapter(createAdapter(pubClient, subClient))
+      console.log('Socket.io using Redis adapter')
+    } catch (err) {
+      console.warn('Redis unavailable, using in-memory adapter:', err.message)
+    }
+  }
 
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token

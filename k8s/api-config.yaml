@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: servicedesk
+data:
+  PORT: "4000"
+  DB_HOST: mysql
+  DB_PORT: "3306"
+  DB_USER: root
+  DB_NAME: servicedesk
+  CORS_ORIGIN: http://frontend:80
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-secret
+  namespace: servicedesk
+type: Opaque
+stringData:
+  DB_PASSWORD: root
+  JWT_SECRET: change-me-in-production
+  REDIS_URL: redis://redis:6379

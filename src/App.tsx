@@ -20,6 +20,7 @@ import ChatDetail from "@/pages/ChatDetail"
 import ProfilePage from "@/pages/Profile"
 import NewsPage from "@/pages/News"
 import KanbanPage from "@/pages/Kanban"
+import NotificationsPage from "@/pages/NotificationsPage"
 import Login from "@/pages/Login"
 import ForgotPassword from "@/pages/ForgotPassword"
 import ResetPassword from "@/pages/ResetPassword"
@@ -72,6 +73,7 @@ export default function App() {
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/wiki" element={<WikiPage />} />
                   <Route path="/news" element={<NewsPage />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/kanban" element={<KanbanPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

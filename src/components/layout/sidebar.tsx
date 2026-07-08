@@ -28,6 +28,7 @@ import NotificationBell from '@/components/NotificationBell'
 const navItems = [
   { to: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['admin', 'senior_agent', 'agent'] },
   { to: '/search', icon: Search, labelKey: 'nav.search', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/notifications', icon: Bell, labelKey: 'nav.notifications', roles: ['admin', 'senior_agent', 'agent'] },
   { to: '/chats', icon: MessageCircle, labelKey: 'nav.chats', roles: ['admin', 'senior_agent', 'agent'] },
   { to: '/tickets', icon: Ticket, labelKey: 'nav.tickets', roles: ['admin', 'senior_agent', 'agent'] },
   { to: '/kanban', icon: Columns3, labelKey: 'nav.kanban', roles: ['admin', 'senior_agent', 'agent'] },

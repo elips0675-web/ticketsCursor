@@ -49,4 +49,13 @@ router.put('/read-all', async (req, res) => {
   }
 })
 
+router.delete('/clear-all', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM notifications WHERE user_id = ?', [req.user.userId])
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to clear notifications' })
+  }
+})
+
 export default router

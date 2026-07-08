@@ -114,6 +114,14 @@ export default function NotificationBell({ inSidebar }: { inSidebar?: boolean })
               ))
             )}
           </div>
+          <div className="border-t px-4 py-2">
+            <button
+              onClick={() => { navigate('/notifications'); setOpen(false) }}
+              className="text-[10px] text-primary hover:underline w-full text-center"
+            >
+              Все уведомления
+            </button>
+          </div>
         </div>
       )}
     </div>

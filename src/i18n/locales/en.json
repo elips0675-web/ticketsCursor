@@ -13,6 +13,7 @@
     "search": "Search",
     "profile": "Profile",
     "admin": "Admin",
+    "notifications": "Notifications",
     "more": "More"
   },
   "common": {
@@ -266,6 +267,17 @@
     "empty": "No news yet",
     "showMore": "Show more",
     "exportCSV": "CSV"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unread": "unread",
+    "markAllRead": "Mark all read",
+    "clearAll": "Clear all",
+    "searchPlaceholder": "Search notifications...",
+    "all": "All",
+    "unreadOnly": "Unread",
+    "noData": "No notifications",
+    "markRead": "Mark as read"
   },
   "wiki": {
     "title": "Wiki",

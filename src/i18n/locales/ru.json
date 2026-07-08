@@ -13,6 +13,7 @@
     "search": "Поиск",
     "profile": "Профиль",
     "admin": "Админ",
+    "notifications": "Уведомления",
     "more": "Ещё"
   },
   "common": {
@@ -265,6 +266,17 @@
     "empty": "Новостей пока нет",
     "showMore": "Показать ещё",
     "exportCSV": "CSV"
+  },
+  "notifications": {
+    "title": "Уведомления",
+    "unread": "непрочитанных",
+    "markAllRead": "Все прочитано",
+    "clearAll": "Очистить все",
+    "searchPlaceholder": "Поиск по уведомлениям...",
+    "all": "Все",
+    "unreadOnly": "Непрочитанные",
+    "noData": "Нет уведомлений",
+    "markRead": "Отметить прочитанным"
   },
   "wiki": {
     "title": "База знаний",

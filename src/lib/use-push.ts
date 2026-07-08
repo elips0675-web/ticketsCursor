@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback } from 'react'
 
 function urlBase64ToUint8Array(base64: string) {
-  const padding = "=".repeat((4 - (base64.length % 4)) % 4)
-  const data = atob(base64.replace(/-/g, "+").replace(/_/g, "/") + padding)
+  const padding = '='.repeat((4 - (base64.length % 4)) % 4)
+  const data = atob(base64.replace(/-/g, '+').replace(/_/g, '/') + padding)
   const output = new Uint8Array(data.length)
   for (let i = 0; i < data.length; i++) output[i] = data.charCodeAt(i)
   return output
@@ -12,25 +12,25 @@ export function usePush() {
   const [subscribed, setSubscribed] = useState(false)
   const [supported, setSupported] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setSupported("serviceWorker" in navigator && "PushManager" in window)
+    setSupported('serviceWorker' in navigator && 'PushManager' in window)
   }, [])
 
   useEffect(() => {
     if (!supported) return
-    navigator.serviceWorker.ready.then((reg) =>
-      reg.pushManager.getSubscription().then((sub) => setSubscribed(!!sub))
-    )
+    navigator.serviceWorker.ready.then((reg) => reg.pushManager.getSubscription().then((sub) => setSubscribed(!!sub)))
   }, [supported])
 
   const subscribe = useCallback(async () => {
     if (!supported) return
     setLoading(true)
+    setError(null)
     try {
-      const token = localStorage.getItem("token")
-      const res = await fetch("/api/push/vapid-key", { headers: { Authorization: `Bearer ${token}` } })
-      if (!res.ok) throw new Error("VAPID key not available")
+      const token = localStorage.getItem('token')
+      const res = await fetch('/api/push/vapid-key', { headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) throw new Error('VAPID key not configured on server')
       const { publicKey } = await res.json()
 
       const reg = await navigator.serviceWorker.ready
@@ -39,15 +39,16 @@ export function usePush() {
         applicationServerKey: urlBase64ToUint8Array(publicKey),
       })
 
-      const save = await fetch("/api/push/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      const save = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ subscription_json: sub.toJSON() }),
       })
-      if (!save.ok) throw new Error("Failed to save subscription")
+      if (!save.ok) throw new Error('Failed to save subscription')
       setSubscribed(true)
-    } catch {
+    } catch (e) {
       setSubscribed(false)
+      setError(e instanceof Error ? e.message : 'Push subscription failed')
     }
     setLoading(false)
   }, [supported])
@@ -60,9 +61,9 @@ export function usePush() {
       const sub = await reg.pushManager.getSubscription()
       if (sub) await sub.unsubscribe()
 
-      const token = localStorage.getItem("token")
-      await fetch("/api/push/unsubscribe", {
-        method: "DELETE",
+      const token = localStorage.getItem('token')
+      await fetch('/api/push/unsubscribe', {
+        method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
     } catch {
@@ -72,5 +73,5 @@ export function usePush() {
     setLoading(false)
   }, [supported])
 
-  return { subscribed, supported, loading, subscribe, unsubscribe }
+  return { subscribed, supported, loading, error, subscribe, unsubscribe }
 }

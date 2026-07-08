@@ -1,29 +1,48 @@
-import { NavLink } from "react-router-dom"
-import { Search, Ticket, LayoutDashboard, Users, PlusCircle, Calendar, BarChart3, FileText, MessageCircle, User, HelpCircle, LogOut, BookOpen, Newspaper, Shield, Columns3, Languages, Bell } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useAuth } from "@/context/AuthContext"
-import { useTranslation } from "react-i18next"
-import LanguageSwitcher from "@/components/LanguageSwitcher"
-import NotificationBell from "@/components/NotificationBell"
+import { NavLink } from 'react-router-dom'
+import {
+  Search,
+  Ticket,
+  LayoutDashboard,
+  Users,
+  PlusCircle,
+  Calendar,
+  BarChart3,
+  FileText,
+  MessageCircle,
+  User,
+  HelpCircle,
+  LogOut,
+  BookOpen,
+  Newspaper,
+  Shield,
+  Columns3,
+  Languages,
+  Bell,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import NotificationBell from '@/components/NotificationBell'
 
 const navItems = [
-  { to: "/", icon: LayoutDashboard, labelKey: "nav.dashboard", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/search", icon: Search, labelKey: "nav.search", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/chats", icon: MessageCircle, labelKey: "nav.chats", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/tickets", icon: Ticket, labelKey: "nav.tickets", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/kanban", icon: Columns3, labelKey: "nav.kanban", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/employees", icon: Users, labelKey: "nav.employees", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/calendar", icon: Calendar, labelKey: "nav.calendar", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/polls", icon: BarChart3, labelKey: "nav.polls", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/wiki", icon: BookOpen, labelKey: "nav.wiki", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/news", icon: Newspaper, labelKey: "nav.news", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/files", icon: FileText, labelKey: "nav.files", roles: ["admin", "senior_agent", "agent"] },
-  { to: "/tickets/new", icon: PlusCircle, labelKey: "tickets.new", roles: ["admin", "senior_agent", "agent"] },
+  { to: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/search', icon: Search, labelKey: 'nav.search', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/chats', icon: MessageCircle, labelKey: 'nav.chats', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/tickets', icon: Ticket, labelKey: 'nav.tickets', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/kanban', icon: Columns3, labelKey: 'nav.kanban', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/employees', icon: Users, labelKey: 'nav.employees', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/calendar', icon: Calendar, labelKey: 'nav.calendar', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/polls', icon: BarChart3, labelKey: 'nav.polls', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/wiki', icon: BookOpen, labelKey: 'nav.wiki', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/news', icon: Newspaper, labelKey: 'nav.news', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/files', icon: FileText, labelKey: 'nav.files', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/tickets/new', icon: PlusCircle, labelKey: 'tickets.new', roles: ['admin', 'senior_agent', 'agent'] },
 ]
 
 const bottomItems = [
-  { to: "/admin", icon: Shield, labelKey: "nav.admin", roles: ["admin"] },
-  { to: "/profile", icon: User, labelKey: "nav.profile", roles: ["admin", "senior_agent", "agent"] },
+  { to: '/admin', icon: Shield, labelKey: 'nav.admin', roles: ['admin'] },
+  { to: '/profile', icon: User, labelKey: 'nav.profile', roles: ['admin', 'senior_agent', 'agent'] },
 ]
 
 export function Sidebar() {
@@ -37,9 +56,9 @@ export function Sidebar() {
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth()
   const { t } = useTranslation()
-  const userRole = user?.role || "agent"
+  const userRole = user?.role || 'agent'
 
-  const filterByRole = (items: typeof navItems) => items.filter(i => i.roles.includes(userRole))
+  const filterByRole = (items: typeof navItems) => items.filter((i) => i.roles.includes(userRole))
   return (
     <>
       <div className="p-5 border-b border-sidebar-border">
@@ -54,19 +73,19 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {filterByRole(navItems).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === "/"}
+            end={item.to === '/'}
             onClick={onNavigate}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors",
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors',
                 isActive
-                  ? "bg-sidebar-accent text-sidebar-primary"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                  ? 'bg-sidebar-accent text-sidebar-primary'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
               )
             }
           >
@@ -84,10 +103,10 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             onClick={onNavigate}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors",
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors',
                 isActive
-                  ? "bg-sidebar-accent text-sidebar-primary"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                  ? 'bg-sidebar-accent text-sidebar-primary'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
               )
             }
           >
@@ -96,16 +115,19 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           </NavLink>
         ))}
         <button
-          onClick={() => { logout(); window.location.href = '/login' }}
+          onClick={() => {
+            logout()
+            window.location.href = '/login'
+          }}
           className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <LogOut className="w-4 h-4" />
-          {t("auth.logout")}
+          {t('auth.logout')}
         </button>
         <LanguageSwitcher />
         {user && (
           <div className="px-3 py-2 mt-2 text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-bold">
-            {user.role === "admin" ? t("admin.title") : user.role === "senior_agent" ? "Senior Agent" : t("auth.role")}
+            {user.role === 'admin' ? t('admin.title') : user.role === 'senior_agent' ? 'Senior Agent' : t('auth.role')}
           </div>
         )}
       </div>

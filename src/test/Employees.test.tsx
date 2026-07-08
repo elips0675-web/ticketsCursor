@@ -26,6 +26,7 @@ vi.mock('react-i18next', () => ({
         'employees.sortName': 'По имени',
         'employees.sortTickets': 'По тикетам',
         'employees.sortResolved': 'По решённым',
+        'employees.exportCSV': 'CSV',
       }
       return map[key] || key
     },
@@ -51,9 +52,9 @@ describe('Employees Page', () => {
     expect(screen.getByText('Администраторы')).toBeInTheDocument()
   })
 
-  it('shows view toggle buttons', () => {
+  it('shows view toggle tabs', () => {
     render(<Employees />, { wrapper: AllTheProviders })
-    const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBeGreaterThanOrEqual(6)
+    expect(screen.getByRole('tab', { name: 'Карточки' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Таблица' })).toBeInTheDocument()
   })
 })

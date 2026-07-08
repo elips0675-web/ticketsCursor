@@ -47,7 +47,7 @@ const bottomItems = [
 
 export function Sidebar() {
   return (
-    <aside className="hidden md:flex md:w-60 flex-col bg-sidebar text-sidebar-foreground h-screen shrink-0">
+    <aside className="hidden md:flex md:w-60 flex-col bg-sidebar text-sidebar-foreground h-screen shrink-0 overflow-y-auto">
       <SidebarContent />
     </aside>
   )
@@ -73,7 +73,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-1">
         {filterByRole(navItems).map((item) => (
           <NavLink
             key={item.to}

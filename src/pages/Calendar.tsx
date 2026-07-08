@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -79,23 +80,32 @@ export default function CalendarPage() {
           description: form.description || null,
         }),
       })
-      if (res.ok) {
-        const evt = await res.json()
-        setEvents((prev) => [...prev, evt])
+      if (!res.ok) {
+        toast.error(t('common.error'))
+        return
       }
+      const evt = await res.json()
+      setEvents((prev) => [...prev, evt])
+      setForm({ title: '', time: '', description: '' })
+      setShowAdd(false)
     } catch {
-      /* ignore */
+      toast.error(t('common.error'))
     }
-    setForm({ title: '', time: '', description: '' })
-    setShowAdd(false)
   }
 
   const deleteEvent = async (id: number) => {
     try {
-      await fetch(`${API_URL}/calendar/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      const res = await fetch(`${API_URL}/calendar/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) {
+        toast.error(t('common.error'))
+        return
+      }
       setEvents((prev) => prev.filter((e) => e.id !== id))
     } catch {
-      /* ignore */
+      toast.error(t('common.error'))
     }
   }
 
@@ -255,10 +265,6 @@ export default function CalendarPage() {
                         </Button>
                       )}
                     </div>
-                    <Button variant="outline" size="sm" onClick={exportCSV}>
-                      <Download className="w-4 h-4 mr-1" />
-                      {t('calendar.exportCSV')}
-                    </Button>
                   </div>
                 ))}
             </CardContent>

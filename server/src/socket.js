@@ -93,6 +93,21 @@ export async function setupSocket(server) {
         )
         const [[msg]] = await pool.query('SELECT * FROM chat_messages WHERE id = ?', [result.insertId])
         io.to(`chat:${chatId}`).emit('message:new', msg)
+        // Уведомление участникам чата кроме отправителя
+        const [participants] = await pool.query(
+          'SELECT DISTINCT sender_id FROM chat_messages WHERE chat_id = ? AND sender_id != ?',
+          [chatId, socket.userId],
+        )
+        const { createNotification } = await import('./routes/notifications.js')
+        for (const p of participants) {
+          await createNotification({
+            userId: p.sender_id,
+            type: 'chat_message',
+            title: senderName,
+            body: text,
+            link: `/chats/${chatId}`,
+          })
+        }
       } catch (err) {
         console.error('WS message error:', err)
       }

@@ -45,6 +45,21 @@ router.post('/:id/messages', async (req, res) => {
       [req.params.id, req.user.userId, req.user.name || 'User', text],
     )
     const [[msg]] = await pool.query('SELECT * FROM chat_messages WHERE id = ?', [result.insertId])
+    // Уведомление участникам чата кроме отправителя
+    const [participants] = await pool.query(
+      'SELECT DISTINCT sender_id FROM chat_messages WHERE chat_id = ? AND sender_id != ?',
+      [req.params.id, req.user.userId],
+    )
+    const { createNotification } = await import('./notifications.js')
+    for (const p of participants) {
+      await createNotification({
+        userId: p.sender_id,
+        type: 'chat_message',
+        title: req.user.name || 'User',
+        body: text,
+        link: `/chats/${req.params.id}`,
+      })
+    }
     res.status(201).json(msg)
   } catch (err) {
     console.error('Send message error:', err)

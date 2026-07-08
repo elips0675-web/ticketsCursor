@@ -36,6 +36,15 @@ router.post('/', createCalendarValidation, async (req, res) => {
       [result.insertId],
     )
     res.status(201).json(event)
+    // Уведомление создателю
+    const { createNotification } = await import('./notifications.js')
+    await createNotification({
+      userId: req.user.userId,
+      type: 'event',
+      title: 'Событие создано',
+      body: title,
+      link: `/calendar`,
+    })
   } catch (err) {
     console.error('Create event error:', err)
     res.status(500).json({ message: 'Failed to create event' })

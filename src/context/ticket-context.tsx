@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
 import type { Ticket, TicketStats, Employee, TicketStatus, TicketPriority } from "@/types"
 import { useAuth } from "@/context/AuthContext"
+import { useSocket } from "@/context/SocketContext"
 import { DEMO_TICKETS, DEMO_EMPLOYEES } from "@/lib/demo-data"
 
 const API = "http://localhost:4000/api"
@@ -91,6 +92,16 @@ export function TicketProvider({ children }: { children: ReactNode }) {
   }, [token])
 
   useEffect(() => { fetchAll() }, [fetchAll])
+
+  const { socket } = useSocket()
+  useEffect(() => {
+    if (!socket) return
+    const onStatus = ({ userId, online }: { userId: number; online: boolean }) => {
+      setEmployees(prev => prev.map(e => e.id === userId ? { ...e, online } : e))
+    }
+    socket.on('user:status', onStatus)
+    return () => { socket.off('user:status', onStatus) }
+  }, [socket])
 
   const stats: TicketStats = {
     total: tickets.length,

@@ -72,6 +72,12 @@ export async function setupSocket(server) {
 
   io.on('connection', (socket) => {
     console.log(`WS user ${socket.userId} connected`)
+    socket.join(`user:${socket.userId}`)
+
+    // Онлайн-статус
+    pool.query('UPDATE employees SET online = 1 WHERE id = ?', [socket.userId])
+      .then(() => io.emit('user:status', { userId: socket.userId, online: true }))
+      .catch(() => {})
 
     socket.on('join:chat', (chatId) => {
       socket.join(`chat:${chatId}`)
@@ -142,6 +148,9 @@ export async function setupSocket(server) {
 
     socket.on('disconnect', () => {
       console.log(`WS user ${socket.userId} disconnected`)
+      pool.query('UPDATE employees SET online = 0, last_active = NOW() WHERE id = ?', [socket.userId])
+        .then(() => io.emit('user:status', { userId: socket.userId, online: false }))
+        .catch(() => {})
     })
   })
 

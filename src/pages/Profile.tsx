@@ -9,8 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { User, Mail, Phone, Briefcase, MapPin, FileText, Settings, Camera, Save, Monitor, Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
-
-const API = 'http://localhost:4000/api'
+import { API_URL } from '@/lib/api'
 
 export default function ProfilePage() {
   const { t } = useTranslation()
@@ -27,7 +26,7 @@ export default function ProfilePage() {
   }, [])
 
   useEffect(() => {
-    fetch(`${API}/employees`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/employees`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         const me = data.find((e: any) => e.id === authUser?.id) || {}

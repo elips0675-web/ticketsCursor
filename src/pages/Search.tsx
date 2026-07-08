@@ -1,11 +1,22 @@
-import { useState, useEffect, useRef } from "react"
-import { useNavigate } from "react-router-dom"
-import { Search as SearchIcon, Ticket, User, BookOpen, Newspaper, MessageCircle, FileText, Loader2, ExternalLink } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useAuth } from "@/context/AuthContext"
-import { cn } from "@/lib/utils"
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  Search as SearchIcon,
+  Ticket,
+  User,
+  BookOpen,
+  Newspaper,
+  MessageCircle,
+  FileText,
+  Loader2,
+  ExternalLink,
+} from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { useAuth } from '@/context/AuthContext'
+import { cn } from '@/lib/utils'
+import { API_URL } from '@/lib/api'
 
 interface SearchResult {
   tickets: any[]
@@ -16,11 +27,16 @@ interface SearchResult {
   files: any[]
 }
 
-const API = "http://localhost:4000/api"
-
 export default function SearchPage() {
-  const [query, setQuery] = useState("")
-  const [results, setResults] = useState<SearchResult>({ tickets: [], employees: [], wiki: [], news: [], chats: [], files: [] })
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<SearchResult>({
+    tickets: [],
+    employees: [],
+    wiki: [],
+    news: [],
+    chats: [],
+    files: [],
+  })
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -43,7 +59,7 @@ export default function SearchPage() {
     timerRef.current = setTimeout(async () => {
       setLoading(true)
       try {
-        const res = await fetch(`${API}/search?q=${encodeURIComponent(q)}`, {
+        const res = await fetch(`${API_URL}/search?q=${encodeURIComponent(q)}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (res.ok) setResults(await res.json())
@@ -54,7 +70,9 @@ export default function SearchPage() {
         setSearched(true)
       }
     }, 300)
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
   }, [query, token])
 
   const total = Object.values(results).reduce((a, b) => a + b.length, 0)
@@ -63,7 +81,9 @@ export default function SearchPage() {
     <div className="mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold mb-1">Глобальный поиск</h1>
-        <p className="text-muted-foreground text-sm">Поиск по тикетам, сотрудникам, базе знаний, новостям, чатам и файлам</p>
+        <p className="text-muted-foreground text-sm">
+          Поиск по тикетам, сотрудникам, базе знаний, новостям, чатам и файлам
+        </p>
       </div>
 
       <div className="relative">
@@ -93,24 +113,97 @@ export default function SearchPage() {
 
       {!loading && total > 0 && (
         <div className="space-y-8">
-          <Section title="Тикеты" icon={Ticket} results={results.tickets} href={(r) => `/tickets/${r.id}`} label={(r) => r.title} meta={(r) => (
-            <div className="flex gap-2">
-              <Badge variant={r.status === "open" ? "default" : r.status === "in_progress" ? "secondary" : "outline"} className="text-[10px]">{r.status}</Badge>
-              <Badge variant={r.priority === "critical" ? "destructive" : r.priority === "high" ? "default" : "secondary"} className="text-[10px]">{r.priority}</Badge>
-            </div>
-          )} />
-          <Section title="Сотрудники" icon={User} results={results.employees} href={(r) => `/employees`} label={(r) => r.name} meta={(r) => <span className="text-xs text-muted-foreground">{r.email} {r.department ? `· ${r.department}` : ""}</span>} />
-          <Section title="База знаний" icon={BookOpen} results={results.wiki} href={(r) => `/wiki`} label={(r) => r.title} meta={(r) => r.category ? <Badge variant="outline" className="text-[10px]">{r.category}</Badge> : null} />
-          <Section title="Новости" icon={Newspaper} results={results.news} href={(r) => `/news`} label={(r) => r.title} meta={() => null} />
-          <Section title="Чаты" icon={MessageCircle} results={results.chats} href={(r) => `/chats/${r.id}`} label={(r) => r.name} meta={() => null} />
-          <Section title="Файлы" icon={FileText} results={results.files} href={(r) => `/files`} label={(r) => r.original_name || r.name} meta={(r) => <span className="text-xs text-muted-foreground">{r.mime_type} · {(r.size / 1024).toFixed(1)} KB</span>} />
+          <Section
+            title="Тикеты"
+            icon={Ticket}
+            results={results.tickets}
+            href={(r) => `/tickets/${r.id}`}
+            label={(r) => r.title}
+            meta={(r) => (
+              <div className="flex gap-2">
+                <Badge
+                  variant={r.status === 'open' ? 'default' : r.status === 'in_progress' ? 'secondary' : 'outline'}
+                  className="text-[10px]"
+                >
+                  {r.status}
+                </Badge>
+                <Badge
+                  variant={r.priority === 'critical' ? 'destructive' : r.priority === 'high' ? 'default' : 'secondary'}
+                  className="text-[10px]"
+                >
+                  {r.priority}
+                </Badge>
+              </div>
+            )}
+          />
+          <Section
+            title="Сотрудники"
+            icon={User}
+            results={results.employees}
+            href={(r) => `/employees`}
+            label={(r) => r.name}
+            meta={(r) => (
+              <span className="text-xs text-muted-foreground">
+                {r.email} {r.department ? `· ${r.department}` : ''}
+              </span>
+            )}
+          />
+          <Section
+            title="База знаний"
+            icon={BookOpen}
+            results={results.wiki}
+            href={(r) => `/wiki`}
+            label={(r) => r.title}
+            meta={(r) =>
+              r.category ? (
+                <Badge variant="outline" className="text-[10px]">
+                  {r.category}
+                </Badge>
+              ) : null
+            }
+          />
+          <Section
+            title="Новости"
+            icon={Newspaper}
+            results={results.news}
+            href={(r) => `/news`}
+            label={(r) => r.title}
+            meta={() => null}
+          />
+          <Section
+            title="Чаты"
+            icon={MessageCircle}
+            results={results.chats}
+            href={(r) => `/chats/${r.id}`}
+            label={(r) => r.name}
+            meta={() => null}
+          />
+          <Section
+            title="Файлы"
+            icon={FileText}
+            results={results.files}
+            href={(r) => `/files`}
+            label={(r) => r.original_name || r.name}
+            meta={(r) => (
+              <span className="text-xs text-muted-foreground">
+                {r.mime_type} · {(r.size / 1024).toFixed(1)} KB
+              </span>
+            )}
+          />
         </div>
       )}
     </div>
   )
 }
 
-function Section({ title, icon: Icon, results, href, label, meta }: {
+function Section({
+  title,
+  icon: Icon,
+  results,
+  href,
+  label,
+  meta,
+}: {
   title: string
   icon: any
   results: any[]

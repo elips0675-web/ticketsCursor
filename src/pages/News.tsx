@@ -8,8 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Search, Newspaper, Plus, Clock, User, AlertTriangle, Pin, Loader2, Download, ImageIcon } from 'lucide-react'
 import type { NewsPost } from '@/types'
 import { useAuth } from '@/context/AuthContext'
-
-const API = 'http://localhost:4000/api'
+import { API_URL } from '@/lib/api'
 
 function mapNews(raw: any): NewsPost {
   return {
@@ -48,7 +47,7 @@ export default function NewsPage() {
     const form = new FormData()
     form.append('image', file)
     try {
-      const res = await fetch(`${API}/wiki/upload-image`, {
+      const res = await fetch(`${API_URL}/wiki/upload-image`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: form,
@@ -68,7 +67,7 @@ export default function NewsPage() {
     const params = new URLSearchParams({ page: String(page), limit: String(PER_PAGE) })
     if (showImportant) params.set('important', 'true')
     if (search.trim()) params.set('q', search.trim())
-    fetch(`${API}/news?${params}`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/news?${params}`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => (res.ok ? res.json() : { data: [], total: 0, totalPages: 1 }))
       .then(({ data, total, totalPages: tp }) => {
         setNews(data.map(mapNews))
@@ -105,7 +104,7 @@ export default function NewsPage() {
   const handleCreate = async () => {
     if (!newTitle.trim() || !newContent.trim()) return
     try {
-      const res = await fetch(`${API}/news`, {
+      const res = await fetch(`${API_URL}/news`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ title: newTitle, content: newContent, important: newImportant }),

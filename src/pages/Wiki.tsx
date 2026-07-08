@@ -10,8 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import type { WikiArticle } from '@/types'
 import { useAuth } from '@/context/AuthContext'
 import { useTranslation } from 'react-i18next'
-
-const API = 'http://localhost:4000/api'
+import { API_URL } from '@/lib/api'
 
 function mapArticle(raw: any): WikiArticle {
   return {
@@ -52,7 +51,7 @@ export default function WikiPage() {
     const form = new FormData()
     form.append('image', file)
     try {
-      const res = await fetch(`${API}/wiki/upload-image`, {
+      const res = await fetch(`${API_URL}/wiki/upload-image`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: form,
@@ -69,7 +68,7 @@ export default function WikiPage() {
   }
 
   useEffect(() => {
-    fetch(`${API}/wiki`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/wiki`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         setArticles(data.map(mapArticle))
@@ -94,7 +93,7 @@ export default function WikiPage() {
   const handleCreate = async () => {
     if (!newTitle.trim() || !newContent.trim()) return
     try {
-      const res = await fetch(`${API}/wiki`, {
+      const res = await fetch(`${API_URL}/wiki`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({

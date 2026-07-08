@@ -9,8 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Plus, BarChart3, CheckCheck, Loader2, X } from 'lucide-react'
 import type { Poll } from '@/types'
 import { useAuth } from '@/context/AuthContext'
-
-const API = 'http://localhost:4000/api'
+import { API_URL } from '@/lib/api'
 
 export default function PollsPage() {
   const { t } = useTranslation()
@@ -21,7 +20,7 @@ export default function PollsPage() {
   const [form, setForm] = useState({ title: '', description: '', options: ['', ''], multipleChoice: false })
 
   useEffect(() => {
-    fetch(`${API}/polls`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/polls`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         setPolls(data.data ?? data)
@@ -33,7 +32,7 @@ export default function PollsPage() {
   const createPoll = async () => {
     if (!form.title.trim() || form.options.filter((o) => o.trim()).length < 2) return
     try {
-      const res = await fetch(`${API}/polls`, {
+      const res = await fetch(`${API_URL}/polls`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -56,7 +55,7 @@ export default function PollsPage() {
 
   const vote = async (pollId: number, optionId: number) => {
     try {
-      const res = await fetch(`${API}/polls/${pollId}/vote`, {
+      const res = await fetch(`${API_URL}/polls/${pollId}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ optionId }),

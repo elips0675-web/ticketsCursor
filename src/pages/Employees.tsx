@@ -24,11 +24,11 @@ import {
   Download,
   MessageCircle,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { useTickets } from '@/context/ticket-context'
 import { useAuth } from '@/context/AuthContext'
+import { API_URL } from '@/lib/api'
 import type { Employee } from '@/types'
-
-const API = 'http://localhost:4000/api'
 
 const roleIcons: Record<string, any> = {
   agent: User,
@@ -55,16 +55,18 @@ export default function Employees() {
 
   const openChat = async (userId: number) => {
     try {
-      const res = await fetch(`${API}/chats/personal/${userId}`, {
+      const res = await fetch(`${API_URL}/chats/personal/${userId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       })
-      if (res.ok) {
-        const chat = await res.json()
-        navigate(`/chats/${chat.id}`)
+      if (!res.ok) {
+        toast.error(t('chats.errorCreate'))
+        return
       }
+      const chat = await res.json()
+      navigate(`/chats/${chat.id}`)
     } catch {
-      /* ignore */
+      toast.error(t('common.error'))
     }
   }
 

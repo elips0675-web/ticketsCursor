@@ -29,7 +29,8 @@
     "close": "Close",
     "confirm": "Confirm",
     "confirmDelete": "Are you sure?",
-    "all": "All"
+    "all": "All",
+    "error": "Error"
   },
   "auth": {
     "login": "Login",
@@ -197,7 +198,8 @@
     "personal": "Personal",
     "general": "General",
     "searchPlaceholder": "Search chats...",
-    "searchInChat": "Search in chat..."
+    "searchInChat": "Search in chat...",
+    "errorCreate": "Failed to create chat"
   },
   "calendar": {
     "title": "Calendar",

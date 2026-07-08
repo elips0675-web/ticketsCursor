@@ -29,7 +29,8 @@
     "close": "Закрыть",
     "confirm": "Подтвердить",
     "confirmDelete": "Вы уверены?",
-    "all": "Все"
+    "all": "Все",
+    "error": "Ошибка"
   },
   "auth": {
     "login": "Войти",
@@ -196,7 +197,8 @@
     "personal": "Личные",
     "general": "Общие",
     "searchPlaceholder": "Поиск чатов...",
-    "searchInChat": "Поиск по чату..."
+    "searchInChat": "Поиск по чату...",
+    "errorCreate": "Не удалось создать чат"
   },
   "calendar": {
     "title": "Календарь",

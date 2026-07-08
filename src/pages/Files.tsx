@@ -9,8 +9,7 @@ import type { FileItem, FileFolder } from '@/types'
 import { useAuth } from '@/context/AuthContext'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-
-const API = 'http://localhost:4000/api'
+import { API_URL } from '@/lib/api'
 
 export default function FilesPage() {
   const { token } = useAuth()
@@ -34,7 +33,7 @@ export default function FilesPage() {
   const dragCounter = useRef(0)
 
   const fetchFolders = useCallback(() => {
-    fetch(`${API}/files/folders`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/files/folders`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         const mapped = data.map((f: any) => ({
@@ -67,7 +66,7 @@ export default function FilesPage() {
       const fd = new FormData()
       fd.append('file', file)
       if (activeFolder) fd.append('folderId', String(activeFolder))
-      const res = await fetch(`${API}/files/upload`, {
+      const res = await fetch(`${API_URL}/files/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: fd,
@@ -241,7 +240,7 @@ export default function FilesPage() {
                   onClick={() => {
                     if (f.path)
                       window.open(
-                        `${API.replace('/api', '')}${f.path}?token=${localStorage.getItem('token')}`,
+                        `${API_URL.replace('/api', '')}${f.path}?token=${localStorage.getItem('token')}`,
                         '_blank',
                       )
                   }}
@@ -252,7 +251,7 @@ export default function FilesPage() {
                       e.preventDefault()
                       if (f.path)
                         window.open(
-                          `${API.replace('/api', '')}${f.path}?token=${localStorage.getItem('token')}`,
+                          `${API_URL.replace('/api', '')}${f.path}?token=${localStorage.getItem('token')}`,
                           '_blank',
                         )
                     }

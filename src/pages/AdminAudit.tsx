@@ -5,8 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/context/AuthContext'
 import { Search, Loader2, Clock, User } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-
-const API = 'http://localhost:4000/api'
+import { API_URL } from '@/lib/api'
 
 const ACTION_COLORS: Record<string, string> = {
   created: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -23,7 +22,7 @@ export default function AdminAudit() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    fetch(`${API}/admin/audit`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/admin/audit`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         setLogs(data)

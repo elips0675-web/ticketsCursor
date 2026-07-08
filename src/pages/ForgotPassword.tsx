@@ -1,29 +1,30 @@
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Mail, ArrowLeft, Loader2 } from "lucide-react"
-import { Link } from "react-router-dom"
-import { useTranslation } from "react-i18next"
-
-const API = "http://localhost:4000/api"
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Mail, ArrowLeft, Loader2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { API_URL } from '@/lib/api'
 
 export default function ForgotPassword() {
   const { t } = useTranslation()
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const submit = async () => {
     setLoading(true)
     try {
-      await fetch(`${API}/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       })
       setSent(true)
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoading(false)
   }
 
@@ -55,7 +56,13 @@ export default function ForgotPassword() {
         <CardContent className="space-y-4">
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="pl-9" type="email" />
+            <Input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className="pl-9"
+              type="email"
+            />
           </div>
           <Button onClick={submit} disabled={loading || !email.trim()} className="w-full gap-2">
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}

@@ -1,7 +1,6 @@
 import { Router } from 'express'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
-import { createPollValidation, voteValidation } from '../validate.js'
 import logger from '../logger.js'
 
 const router = Router()
@@ -11,30 +10,33 @@ router.get('/', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page) || 1)
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50))
   const offset = (page - 1) * limit
+  const status = req.query.status // 'active' | 'closed' | undefined
   try {
-    const [[{ total }]] = await knex.raw('SELECT COUNT(*) as total FROM polls')
-    const [rows] = await knex.raw(`
-      SELECT p.*,
-        (SELECT COUNT(*) FROM poll_options WHERE poll_id = p.id) as options_count,
-        (SELECT COUNT(*) FROM poll_votes WHERE poll_id = p.id) as total_votes
-      FROM polls p ORDER BY p.created_at DESC LIMIT ? OFFSET ?
-    `, [limit, offset])
+    const where = {}
+    if (status === 'active') where.ends_at = { gte: new Date() }
+    else if (status === 'closed') where.ends_at = { lt: new Date() }
+    const total = await prisma.polls.count({ where })
+    const rows = await prisma.polls.findMany({
+      where,
+      skip: offset,
+      take: limit,
+      orderBy: { created_at: 'desc' },
+    })
     const pollIds = rows.map(r => r.id)
     if (pollIds.length > 0) {
-      const ph = pollIds.map(() => '?').join(',')
-      const [allOpts] = await knex.raw(
-        `SELECT o.*, (SELECT COUNT(*) FROM poll_votes WHERE option_id = o.id AND user_id = ?) > 0 as voted
-         FROM poll_options o WHERE o.poll_id IN (${ph}) ORDER BY o.id`,
-        [req.user.userId, ...pollIds],
-      )
-      const [allVotes] = await knex.raw(
-        `SELECT poll_id, option_id FROM poll_votes WHERE poll_id IN (${ph}) AND user_id = ?`,
-        [...pollIds, req.user.userId],
-      )
+      const allVotes = await prisma.poll_votes.findMany({
+        where: { poll_id: { in: pollIds }, user_id: req.user.userId },
+        select: { poll_id: true, option_id: true },
+      })
+      const allOpts = await prisma.poll_options.findMany({
+        where: { poll_id: { in: pollIds } },
+        orderBy: { id: 'asc' },
+      })
+      const voteOptionIds = new Set(allVotes.map(v => `${v.poll_id}:${v.option_id}`))
       const optsByPoll = {}
       for (const o of allOpts) {
         if (!optsByPoll[o.poll_id]) optsByPoll[o.poll_id] = []
-        optsByPoll[o.poll_id].push(o)
+        optsByPoll[o.poll_id].push({ ...o, voted: voteOptionIds.has(`${o.poll_id}:${o.id}`) })
       }
       const votesByPoll = {}
       for (const v of allVotes) {
@@ -45,7 +47,9 @@ router.get('/', async (req, res) => {
         poll.options = optsByPoll[poll.id] || []
         poll.myVotes = votesByPoll[poll.id] || []
         poll.multipleChoice = !!poll.multiple_choice
-        poll.totalVotes = poll.total_votes
+        poll.showResults = poll.show_results || 'after_vote'
+        poll.totalVotes = allOpts.filter(o => o.poll_id === poll.id).reduce((s, o) => s + (o.votes_count || 0), 0)
+        poll.isClosed = poll.ends_at ? new Date(poll.ends_at) < new Date() : false
       }
     }
     res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
@@ -55,79 +59,123 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', requireRole('admin', 'senior_agent'), createPollValidation, async (req, res) => {
-  const { title, description, options, multipleChoice } = req.body
+router.post('/', requireRole('admin', 'senior_agent'), async (req, res) => {
+  const { title, description, options, multipleChoice, showResults, endsAt } = req.body
+  if (!title?.trim() || !options?.length || options.length < 2) {
+    return res.status(400).json({ message: 'Title and at least 2 options required' })
+  }
   try {
-    const insertId = await knex.transaction(async (trx) => {
-      const [r] = await trx.raw(
-        'INSERT INTO polls (title, description, multiple_choice, created_by) VALUES (?, ?, ?, ?)',
-        [title, description || '', multipleChoice ? 1 : 0, req.user.userId],
-      )
-      for (const opt of options) {
-        await trx.raw('INSERT INTO poll_options (poll_id, text) VALUES (?, ?)', [r.insertId, opt])
-      }
-      return r.insertId
+    const poll = await prisma.polls.create({
+      data: {
+        title,
+        description: description || '',
+        multiple_choice: multipleChoice || false,
+        show_results: showResults || 'after_vote',
+        ends_at: endsAt ? new Date(endsAt) : null,
+        created_by: req.user.userId,
+        poll_options: {
+          create: options.map(opt => ({ text: opt.trim() })),
+        },
+      },
+      include: { poll_options: true },
     })
-    const [[poll]] = await knex.raw('SELECT * FROM polls WHERE id = ?', [insertId])
-    const [opts] = await knex.raw('SELECT * FROM poll_options WHERE poll_id = ?', [insertId])
-    res.status(201).json({ ...poll, options: opts, totalVotes: 0, myVotes: [], multipleChoice: !!poll.multiple_choice })
+    const created = await prisma.polls.findUnique({ where: { id: poll.id } })
+    res.status(201).json({
+      ...created,
+      options: poll.poll_options.map(o => ({ ...o, voted: false })),
+      totalVotes: 0,
+      myVotes: [],
+      multipleChoice: !!created.multiple_choice,
+      showResults: created.show_results || 'after_vote',
+      isClosed: false,
+    })
   } catch (err) {
     logger.error('Create poll error:', err)
     res.status(500).json({ message: 'Failed to create poll' })
   }
 })
 
-router.post('/:id/vote', voteValidation, async (req, res) => {
+router.post('/:id/vote', async (req, res) => {
   const { optionId } = req.body
+  if (!optionId) return res.status(400).json({ message: 'optionId required' })
   try {
-    await knex.transaction(async (trx) => {
-      const [[poll]] = await trx.raw('SELECT * FROM polls WHERE id = ?', [req.params.id])
-      if (!poll) {
-        const err = new Error('Not found')
-        err.status = 404
-        throw err
-      }
+    const poll = await prisma.polls.findUnique({ where: { id: Number(req.params.id) } })
+    if (!poll) return res.status(404).json({ message: 'Not found' })
+    if (poll.ends_at && new Date(poll.ends_at) < new Date()) {
+      return res.status(400).json({ message: 'Poll is closed' })
+    }
 
+    await prisma.$transaction(async (tx) => {
       if (poll.multiple_choice) {
-        const [existing] = await trx.raw(
-          'SELECT id FROM poll_votes WHERE poll_id = ? AND option_id = ? AND user_id = ?',
-          [req.params.id, optionId, req.user.userId],
-        )
-        if (existing.length) {
-          await trx.raw('DELETE FROM poll_votes WHERE id = ?', [existing[0].id])
+        const existing = await tx.poll_votes.findFirst({
+          where: { poll_id: Number(req.params.id), option_id: optionId, user_id: req.user.userId },
+        })
+        if (existing) {
+          await tx.poll_votes.delete({ where: { id: existing.id } })
         } else {
-          await trx.raw('INSERT INTO poll_votes (poll_id, option_id, user_id) VALUES (?, ?, ?)',
-            [req.params.id, optionId, req.user.userId])
+          await tx.poll_votes.create({
+            data: { poll_id: Number(req.params.id), option_id: optionId, user_id: req.user.userId },
+          })
         }
       } else {
-        await trx.raw('DELETE FROM poll_votes WHERE poll_id = ? AND user_id = ?',
-          [req.params.id, req.user.userId])
-        await trx.raw('INSERT INTO poll_votes (poll_id, option_id, user_id) VALUES (?, ?, ?)',
-          [req.params.id, optionId, req.user.userId])
+        await tx.poll_votes.deleteMany({
+          where: { poll_id: Number(req.params.id), user_id: req.user.userId },
+        })
+        await tx.poll_votes.create({
+          data: { poll_id: Number(req.params.id), option_id: optionId, user_id: req.user.userId },
+        })
       }
 
-      const [votes] = await trx.raw(
-        'SELECT option_id, COUNT(*) as cnt FROM poll_votes WHERE poll_id = ? GROUP BY option_id',
-        [req.params.id],
-      )
-      await trx.raw('UPDATE poll_options SET votes_count = 0 WHERE poll_id = ?', [req.params.id])
+      const votes = await tx.poll_votes.groupBy({
+        by: ['option_id'],
+        where: { poll_id: Number(req.params.id) },
+        _count: { id: true },
+      })
+      await tx.poll_options.updateMany({
+        where: { poll_id: Number(req.params.id) },
+        data: { votes_count: 0 },
+      })
       for (const v of votes) {
-        await trx.raw('UPDATE poll_options SET votes_count = ? WHERE id = ?', [v.cnt, v.option_id])
+        await tx.poll_options.update({
+          where: { id: v.option_id },
+          data: { votes_count: v._count.id },
+        })
       }
     })
 
-    const [opts] = await knex.raw(
-      `SELECT o.*, (SELECT COUNT(*) FROM poll_votes WHERE option_id = o.id AND user_id = ?) > 0 as voted
-       FROM poll_options o WHERE o.poll_id = ? ORDER BY o.id`,
-      [req.user.userId, req.params.id],
-    )
-    const totalVotes = opts.reduce((s, o) => s + o.votes_count, 0)
-    const [[updated]] = await knex.raw('SELECT * FROM polls WHERE id = ?', [req.params.id])
-    res.json({ ...updated, options: opts, totalVotes, multipleChoice: !!updated.multiple_choice })
+    const opts = await prisma.poll_options.findMany({
+      where: { poll_id: Number(req.params.id) },
+      orderBy: { id: 'asc' },
+    })
+    const userVotes = await prisma.poll_votes.findMany({
+      where: { poll_id: Number(req.params.id), user_id: req.user.userId },
+      select: { option_id: true },
+    })
+    const votedIds = new Set(userVotes.map(v => v.option_id))
+    const optsWithVoted = opts.map(o => ({ ...o, voted: votedIds.has(o.id) }))
+    const totalVotes = opts.reduce((s, o) => s + (o.votes_count || 0), 0)
+    const updated = await prisma.polls.findUnique({ where: { id: Number(req.params.id) } })
+    res.json({
+      ...updated,
+      options: optsWithVoted,
+      totalVotes,
+      multipleChoice: !!updated.multiple_choice,
+      showResults: updated.show_results || 'after_vote',
+      isClosed: updated.ends_at ? new Date(updated.ends_at) < new Date() : false,
+    })
   } catch (err) {
-    if (err.status === 404) return res.status(404).json({ message: 'Not found' })
     logger.error('Vote error:', err)
     res.status(500).json({ message: 'Failed to vote' })
+  }
+})
+
+router.delete('/:id', requireRole('admin', 'senior_agent'), async (req, res) => {
+  try {
+    await prisma.polls.delete({ where: { id: Number(req.params.id) } })
+    res.json({ success: true })
+  } catch (err) {
+    logger.error('Delete poll error:', err)
+    res.status(500).json({ message: 'Failed to delete poll' })
   }
 })
 

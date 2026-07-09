@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
 
@@ -15,7 +15,7 @@ const ALLOWED_SETTINGS = [
 
 router.get('/settings', async (req, res) => {
   try {
-    const [rows] = await knex.raw('SELECT `key`, `value` FROM admin_settings')
+    const rows = await prisma.admin_settings.findMany({ select: { key: true, value: true } })
     const settings = {}
     for (const r of rows) settings[r.key] = r.value
     res.json(settings)
@@ -29,10 +29,11 @@ router.put('/settings', async (req, res) => {
   try {
     for (const [key, value] of Object.entries(req.body)) {
       if (!ALLOWED_SETTINGS.includes(key)) continue
-      await knex.raw(
-        'INSERT INTO admin_settings (`key`, `value`, `updated_at`) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), `updated_at` = NOW()',
-        [key, String(value)],
-      )
+      await prisma.admin_settings.upsert({
+        where: { key },
+        update: { value: String(value), updated_at: new Date() },
+        create: { key, value: String(value), updated_at: new Date() },
+      })
     }
     res.json({ success: true })
   } catch (err) {
@@ -43,13 +44,18 @@ router.put('/settings', async (req, res) => {
 
 router.get('/users', async (req, res) => {
   try {
-    const [rows] = await knex.raw(
-      `SELECT id, name, email, role, department, title, avatar, phone,
-              online, active_tickets as activeTickets, resolved_today as resolvedToday,
-              is_active as isActive, created_at as createdAt
-       FROM employees ORDER BY is_active DESC, name`,
-    )
-    res.json(rows)
+    const rows = await prisma.$queryRaw`
+      SELECT id, name, email, role, department, title, avatar, phone,
+        online, active_tickets as activeTickets, resolved_today as resolvedToday,
+        is_active as isActive, created_at as createdAt
+      FROM employees ORDER BY is_active DESC, name
+    `
+    res.json(rows.map(r => ({
+      ...r,
+      id: Number(r.id),
+      activeTickets: Number(r.activeTickets),
+      resolvedToday: Number(r.resolvedToday),
+    })))
   } catch (err) {
     logger.error('Admin users list error:', err)
     res.status(500).json({ message: 'Failed to fetch users' })
@@ -58,28 +64,22 @@ router.get('/users', async (req, res) => {
 
 router.put('/users/:id', async (req, res) => {
   const { role, isActive, department, title } = req.body
-  const updates = []
-  const params = []
+  const data = {}
   if (role && ['super_admin', 'admin', 'senior_agent', 'agent'].includes(role)) {
-    updates.push('role = ?')
-    params.push(role)
+    data.role = role
   }
   if (isActive !== undefined) {
-    updates.push('is_active = ?')
-    params.push(isActive ? 1 : 0)
+    data.is_active = Boolean(isActive)
   }
   if (department !== undefined) {
-    updates.push('department = ?')
-    params.push(department)
+    data.department = department
   }
   if (title !== undefined) {
-    updates.push('title = ?')
-    params.push(title)
+    data.title = title
   }
-  if (updates.length === 0) return res.status(400).json({ message: 'No fields to update' })
+  if (Object.keys(data).length === 0) return res.status(400).json({ message: 'No fields to update' })
   try {
-    params.push(req.params.id)
-    await knex.raw(`UPDATE employees SET ${updates.join(', ')} WHERE id = ?`, params)
+    await prisma.employees.update({ where: { id: Number(req.params.id) }, data })
     res.json({ success: true })
   } catch (err) {
     logger.error('Admin user update error:', err)
@@ -90,15 +90,15 @@ router.put('/users/:id', async (req, res) => {
 router.get('/audit', async (req, res) => {
   const { entityType, entityId, limit = 50, offset = 0 } = req.query
   try {
-    let sql = 'SELECT * FROM audit_log'
-    const params = []
-    const conditions = []
-    if (entityType) { conditions.push('entity_type = ?'); params.push(entityType) }
-    if (entityId) { conditions.push('entity_id = ?'); params.push(Number(entityId)) }
-    if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ')
-    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?'
-    params.push(Number(limit), Number(offset))
-    const [rows] = await knex.raw(sql, params)
+    const where = {}
+    if (entityType) where.entity_type = entityType
+    if (entityId) where.entity_id = Number(entityId)
+    const rows = await prisma.audit_log.findMany({
+      where,
+      orderBy: { created_at: 'desc' },
+      skip: Number(offset),
+      take: Number(limit),
+    })
     res.json(rows)
   } catch (err) {
     logger.error('Audit log error:', err)

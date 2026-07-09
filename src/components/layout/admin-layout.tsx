@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom"
+import { NavLink, useNavigate, Outlet } from "react-router-dom"
 import { Shield, LayoutDashboard, Users, Bell, Settings, History, ArrowLeft, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -14,12 +14,12 @@ const adminNavItems = [
   { to: "/admin/audit", icon: History, labelKey: "admin.audit" },
 ]
 
-export function AdminLayout({ children }: { children: React.ReactNode }) {
+export function AdminLayout() {
   const { user, logout } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  if (user?.role !== "admin") {
+  if (user?.role !== "admin" && user?.role !== "super_admin") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Shield className="w-16 h-16 text-muted-foreground/40" />
@@ -91,7 +91,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
       <div className="flex flex-col flex-1 min-w-0">
         <MobileAdminHeader />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8"><Outlet /></main>
       </div>
     </div>
   )

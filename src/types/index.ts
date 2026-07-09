@@ -87,6 +87,9 @@ export interface Poll {
   myVotes: number[]
   createdBy: number
   createdAt: string
+  endsAt?: string
+  showResults: 'after_vote' | 'always'
+  isClosed: boolean
 }
 
 export interface FileItem {

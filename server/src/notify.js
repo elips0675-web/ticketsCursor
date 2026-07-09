@@ -1,4 +1,4 @@
-import knex from './db.js'
+import prisma from './prisma.js'
 import { sendTicketNotification } from './email.js'
 import { sendTelegramNotification } from './telegram.js'
 import { createNotification } from './routes/notifications.js'
@@ -7,24 +7,33 @@ const STATUS_LABELS = { open: 'Открыт', in_progress: 'В работе', re
 const PRIORITY_LABELS = { low: 'Низкий', medium: 'Средний', high: 'Высокий', critical: 'Критичный' }
 
 async function getTicketWithUsers(ticketId) {
-  const [[ticket]] = await knex.raw(
-    `SELECT t.*,
-       c.id as creatorId, c.name as creatorName, c.email as creatorEmail,
-       a.id as assigneeId, a.name as assigneeName, a.email as assigneeEmail
-     FROM tickets t
-     LEFT JOIN employees c ON t.created_by = c.id
-     LEFT JOIN employees a ON t.assigned_to = a.id
-     WHERE t.id = ?`,
-    [ticketId],
-  )
-  return ticket
+  const ticket = await prisma.tickets.findUnique({
+    where: { id: ticketId },
+    include: {
+      created_by_employee: { select: { id: true, name: true, email: true } },
+      assigned_to_employee: { select: { id: true, name: true, email: true } },
+    },
+  })
+  if (!ticket) return null
+  return {
+    ...ticket,
+    creatorId: ticket.created_by_employee?.id || ticket.created_by,
+    creatorName: ticket.created_by_employee?.name,
+    creatorEmail: ticket.created_by_employee?.email,
+    assigneeId: ticket.assigned_to_employee?.id,
+    assigneeName: ticket.assigned_to_employee?.name,
+    assigneeEmail: ticket.assigned_to_employee?.email,
+    created_by_employee: undefined,
+    assigned_to_employee: undefined,
+  }
 }
 
 async function getTicketParticipants(ticketId, excludeUserId) {
-  const [rows] = await knex.raw(
-    'SELECT DISTINCT sender_id FROM ticket_messages WHERE ticket_id = ? AND sender_id != ?',
-    [ticketId, excludeUserId],
-  )
+  const rows = await prisma.ticket_messages.findMany({
+    where: { ticket_id: ticketId, sender_id: { not: excludeUserId } },
+    distinct: ['sender_id'],
+    select: { sender_id: true },
+  })
   return rows.map(r => r.sender_id)
 }
 

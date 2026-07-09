@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import webpush from 'web-push'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
 
@@ -22,7 +22,10 @@ router.get('/vapid-key', (req, res) => {
 
 router.get('/subscription', async (req, res) => {
   try {
-    const [rows] = await knex.raw('SELECT subscription_json FROM push_subscriptions WHERE user_id = ?', [req.user.userId])
+    const rows = await prisma.push_subscriptions.findMany({
+      where: { user_id: req.user.userId },
+      select: { subscription_json: true },
+    })
     res.json(rows.map(r => JSON.parse(r.subscription_json)))
   } catch (err) {
     logger.error('Get subscriptions error:', err)
@@ -34,10 +37,11 @@ router.post('/subscribe', async (req, res) => {
   const { subscription_json } = req.body
   if (!subscription_json) return res.status(400).json({ message: 'Subscription object required' })
   try {
-    await knex.raw(
-      'INSERT INTO push_subscriptions (user_id, subscription_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE subscription_json = VALUES(subscription_json)',
-      [req.user.userId, JSON.stringify(subscription_json)],
-    )
+    await prisma.push_subscriptions.upsert({
+      where: { user_id: req.user.userId },
+      update: { subscription_json: JSON.stringify(subscription_json) },
+      create: { user_id: req.user.userId, subscription_json: JSON.stringify(subscription_json) },
+    })
     res.status(201).json({ ok: true })
   } catch (err) {
     logger.error('Subscribe error:', err)
@@ -47,7 +51,7 @@ router.post('/subscribe', async (req, res) => {
 
 router.delete('/unsubscribe', async (req, res) => {
   try {
-    await knex.raw('DELETE FROM push_subscriptions WHERE user_id = ?', [req.user.userId])
+    await prisma.push_subscriptions.deleteMany({ where: { user_id: req.user.userId } })
     res.json({ ok: true })
   } catch (err) {
     logger.error('Unsubscribe error:', err)
@@ -60,7 +64,9 @@ router.post('/send', requireRole('admin', 'senior_agent'), async (req, res) => {
   if (!title) return res.status(400).json({ message: 'Title is required' })
 
   try {
-    const [rows] = await knex.raw('SELECT user_id, subscription_json FROM push_subscriptions')
+    const rows = await prisma.push_subscriptions.findMany({
+      select: { user_id: true, subscription_json: true },
+    })
     if (!rows.length) return res.json({ sent: 0, total: 0 })
 
     const payload = JSON.stringify({ title, body: body || '', url: url || '/', icon: '/icon.svg' })
@@ -73,7 +79,7 @@ router.post('/send', requireRole('admin', 'senior_agent'), async (req, res) => {
         sent++
       } catch (err) {
         if (err.statusCode === 410 || err.statusCode === 404) {
-          await knex.raw('DELETE FROM push_subscriptions WHERE user_id = ?', [row.user_id])
+          await prisma.push_subscriptions.deleteMany({ where: { user_id: row.user_id } })
         }
         failed++
       }

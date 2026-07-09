@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model employees {
+  id             Int       @id @default(autoincrement())
+  name           String    @db.VarChar(255)
+  email          String    @unique @db.VarChar(255)
+  password_hash  String    @db.VarChar(255)
+  role           String?   @default("agent") @db.VarChar(10)
+  department     String?   @default("") @db.VarChar(255)
+  avatar         String?   @default("") @db.VarChar(500)
+  phone          String?   @default("") @db.VarChar(50)
+  online         Boolean?  @default(false)
+  active_tickets Int?      @default(0)
+  resolved_today Int?      @default(0)
+  title          String?   @default("") @db.VarChar(100)
+  is_active      Boolean?  @default(true)
+  created_at     DateTime? @default(now())
+
+  tickets_created_by  tickets[]          @relation("tickets_created_by")
+  tickets_assigned_to tickets[]          @relation("tickets_assigned_to")
+  events              events[]
+  polls               polls[]
+  file_folders        file_folders[]
+  files               files[]
+  chat_messages       chat_messages[]
+  wiki_articles       wiki_articles[]
+  news_posts          news_posts[]
+  push_subscriptions  push_subscriptions?
+  refresh_tokens      refresh_tokens[]
+  notifications       notifications[]
+  poll_votes          poll_votes[]
+  ticket_messages     ticket_messages[]
+}
+
+model tickets {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(500)
+  description String?  @db.Text
+  status      String?  @default("open") @db.VarChar(20)
+  priority    String?  @default("medium") @db.VarChar(20)
+  category    String?  @default("support") @db.VarChar(50)
+  created_by Int
+  assigned_to Int?
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @default(now())
+
+  created_by_employee  employees?      @relation("tickets_created_by", fields: [created_by], references: [id])
+  assigned_to_employee employees?      @relation("tickets_assigned_to", fields: [assigned_to], references: [id])
+  ticket_messages      ticket_messages[]
+}
+
+model ticket_messages {
+  id            Int       @id @default(autoincrement())
+  ticket_id     Int
+  sender_id     Int
+  sender_name   String    @db.VarChar(255)
+  sender_avatar String?   @default("") @db.VarChar(500)
+  text          String    @db.Text
+  attachments   Json?
+  is_internal   Boolean?  @default(false)
+  created_at    DateTime? @default(now())
+
+  ticket   tickets?   @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  employee employees? @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+}
+
+model events {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(200)
+  date        DateTime  @db.Date
+  time        String?   @db.VarChar(10)
+  description String?   @db.Text
+  creator_id  Int?
+  created_at  DateTime? @default(now())
+
+  creator employees? @relation(fields: [creator_id], references: [id], onDelete: SetNull)
+}
+
+model polls {
+  id              Int       @id @default(autoincrement())
+  title           String    @db.VarChar(200)
+  description     String?   @db.Text
+  multiple_choice Boolean?  @default(false)
+  ends_at         DateTime?
+  show_results    String?   @default("after_vote") @db.VarChar(20)
+  created_by      Int?
+  created_at      DateTime? @default(now())
+
+  creator      employees?    @relation(fields: [created_by], references: [id], onDelete: SetNull)
+  poll_options poll_options[]
+  poll_votes   poll_votes[]
+}
+
+model poll_options {
+  id          Int      @id @default(autoincrement())
+  poll_id     Int
+  text        String   @db.VarChar(200)
+  votes_count Int?     @default(0)
+
+  poll       polls?       @relation(fields: [poll_id], references: [id], onDelete: Cascade)
+  poll_votes poll_votes[]
+}
+
+model poll_votes {
+  id        Int      @id @default(autoincrement())
+  poll_id   Int
+  option_id Int
+  user_id   Int
+  created_at DateTime? @default(now())
+
+  poll   polls?       @relation(fields: [poll_id], references: [id], onDelete: Cascade)
+  option poll_options? @relation(fields: [option_id], references: [id], onDelete: Cascade)
+  user   employees?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([poll_id, option_id, user_id])
+}
+
+model file_folders {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(100)
+  user_id    Int
+  is_shared  Boolean?  @default(false)
+  created_at DateTime? @default(now())
+
+  user  employees? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  files files[]
+}
+
+model files {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(200)
+  size      String?   @db.VarChar(20)
+  type      String?   @db.VarChar(50)
+  folder_id Int?
+  path      String?   @db.VarChar(500)
+  user_id   Int
+  created_at DateTime? @default(now())
+
+  folder file_folders? @relation(fields: [folder_id], references: [id], onDelete: Cascade)
+  user   employees?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model chat_rooms {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(200)
+  type       String?   @default("group") @db.VarChar(20)
+  unread     Int?      @default(0)
+  created_at DateTime? @default(now())
+
+  chat_messages chat_messages[]
+}
+
+model chat_messages {
+  id          Int       @id @default(autoincrement())
+  chat_id     Int
+  sender_id   Int
+  sender_name String    @db.VarChar(255)
+  text        String    @db.Text
+  created_at  DateTime? @default(now())
+
+  chat   chat_rooms? @relation(fields: [chat_id], references: [id], onDelete: Cascade)
+  sender employees?  @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+}
+
+model wiki_articles {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(300)
+  content     String    @db.Text
+  category    String?   @default("Другое") @db.VarChar(100)
+  tags        Json?
+  author_id   Int
+  author_name String    @db.VarChar(255)
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @default(now())
+
+  author employees? @relation(fields: [author_id], references: [id], onDelete: Cascade)
+}
+
+model news_posts {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(300)
+  content     String    @db.Text
+  important   Boolean?  @default(false)
+  author_id   Int
+  author_name String    @db.VarChar(255)
+  created_at  DateTime? @default(now())
+
+  author employees? @relation(fields: [author_id], references: [id], onDelete: Cascade)
+}
+
+model push_subscriptions {
+  id                Int       @id @default(autoincrement())
+  user_id           Int       @unique
+  subscription_json String    @db.Text
+  created_at        DateTime? @default(now())
+
+  user employees? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model refresh_tokens {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  token      String    @db.VarChar(500)
+  created_at DateTime? @default(now())
+  expires_at DateTime
+
+  user employees? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model notifications {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  type       String?   @db.VarChar(50)
+  title      String?   @db.VarChar(500)
+  body       String?   @db.Text
+  link       String?   @db.VarChar(500)
+  is_read    Boolean?  @default(false)
+  created_at DateTime? @default(now())
+
+  user employees? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model admin_settings {
+  id         Int       @id @default(autoincrement())
+  key        String?   @unique @db.VarChar(100)
+  value      String?   @db.Text
+  updated_at DateTime? @default(now())
+}
+
+model audit_log {
+  id          Int       @id @default(autoincrement())
+  user_id     Int?
+  user_name   String?   @db.VarChar(255)
+  action      String?   @db.VarChar(50)
+  entity_type String?   @db.VarChar(50)
+  entity_id   Int?
+  details     String?   @db.Text
+  created_at  DateTime? @default(now())
+}
+
+model password_resets {
+  email      String    @id @db.VarChar(255)
+  token      String    @db.VarChar(500)
+  expires_at DateTime
+  created_at DateTime? @default(now())
+}

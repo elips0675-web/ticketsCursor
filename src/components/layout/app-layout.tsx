@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { Outlet, useNavigate, useLocation } from "react-router-dom"
 import { LayoutDashboard, Ticket, MessageCircle, Users, Menu, MoreHorizontal, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -17,7 +17,7 @@ const bottomNavItems = [
   { to: "/employees", icon: Users, label: "Сотрудники" },
 ]
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -38,7 +38,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-col flex-1 min-w-0">
         <MobileHeader onMenuClick={() => setMenuOpen(true)} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-20 md:pb-6 lg:pb-8">
-          {children}
+          <Outlet />
         </main>
         <MobileBottomNav onMenuClick={() => setMenuOpen(true)} />
       </div>

@@ -18,7 +18,7 @@ export default function ChatDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const chatId = Number(id)
-  const { sendMessage, deleteMessage, joinChat, leaveChat, socket, sendTyping } = useSocket()
+  const { sendMessage, deleteMessage, joinChat, leaveChat, socket, connected, sendTyping } = useSocket()
   const { user } = useAuth()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [chatInfo, setChatInfo] = useState<{ name: string; type: string }>({ name: 'Чат', type: 'personal' })
@@ -34,6 +34,17 @@ export default function ChatDetail() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const msgEndRef = useRef<HTMLDivElement>(null)
 
+  const mapMessage = (m: Record<string, unknown>): ChatMessage => ({
+    id: m.id as number,
+    chatId: (m.chatId ?? m.chat_id) as number,
+    senderId: (m.senderId ?? m.sender_id) as number,
+    senderName: (m.senderName ?? m.sender_name ?? '') as string,
+    text: m.text as string,
+    image: m.image as string | undefined,
+    createdAt: (m.createdAt ?? m.created_at) as string,
+    reactions: m.reactions as Record<string, number[]> | undefined,
+  })
+
   useEffect(() => {
     if (!chatId) return
     setLoading(true)
@@ -41,7 +52,7 @@ export default function ChatDetail() {
       .then((data) => {
         if (data) {
           setChatInfo({ name: data.name, type: data.type })
-          setMessages(data.messages || [])
+          setMessages((data.messages || []).map(mapMessage))
         }
         setLoading(false)
       })
@@ -58,9 +69,9 @@ export default function ChatDetail() {
 
   useEffect(() => {
     if (!socket) return
-    const onNew = (msg: ChatMessage) => {
-      setMessages((prev) => [...prev, msg])
-      setTypingUsers((prev) => prev.filter((id) => id !== msg.senderId))
+    const onNew = (msg: Record<string, unknown>) => {
+      setMessages((prev) => [...prev, mapMessage(msg)])
+      setTypingUsers((prev) => prev.filter((id) => id !== (msg.senderId ?? msg.sender_id) as number))
     }
     const onRemove = (msgId: number) => setMessages((prev) => prev.filter((m) => m.id !== msgId))
     const onTyping = ({ userId }: { userId: number }) => {
@@ -82,7 +93,7 @@ export default function ChatDetail() {
     msgEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const send = () => {
+  const send = async () => {
     if (!input.trim() && !imageFile) return
     const msg: Partial<ChatMessage> = {
       id: Date.now(),
@@ -94,7 +105,15 @@ export default function ChatDetail() {
       createdAt: new Date().toISOString(),
     }
     setMessages((prev) => [...prev, msg as ChatMessage])
-    if (input.trim()) sendMessage(chatId, input.trim())
+    if (input.trim()) {
+      if (connected) {
+        sendMessage(chatId, input.trim())
+      } else {
+        try {
+          await api.post(`/chats/${chatId}/messages`, { text: input.trim() })
+        } catch { /* ignore */ }
+      }
+    }
     setInput('')
     setImageFile(null)
     setTimeout(() => msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)

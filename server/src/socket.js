@@ -1,7 +1,7 @@
 import { Server } from 'socket.io'
 import { createAdapter } from '@socket.io/redis-adapter'
 import jwt from 'jsonwebtoken'
-import knex from './db.js'
+import prisma from './prisma.js'
 import { JWT_SECRET } from './middleware.js'
 import logger from './logger.js'
 
@@ -76,7 +76,7 @@ export async function setupSocket(server) {
     socket.join(`user:${socket.userId}`)
 
     // Онлайн-статус
-    knex.raw('UPDATE employees SET online = 1 WHERE id = ?', [socket.userId])
+    prisma.employees.update({ where: { id: socket.userId }, data: { online: true } })
       .then(() => io.emit('user:status', { userId: socket.userId, online: true }))
       .catch(() => {})
 
@@ -92,19 +92,23 @@ export async function setupSocket(server) {
       if (!text?.trim()) return
       if (!wsRateLimit(socket)) return socket.emit('rate:limited', { event: 'message:send' })
       try {
-        const [user] = await knex.raw('SELECT name FROM employees WHERE id = ?', [socket.userId])
-        const senderName = user[0]?.name || 'User'
-        const [result] = await knex.raw(
-          'INSERT INTO chat_messages (chat_id, sender_id, sender_name, text) VALUES (?, ?, ?, ?)',
-          [chatId, socket.userId, senderName, text],
-        )
-        const [[msg]] = await knex.raw('SELECT * FROM chat_messages WHERE id = ?', [result.insertId])
+        const user = await prisma.employees.findUnique({ where: { id: socket.userId }, select: { name: true } })
+        const senderName = user?.name || 'User'
+        const msg = await prisma.chat_messages.create({
+          data: {
+            chat_id: chatId,
+            sender_id: socket.userId,
+            sender_name: senderName,
+            text,
+          },
+        })
         io.to(`chat:${chatId}`).emit('message:new', msg)
         // Уведомление участникам чата кроме отправителя
-        const [participants] = await knex.raw(
-          'SELECT DISTINCT sender_id FROM chat_messages WHERE chat_id = ? AND sender_id != ?',
-          [chatId, socket.userId],
-        )
+        const participants = await prisma.chat_messages.findMany({
+          where: { chat_id: chatId, sender_id: { not: socket.userId } },
+          distinct: ['sender_id'],
+          select: { sender_id: true },
+        })
         const { createNotification } = await import('./routes/notifications.js')
         for (const p of participants) {
           await createNotification({
@@ -126,11 +130,11 @@ export async function setupSocket(server) {
 
     socket.on('message:delete', async ({ chatId, msgId }) => {
       try {
-        const [[msg]] = await knex.raw('SELECT * FROM chat_messages WHERE id = ?', [msgId])
+        const msg = await prisma.chat_messages.findUnique({ where: { id: msgId } })
         if (!msg) return
         const isAdmin = socket.userRole === 'admin' || socket.userRole === 'senior_agent'
         if (!isAdmin && msg.sender_id !== socket.userId) return
-        await knex.raw('DELETE FROM chat_messages WHERE id = ?', [msgId])
+        await prisma.chat_messages.delete({ where: { id: msgId } })
         io.to(`chat:${chatId}`).emit('message:removed', msgId)
       } catch (err) {
         logger.error('WS delete error:', err)
@@ -149,8 +153,10 @@ export async function setupSocket(server) {
 
     socket.on('disconnect', () => {
       console.log(`WS user ${socket.userId} disconnected`)
-      knex.raw('UPDATE employees SET online = 0, last_active = NOW() WHERE id = ?', [socket.userId])
-        .then(() => io.emit('user:status', { userId: socket.userId, online: false }))
+      prisma.employees.update({
+        where: { id: socket.userId },
+        data: { online: false, last_active: new Date() },
+      }).then(() => io.emit('user:status', { userId: socket.userId, online: false }))
         .catch(() => {})
     })
   })

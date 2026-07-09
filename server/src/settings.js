@@ -1,11 +1,11 @@
-import knex from './db.js'
+import prisma from './prisma.js'
 
 let cache = null
 
 export async function getSettings() {
   if (cache) return cache
   try {
-    const [rows] = await knex.raw('SELECT `key`, `value` FROM admin_settings')
+    const rows = await prisma.admin_settings.findMany({ select: { key: true, value: true } })
     cache = {}
     for (const r of rows) cache[r.key] = r.value
     return cache

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { authenticateToken } from '../middleware.js'
 import logger from '../logger.js'
 
@@ -8,12 +8,25 @@ router.use(authenticateToken)
 
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await knex.raw(`
-      SELECT c.*,
-        (SELECT m.text FROM chat_messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) as last_message,
-        (SELECT m.created_at FROM chat_messages m WHERE m.chat_id = c.id ORDER BY m.created_at DESC LIMIT 1) as last_time
-      FROM chat_rooms c ORDER BY last_time DESC
-    `)
+    const rooms = await prisma.chat_rooms.findMany({
+      include: {
+        chat_messages: {
+          take: 1,
+          orderBy: { created_at: 'desc' },
+        },
+      },
+    })
+    const rows = rooms
+      .map(({ chat_messages, ...c }) => ({
+        ...c,
+        last_message: chat_messages[0]?.text || null,
+        last_time: chat_messages[0]?.created_at || null,
+      }))
+      .sort((a, b) => {
+        if (!a.last_time) return 1
+        if (!b.last_time) return -1
+        return new Date(b.last_time) - new Date(a.last_time)
+      })
     res.json(rows)
   } catch (err) {
     logger.error('Chats list error:', err)
@@ -23,12 +36,14 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const [[chat]] = await knex.raw('SELECT * FROM chat_rooms WHERE id = ?', [req.params.id])
+    const chat = await prisma.chat_rooms.findUnique({
+      where: { id: Number(req.params.id) },
+    })
     if (!chat) return res.status(404).json({ message: 'Chat not found' })
-    const [messages] = await knex.raw(
-      'SELECT * FROM chat_messages WHERE chat_id = ? ORDER BY created_at ASC',
-      [req.params.id],
-    )
+    const messages = await prisma.chat_messages.findMany({
+      where: { chat_id: Number(req.params.id) },
+      orderBy: { created_at: 'asc' },
+    })
     chat.messages = messages
     res.json(chat)
   } catch (err) {
@@ -41,16 +56,22 @@ router.post('/:id/messages', async (req, res) => {
   const { text } = req.body
   if (!text?.trim()) return res.status(400).json({ message: 'Text required' })
   try {
-    const [result] = await knex.raw(
-      'INSERT INTO chat_messages (chat_id, sender_id, sender_name, text) VALUES (?, ?, ?, ?)',
-      [req.params.id, req.user.userId, req.user.name || 'User', text],
-    )
-    const [[msg]] = await knex.raw('SELECT * FROM chat_messages WHERE id = ?', [result.insertId])
-    // Уведомление участникам чата кроме отправителя
-    const [participants] = await knex.raw(
-      'SELECT DISTINCT sender_id FROM chat_messages WHERE chat_id = ? AND sender_id != ?',
-      [req.params.id, req.user.userId],
-    )
+    const msg = await prisma.chat_messages.create({
+      data: {
+        chat_id: Number(req.params.id),
+        sender_id: req.user.userId,
+        sender_name: req.user.name || 'User',
+        text,
+      },
+    })
+    const participants = await prisma.chat_messages.findMany({
+      where: {
+        chat_id: Number(req.params.id),
+        sender_id: { not: req.user.userId },
+      },
+      distinct: ['sender_id'],
+      select: { sender_id: true },
+    })
     const { createNotification } = await import('./notifications.js')
     for (const p of participants) {
       await createNotification({
@@ -70,7 +91,10 @@ router.post('/:id/messages', async (req, res) => {
 
 router.put('/:id/read', async (req, res) => {
   try {
-    await knex.raw('UPDATE chat_rooms SET unread = 0 WHERE id = ?', [req.params.id])
+    await prisma.chat_rooms.update({
+      where: { id: Number(req.params.id) },
+      data: { unread: 0 },
+    })
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ message: 'Failed to mark read' })
@@ -82,19 +106,21 @@ router.post('/personal/:userId', async (req, res) => {
   const myId = req.user.userId
   if (Number(userId) === myId) return res.status(400).json({ message: 'Cannot chat with yourself' })
   try {
-    const [[existing]] = await knex.raw(
-      'SELECT * FROM chat_rooms WHERE type = ? AND name = (SELECT name FROM employees WHERE id = ?)',
-      ['personal', userId],
-    )
+    const user = await prisma.employees.findUnique({
+      where: { id: Number(userId) },
+      select: { name: true },
+    })
+    if (!user) return res.status(404).json({ message: 'User not found' })
+    const existing = await prisma.chat_rooms.findFirst({
+      where: { type: 'personal', name: user.name },
+    })
     if (existing) return res.json(existing)
-
-    const [[userRow]] = await knex.raw('SELECT name FROM employees WHERE id = ?', [userId])
-    if (!userRow) return res.status(404).json({ message: 'User not found' })
-    const [result] = await knex.raw(
-      'INSERT INTO chat_rooms (name, type) VALUES (?, ?)',
-      [userRow.name, 'personal'],
-    )
-    const [[chat]] = await knex.raw('SELECT * FROM chat_rooms WHERE id = ?', [result.insertId])
+    const chat = await prisma.chat_rooms.create({
+      data: {
+        name: user.name,
+        type: 'personal',
+      },
+    })
     res.status(201).json(chat)
   } catch (err) {
     logger.error('Create personal chat error:', err)

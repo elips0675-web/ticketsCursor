@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { createNewsValidation } from '../validate.js'
 import logger from '../logger.js'
@@ -14,15 +14,22 @@ router.get('/', async (req, res) => {
   const important = req.query.important
   const q = req.query.q?.trim()
   try {
-    let where = '1=1'
-    const params = []
-    if (important === 'true') { where += ' AND important = 1' }
-    if (q) { where += ' AND (title LIKE ? OR content LIKE ?)'; params.push(`%${q}%`, `%${q}%`) }
-    const [[{ total }]] = await knex.raw(`SELECT COUNT(*) as total FROM news_posts WHERE ${where}`, params)
-    const [rows] = await knex.raw(
-      `SELECT id, title, content, important, author_id, author_name, created_at FROM news_posts WHERE ${where} ORDER BY important DESC, created_at DESC LIMIT ? OFFSET ?`,
-      [...params, limit, offset],
-    )
+    const where = {}
+    if (important === 'true') where.important = true
+    if (q) {
+      where.OR = [
+        { title: { contains: q } },
+        { content: { contains: q } },
+      ]
+    }
+    const total = await prisma.news_posts.count({ where })
+    const rows = await prisma.news_posts.findMany({
+      where,
+      select: { id: true, title: true, content: true, important: true, author_id: true, author_name: true, created_at: true },
+      orderBy: [{ important: 'desc' }, { created_at: 'desc' }],
+      skip: offset,
+      take: limit,
+    })
     res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
   } catch (err) {
     logger.error('News list error:', err)
@@ -33,11 +40,15 @@ router.get('/', async (req, res) => {
 router.post('/', requireRole('admin', 'senior_agent'), createNewsValidation, async (req, res) => {
   const { title, content, important } = req.body
   try {
-    const [result] = await knex.raw(
-      'INSERT INTO news_posts (title, content, important, author_id, author_name) VALUES (?, ?, ?, ?, ?)',
-      [title, content, important || false, req.user.userId, req.user.name || 'User'],
-    )
-    const [[post]] = await knex.raw('SELECT * FROM news_posts WHERE id = ?', [result.insertId])
+    const post = await prisma.news_posts.create({
+      data: {
+        title,
+        content,
+        important: important || false,
+        author_id: req.user.userId,
+        author_name: req.user.name || 'User',
+      },
+    })
     res.status(201).json(post)
   } catch (err) {
     logger.error('Create news error:', err)

@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
 import multer from 'multer'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { authenticateToken } from '../middleware.js'
 import logger from '../logger.js'
 import { validateUpload } from '../middleware/validateUpload.js'
@@ -40,18 +40,33 @@ router.get('/folders', async (req, res) => {
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50))
   const offset = (page - 1) * limit
   try {
-    const [folders] = await knex.raw(
-      'SELECT * FROM file_folders WHERE user_id = ? OR is_shared = 1 ORDER BY name',
-      [req.user.userId],
-    )
+    const folders = await prisma.file_folders.findMany({
+      where: {
+        OR: [
+          { user_id: req.user.userId },
+          { is_shared: true },
+        ],
+      },
+      include: {
+        files: {
+          orderBy: { created_at: 'desc' },
+          take: limit,
+          skip: offset,
+        },
+      },
+      orderBy: { name: 'asc' },
+    })
     for (const f of folders) {
-      const [files] = await knex.raw(
-        'SELECT id, name, size, type, folder_id as folderId, path, created_at as createdAt FROM files WHERE folder_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
-        [f.id, limit, offset],
-      )
-      f.files = files
-      const [[{ total }]] = await knex.raw('SELECT COUNT(*) as total FROM files WHERE folder_id = ?', [f.id])
-      f.totalFiles = total
+      f.files = f.files.map(file => ({
+        id: file.id,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        folderId: file.folder_id,
+        path: file.path,
+        createdAt: file.created_at,
+      }))
+      f.totalFiles = await prisma.files.count({ where: { folder_id: f.id } })
     }
     res.json(folders)
   } catch (err) {
@@ -64,11 +79,12 @@ router.post('/folders', async (req, res) => {
   const { name } = req.body
   if (!name) return res.status(400).json({ message: 'Name required' })
   try {
-    const [result] = await knex.raw(
-      'INSERT INTO file_folders (name, user_id) VALUES (?, ?)',
-      [name, req.user.userId],
-    )
-    const [[folder]] = await knex.raw('SELECT * FROM file_folders WHERE id = ?', [result.insertId])
+    const folder = await prisma.file_folders.create({
+      data: {
+        name,
+        user_id: req.user.userId,
+      },
+    })
     res.status(201).json(folder)
   } catch (err) {
     logger.error('Create folder error:', err)
@@ -89,15 +105,25 @@ router.post('/upload', upload.single('file'), validateUpload, async (req, res) =
   try {
     const buffer = fs.readFileSync(req.file.path)
     const { url } = await saveFile('files', req.file.filename, buffer)
-    const [result] = await knex.raw(
-      'INSERT INTO files (name, size, type, folder_id, path, user_id) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, sizeKB, fileType, folderId || null, url, req.user.userId],
-    )
-    const [[file]] = await knex.raw(
-      'SELECT id, name, size, type, folder_id as folderId, path, created_at as createdAt FROM files WHERE id = ?',
-      [result.insertId],
-    )
-    res.status(201).json(file)
+    const file = await prisma.files.create({
+      data: {
+        name,
+        size: sizeKB,
+        type: fileType,
+        folder_id: folderId ? Number(folderId) : null,
+        path: url,
+        user_id: req.user.userId,
+      },
+    })
+    res.status(201).json({
+      id: file.id,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      folderId: file.folder_id,
+      path: file.path,
+      createdAt: file.created_at,
+    })
   } catch (err) {
     logger.error('Upload error:', err)
     res.status(500).json({ message: 'Failed to upload file' })
@@ -106,7 +132,7 @@ router.post('/upload', upload.single('file'), validateUpload, async (req, res) =
 
 router.delete('/:id', async (req, res) => {
   try {
-    await knex.raw('DELETE FROM files WHERE id = ?', [req.params.id])
+    await prisma.files.delete({ where: { id: Number(req.params.id) } })
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete file' })

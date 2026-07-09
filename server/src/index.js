@@ -30,12 +30,15 @@ initTelegram()
 })()
 
 // Удаление уведомлений старше 90 дней (каждые 6 часов)
-import knex from './db.js'
+import prisma from './prisma.js'
 
 async function cleanupOldNotifications() {
   try {
-    const [r] = await knex.raw("DELETE FROM notifications WHERE created_at < NOW() - INTERVAL 90 DAY")
-    if (r.affectedRows > 0) console.log(`Cleaned ${r.affectedRows} old notifications`)
+    const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    const r = await prisma.notifications.deleteMany({
+      where: { created_at: { lt: cutoff } },
+    })
+    if (r.count > 0) console.log(`Cleaned ${r.count} old notifications`)
   } catch (e) {
     logger.error('Notification cleanup error:', e.message)
   }

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { createCalendarValidation, updateCalendarValidation, deleteEventValidation } from '../validate.js'
 import logger from '../logger.js'
@@ -10,15 +10,18 @@ router.use(authenticateToken)
 router.get('/', async (req, res) => {
   const { year, month } = req.query
   try {
-    let query = 'SELECT id, title, date, time, description, creator_id as creatorId, created_at as createdAt FROM events WHERE 1=1'
-    const params = []
+    const where = {}
     if (year && month) {
-      query += ' AND YEAR(date) = ? AND MONTH(date) = ?'
-      params.push(Number(year), Number(month))
+      const startDate = new Date(Number(year), Number(month) - 1, 1)
+      const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59)
+      where.date = { gte: startDate, lte: endDate }
     }
-    query += ' ORDER BY date, time ASC'
-    const [events] = await knex.raw(query, params)
-    res.json(events)
+    const events = await prisma.events.findMany({
+      where,
+      select: { id: true, title: true, date: true, time: true, description: true, creator_id: true, created_at: true },
+      orderBy: [{ date: 'asc' }, { time: 'asc' }],
+    })
+    res.json(events.map(({ creator_id, created_at, ...rest }) => ({ ...rest, creatorId: creator_id, createdAt: created_at })))
   } catch (err) {
     logger.error('Calendar list error:', err)
     res.status(500).json({ message: 'Failed to fetch events' })
@@ -28,16 +31,17 @@ router.get('/', async (req, res) => {
 router.post('/', createCalendarValidation, async (req, res) => {
   const { title, date, time, description } = req.body
   try {
-    const [result] = await knex.raw(
-      'INSERT INTO events (title, date, time, description, creator_id) VALUES (?, ?, ?, ?, ?)',
-      [title, date, time || null, description || '', req.user.userId],
-    )
-    const [[event]] = await knex.raw(
-      'SELECT id, title, date, time, description, creator_id as creatorId, created_at as createdAt FROM events WHERE id = ?',
-      [result.insertId],
-    )
-    res.status(201).json(event)
-    // Уведомление создателю
+    const event = await prisma.events.create({
+      data: {
+        title,
+        date: new Date(date),
+        time: time || null,
+        description: description || '',
+        creator_id: req.user.userId,
+      },
+      select: { id: true, title: true, date: true, time: true, description: true, creator_id: true, created_at: true },
+    })
+    res.status(201).json({ ...event, creatorId: event.creator_id, createdAt: event.created_at, creator_id: undefined, created_at: undefined })
     const { createNotification } = await import('./notifications.js')
     await createNotification({
       userId: req.user.userId,
@@ -55,15 +59,20 @@ router.post('/', createCalendarValidation, async (req, res) => {
 router.put('/:id', requireRole('admin', 'senior_agent'), updateCalendarValidation, async (req, res) => {
   const { title, date, time, description } = req.body
   try {
-    await knex.raw(
-      'UPDATE events SET title = ?, date = ?, time = ?, description = ? WHERE id = ?',
-      [title, date, time || null, description || '', req.params.id],
-    )
-    const [[event]] = await knex.raw(
-      'SELECT id, title, date, time, description, creator_id as creatorId, created_at as createdAt FROM events WHERE id = ?',
-      [req.params.id],
-    )
-    res.json(event)
+    await prisma.events.update({
+      where: { id: Number(req.params.id) },
+      data: {
+        title,
+        date: new Date(date),
+        time: time || null,
+        description: description || '',
+      },
+    })
+    const event = await prisma.events.findUnique({
+      where: { id: Number(req.params.id) },
+      select: { id: true, title: true, date: true, time: true, description: true, creator_id: true, created_at: true },
+    })
+    res.json({ ...event, creatorId: event.creator_id, createdAt: event.created_at, creator_id: undefined, created_at: undefined })
   } catch (err) {
     logger.error('Update event error:', err)
     res.status(500).json({ message: 'Failed to update event' })
@@ -72,7 +81,7 @@ router.put('/:id', requireRole('admin', 'senior_agent'), updateCalendarValidatio
 
 router.delete('/:id', requireRole('admin', 'senior_agent'), deleteEventValidation, async (req, res) => {
   try {
-    await knex.raw('DELETE FROM events WHERE id = ?', [req.params.id])
+    await prisma.events.delete({ where: { id: Number(req.params.id) } })
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete event' })

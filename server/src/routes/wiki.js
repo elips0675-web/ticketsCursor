@@ -3,7 +3,7 @@ import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { createWikiValidation } from '../validate.js'
 import logger from '../logger.js'
@@ -38,11 +38,12 @@ router.get('/', async (req, res) => {
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50))
   const offset = (page - 1) * limit
   try {
-    const [[{ total }]] = await knex.raw('SELECT COUNT(*) as total FROM wiki_articles')
-    const [rows] = await knex.raw(
-      'SELECT id, title, content, category, tags, author_id, author_name, created_at, updated_at FROM wiki_articles ORDER BY updated_at DESC LIMIT ? OFFSET ?',
-      [limit, offset],
-    )
+    const total = await prisma.wiki_articles.count()
+    const rows = await prisma.wiki_articles.findMany({
+      orderBy: { updated_at: 'desc' },
+      skip: offset,
+      take: limit,
+    })
     res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
   } catch (err) {
     logger.error('Wiki list error:', err)
@@ -52,7 +53,9 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const [[article]] = await knex.raw('SELECT * FROM wiki_articles WHERE id = ?', [req.params.id])
+    const article = await prisma.wiki_articles.findUnique({
+      where: { id: Number(req.params.id) },
+    })
     if (!article) return res.status(404).json({ message: 'Article not found' })
     res.json(article)
   } catch (err) {
@@ -63,11 +66,16 @@ router.get('/:id', async (req, res) => {
 router.post('/', requireRole('admin', 'senior_agent'), createWikiValidation, async (req, res) => {
   const { title, content, category, tags } = req.body
   try {
-    const [result] = await knex.raw(
-      'INSERT INTO wiki_articles (title, content, category, tags, author_id, author_name) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, content, category || 'Другое', JSON.stringify(tags || []), req.user.userId, req.user.name || 'User'],
-    )
-    const [[article]] = await knex.raw('SELECT * FROM wiki_articles WHERE id = ?', [result.insertId])
+    const article = await prisma.wiki_articles.create({
+      data: {
+        title,
+        content,
+        category: category || 'Другое',
+        tags: tags || [],
+        author_id: req.user.userId,
+        author_name: req.user.name || 'User',
+      },
+    })
     res.status(201).json(article)
   } catch (err) {
     logger.error('Create article error:', err)

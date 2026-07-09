@@ -26,25 +26,25 @@ import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/search', icon: Search, labelKey: 'nav.search', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/search', icon: Search, labelKey: 'nav.search', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
 
-  { to: '/chats', icon: MessageCircle, labelKey: 'nav.chats', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/tickets', icon: Ticket, labelKey: 'nav.tickets', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/kanban', icon: Columns3, labelKey: 'nav.kanban', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/employees', icon: Users, labelKey: 'nav.employees', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/calendar', icon: Calendar, labelKey: 'nav.calendar', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/polls', icon: BarChart3, labelKey: 'nav.polls', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/wiki', icon: BookOpen, labelKey: 'nav.wiki', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/news', icon: Newspaper, labelKey: 'nav.news', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/calculator', icon: Calculator, labelKey: 'nav.calculator', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/files', icon: FileText, labelKey: 'nav.files', roles: ['admin', 'senior_agent', 'agent'] },
-  { to: '/tickets/new', icon: PlusCircle, labelKey: 'tickets.new', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/chats', icon: MessageCircle, labelKey: 'nav.chats', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/tickets', icon: Ticket, labelKey: 'nav.tickets', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/kanban', icon: Columns3, labelKey: 'nav.kanban', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/employees', icon: Users, labelKey: 'nav.employees', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/calendar', icon: Calendar, labelKey: 'nav.calendar', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/polls', icon: BarChart3, labelKey: 'nav.polls', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/wiki', icon: BookOpen, labelKey: 'nav.wiki', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/news', icon: Newspaper, labelKey: 'nav.news', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/calculator', icon: Calculator, labelKey: 'nav.calculator', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/files', icon: FileText, labelKey: 'nav.files', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/tickets/new', icon: PlusCircle, labelKey: 'tickets.new', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
 ]
 
 const bottomItems = [
-  { to: '/admin', icon: Shield, labelKey: 'nav.admin', roles: ['admin'] },
-  { to: '/profile', icon: User, labelKey: 'nav.profile', roles: ['admin', 'senior_agent', 'agent'] },
+  { to: '/admin', icon: Shield, labelKey: 'nav.admin', roles: ['super_admin', 'admin'] },
+  { to: '/profile', icon: User, labelKey: 'nav.profile', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
 ]
 
 export function Sidebar() {
@@ -129,7 +129,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <LanguageSwitcher />
         {user && (
           <div className="px-3 py-2 mt-2 text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-bold">
-            {user.role === 'admin' ? t('admin.title') : user.role === 'senior_agent' ? 'Senior Agent' : t('auth.role')}
+            {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? t('admin.title') : user.role === 'senior_agent' ? 'Senior Agent' : t('auth.role')}
           </div>
         )}
       </div>

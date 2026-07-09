@@ -1,18 +1,23 @@
-import knex from './db.js'
+import prisma from './prisma.js'
 import logger from './logger.js'
 
 export async function logAudit({ userId, userName, action, entityType, entityId, details }) {
   try {
-    await knex.raw(
-      'INSERT INTO audit_log (user_id, user_name, action, entity_type, entity_id, details, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-      [userId, userName || 'Unknown', action, entityType, entityId, details ? JSON.stringify(details) : null],
-    )
+    await prisma.audit_log.create({
+      data: {
+        user_id: userId,
+        user_name: userName || 'Unknown',
+        action,
+        entity_type: entityType,
+        entity_id: Number(entityId) || null,
+        details: details ? JSON.stringify(details) : null,
+      },
+    })
   } catch (err) {
     logger.error('Audit log error:', err)
   }
 }
 
-// Автоматический audit-log middleware для POST/PUT/DELETE
 const ACTION_MAP = { POST: 'created', PUT: 'updated', DELETE: 'deleted' }
 
 export function auditLogMiddleware(req, res, next) {

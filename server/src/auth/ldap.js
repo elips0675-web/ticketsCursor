@@ -1,6 +1,6 @@
 import ldap from 'ldapjs'
 import jwt from 'jsonwebtoken'
-import knex from '../db.js'
+import prisma from '../prisma.js'
 import { getSettings } from '../settings.js'
 import { JWT_SECRET } from '../middleware.js'
 import logger from '../logger.js'
@@ -51,17 +51,14 @@ export async function authenticateLDAP(req, res) {
           const name = entry.cn || entry.displayName || username
 
           try {
-            const [rows] = await knex.raw(
-              'SELECT id, name, email, role FROM employees WHERE email = ? AND is_active = 1',
-              [email],
-            )
-            let employee = rows[0]
+            let employee = await prisma.employees.findFirst({
+              where: { email, is_active: true },
+              select: { id: true, name: true, email: true, role: true },
+            })
             if (!employee) {
-              const [result] = await knex.raw(
-                'INSERT INTO employees (name, email, role, is_active) VALUES (?, ?, ?, 1)',
-                [name, email, 'agent'],
-              )
-              employee = { id: result.insertId, name, email, role: 'agent' }
+              employee = await prisma.employees.create({
+                data: { name, email, role: 'agent', is_active: true },
+              })
             }
             const token = jwt.sign({ userId: employee.id, role: employee.role }, JWT_SECRET, { expiresIn: '24h' })
             resolve(res.json({ token, employee: { id: employee.id, name: employee.name, email: employee.email, role: employee.role } }))

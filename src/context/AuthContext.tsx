@@ -1,4 +1,34 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { createContext, useContext, useState, type ReactNode } from "react"
+
+function getInitialToken(): string | null {
+  const t = localStorage.getItem("token")
+  if (!t) return null
+  try {
+    const payload = JSON.parse(atob(t.split('.')[1]))
+    if (payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem("token")
+      localStorage.removeItem("user")
+      return null
+    }
+    return t
+  } catch {
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    return null
+  }
+}
+
+function getInitialUser(): User | null {
+  const u = localStorage.getItem("user")
+  if (!u) return null
+  try {
+    return JSON.parse(u)
+  } catch {
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    return null
+  }
+}
 
 interface User {
   id: number
@@ -20,17 +50,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
-
-  useEffect(() => {
-    const t = localStorage.getItem("token")
-    const u = localStorage.getItem("user")
-    if (t && u) {
-      setToken(t)
-      setUser(JSON.parse(u))
-    }
-  }, [])
+  const [user, setUser] = useState<User | null>(getInitialUser)
+  const [token, setToken] = useState<string | null>(getInitialToken)
 
   const login = (t: string, u: User) => {
     localStorage.setItem("token", t)

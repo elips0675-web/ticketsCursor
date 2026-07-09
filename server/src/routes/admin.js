@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
+import { invalidateCache as invalidateSettingsCache } from '../settings.js'
 import logger from '../logger.js'
 
 const router = Router()
@@ -18,10 +19,10 @@ router.get('/settings', async (req, res) => {
     const rows = await prisma.admin_settings.findMany({ select: { key: true, value: true } })
     const settings = {}
     for (const r of rows) settings[r.key] = r.value
-    res.json(settings)
+    res.json({ success: true, data: settings })
   } catch (err) {
     logger.error('Settings get error:', err)
-    res.status(500).json({ message: 'Failed to fetch settings' })
+    res.status(500).json({ success: false, message: 'Failed to fetch settings' })
   }
 })
 
@@ -35,10 +36,11 @@ router.put('/settings', async (req, res) => {
         create: { key, value: String(value), updated_at: new Date() },
       })
     }
-    res.json({ success: true })
+    invalidateSettingsCache()
+    res.json({ success: true, data: { updated: true } })
   } catch (err) {
     logger.error('Settings update error:', err)
-    res.status(500).json({ message: 'Failed to update settings' })
+    res.status(500).json({ success: false, message: 'Failed to update settings' })
   }
 })
 
@@ -50,15 +52,16 @@ router.get('/users', async (req, res) => {
         is_active as isActive, created_at as createdAt
       FROM employees ORDER BY is_active DESC, name
     `
-    res.json(rows.map(r => ({
+    const data = rows.map(r => ({
       ...r,
       id: Number(r.id),
       activeTickets: Number(r.activeTickets),
       resolvedToday: Number(r.resolvedToday),
-    })))
+    }))
+    res.json({ success: true, data })
   } catch (err) {
     logger.error('Admin users list error:', err)
-    res.status(500).json({ message: 'Failed to fetch users' })
+    res.status(500).json({ success: false, message: 'Failed to fetch users' })
   }
 })
 
@@ -77,13 +80,13 @@ router.put('/users/:id', async (req, res) => {
   if (title !== undefined) {
     data.title = title
   }
-  if (Object.keys(data).length === 0) return res.status(400).json({ message: 'No fields to update' })
+  if (Object.keys(data).length === 0) return res.status(400).json({ success: false, message: 'No fields to update' })
   try {
     await prisma.employees.update({ where: { id: Number(req.params.id) }, data })
-    res.json({ success: true })
+    res.json({ success: true, data: { updated: true } })
   } catch (err) {
     logger.error('Admin user update error:', err)
-    res.status(500).json({ message: 'Failed to update user' })
+    res.status(500).json({ success: false, message: 'Failed to update user' })
   }
 })
 
@@ -99,10 +102,10 @@ router.get('/audit', async (req, res) => {
       skip: Number(offset),
       take: Number(limit),
     })
-    res.json(rows)
+    res.json({ success: true, data: rows })
   } catch (err) {
     logger.error('Audit log error:', err)
-    res.status(500).json({ message: 'Failed to fetch audit log' })
+    res.status(500).json({ success: false, message: 'Failed to fetch audit log' })
   }
 })
 

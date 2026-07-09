@@ -34,6 +34,14 @@ export default function Admin() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const unwrapApiData = <T,>(payload: T | { success?: boolean; data?: T } | null): T | null => {
+    if (!payload) return null
+    if (typeof payload === 'object' && payload !== null && 'success' in payload && 'data' in payload) {
+      return (payload as { data?: T }).data ?? null
+    }
+    return payload as T
+  }
+
   const fetchData = async () => {
     setLoading(true)
     const token = localStorage.getItem("token")
@@ -42,7 +50,10 @@ export default function Admin() {
         fetch("/api/admin/users", { headers: { Authorization: `Bearer ${token}` } }),
         fetch("/api/employees/stats", { headers: { Authorization: `Bearer ${token}` } }),
       ])
-      if (empRes.ok) setEmployees(await empRes.json())
+      if (empRes.ok) {
+        const raw = await empRes.json()
+        setEmployees(unwrapApiData<Employee[]>(raw) || [])
+      }
       if (statsRes.ok) setStats(await statsRes.json())
     } catch (err) {
       console.error("Admin fetch error:", err)

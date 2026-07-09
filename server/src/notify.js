@@ -138,3 +138,56 @@ export async function notifyTicketMessage(ticketId, senderId, senderName, text) 
 
   sendTelegramNotification(`💬 Новое сообщение в тикете #${ticketId}: ${t.title}\n${senderName}: ${text.slice(0, 200)}`)
 }
+
+export async function notifySlaBreached(ticketId) {
+  const t = await getTicketWithUsers(ticketId)
+  if (!t) return
+
+  const now = Date.now()
+  const dueAt = t.due_at ? new Date(t.due_at).getTime() : null
+  if (!dueAt || dueAt > now) return
+
+  const exists = await prisma.notifications.findFirst({
+    where: {
+      user_id: t.creatorId,
+      type: 'ticket_sla_overdue',
+      link: `/tickets/${ticketId}`,
+      created_at: { gte: new Date(now - 24 * 60 * 60 * 1000) },
+    },
+    select: { id: true },
+  })
+  if (exists) return
+
+  const targets = new Set([t.creatorId, t.assigneeId].filter(Boolean))
+  const admins = await prisma.employees.findMany({
+    where: {
+      is_active: true,
+      role: { in: ['super_admin', 'admin', 'senior_agent'] },
+    },
+    select: { id: true, email: true, name: true },
+  })
+  for (const a of admins) targets.add(a.id)
+
+  for (const userId of targets) {
+    await createNotification({
+      userId,
+      type: 'ticket_sla_overdue',
+      title: 'Нарушение SLA',
+      body: `Тикет #${ticketId} просрочен по SLA`,
+      link: `/tickets/${ticketId}`,
+    })
+  }
+
+  const adminEmails = admins
+    .map(a => a.email)
+    .filter(Boolean)
+  for (const email of adminEmails) {
+    sendTicketNotification({
+      to: email,
+      subject: `SLA просрочка: тикет #${ticketId}`,
+      text: `Тикет "${t.title}" (#${ticketId}) просрочен по SLA.\nСрок реакции истёк: ${new Date(t.due_at).toLocaleString('ru-RU')}\n\nService Desk`,
+    })
+  }
+
+  sendTelegramNotification(`🚨 SLA просрочка\nТикет #${ticketId}: ${t.title}\nСрок реакции истёк: ${new Date(t.due_at).toLocaleString('ru-RU')}`)
+}

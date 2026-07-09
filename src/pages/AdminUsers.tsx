@@ -27,12 +27,23 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<number | null>(null)
 
+  const unwrapApiData = <T,>(payload: T | { success?: boolean; data?: T } | null): T | null => {
+    if (!payload) return null
+    if (typeof payload === 'object' && payload !== null && 'success' in payload && 'data' in payload) {
+      return (payload as { data?: T }).data ?? null
+    }
+    return payload as T
+  }
+
   const fetchUsers = async () => {
     setLoading(true)
     const token = localStorage.getItem("token")
     try {
       const res = await fetch("/api/admin/users", { headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) setUsers(await res.json())
+      if (res.ok) {
+        const raw = await res.json()
+        setUsers(unwrapApiData<User[]>(raw) || [])
+      }
     } catch (err) {
       console.error("Fetch users error:", err)
     }

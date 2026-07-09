@@ -48,6 +48,9 @@ model tickets {
   category    String?  @default("support") @db.VarChar(50)
   created_by Int
   assigned_to Int?
+  due_at      DateTime?
+  first_response_at DateTime?
+  resolved_at DateTime?
   created_at  DateTime? @default(now())
   updated_at  DateTime? @default(now())
 

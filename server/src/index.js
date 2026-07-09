@@ -5,6 +5,7 @@ import { app, server } from './app.js'
 import { setupSocket } from './socket.js'
 import { initTelegram } from './telegram.js'
 import logger from './logger.js'
+import { notifySlaBreached } from './notify.js'
 
 if (!process.env.JWT_SECRET) {
   logger.error('FATAL: JWT_SECRET environment variable is required')
@@ -45,6 +46,28 @@ async function cleanupOldNotifications() {
 }
 cleanupOldNotifications()
 setInterval(cleanupOldNotifications, 6 * 60 * 60 * 1000)
+
+async function checkOverdueSlaTickets() {
+  try {
+    const overdue = await prisma.tickets.findMany({
+      where: {
+        status: { in: ['open', 'in_progress'] },
+        due_at: { lt: new Date() },
+      },
+      select: { id: true },
+      take: 200,
+    })
+    for (const t of overdue) {
+      // notify function has deduplication for 24h window
+      await notifySlaBreached(t.id)
+    }
+  } catch (e) {
+    logger.error('SLA overdue check error:', e.message)
+  }
+}
+
+checkOverdueSlaTickets()
+setInterval(checkOverdueSlaTickets, 15 * 60 * 1000)
 
 server.listen(PORT, () => {
   console.log(`Service Desk API running on port ${PORT}`)

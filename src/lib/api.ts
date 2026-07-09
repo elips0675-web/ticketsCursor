@@ -18,7 +18,12 @@ async function handleResponse(res: Response): Promise<any> {
     throw new Error(data?.message || `Ошибка ${res.status}`)
   }
   if (res.status === 204) return null
-  return res.json().catch(() => null)
+  const payload = await res.json().catch(() => null)
+  if (payload && typeof payload === 'object' && typeof payload.success === 'boolean') {
+    if (Object.prototype.hasOwnProperty.call(payload, 'data')) return payload.data
+    return payload
+  }
+  return payload
 }
 
 async function request(method: string, path: string, body?: any, opts?: RequestInit): Promise<any> {

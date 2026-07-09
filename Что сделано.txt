@@ -19,6 +19,10 @@
     • CRUD, статусы (open → in_progress → resolved → closed)
     • Приоритеты (low / medium / high / critical)
     • Назначение на сотрудника
+    • Базовый SLA: due_at при создании, first_response_at при первом in_progress, resolved_at при resolved/closed
+    • Базовое автоназначение (AUTO_ASSIGN): выбор наименее загруженного agent/senior_agent
+    • SLA-мониторинг: GET /api/tickets/sla/overdue (admin/senior_agent)
+    • Фоновая проверка просрочек SLA каждые 15 минут + эскалация (in-app/email/telegram, дедупликация 24ч)
     • Чат внутри тикета + внутренние заметки
     • Вложения (multer → uploads/tickets/)
     • WebSocket-эмиты изменений в реальном времени
@@ -205,9 +209,11 @@
 
 ────────────────────────────────────────────────────────────────────────────
 
-АУДИТ ПРОЕКТА (2026-07) — ИТОГОВАЯ ОЦЕНКА: 8.5/10
+АУДИТ ПРОЕКТА (2026-07) — ИТОГОВАЯ ОЦЕНКА: 8.7/10
 
   Проверка по типовому чек-листу корпоративного Service Desk + внешнее ревью.
+  Проект близок к production-ready уровню и полностью пригоден для демонстрации навыков (портфолио),
+  но остаётся технический долг по SLA/workflow тикетов, унификации API-ответов, архитектуре слоёв и тестовому покрытию.
 
   Безопасность:
     ✅ bcrypt (10 раундов), параметризованные SQL-запросы
@@ -219,24 +225,21 @@
     ✅ /api/system-info — защищён authenticateToken
     ✅ Error Boundary на клиенте
     ✅ auth.js — все ответы в формате { message }
-    ✅ Multer: limits.fileSize (files 50MB, wiki 10MB, tickets 20MB)
-    🟡 Multer: нет fileFilter по MIME-типам (можно загрузить .exe)
+    ✅ Multer: limits.fileSize (files 50MB, wiki 10MB, tickets 20MB) + fileFilter по MIME-типам + file-type magic bytes
 
   Тестирование:
-    ✅ 43 клиентских (11 файлов, vitest + MSW) + 17 серверных тестов
+    ✅ 47 клиентских (14 файлов, vitest + MSW) + 17 серверных тестов
     ✅ E2E: login, tickets, chats, admin (Playwright)
     ✅ Coverage (v8) c порогами
     ✅ CI гоняет клиентские тесты, поднимает MySQL 8.4 + seed.sql
 
   Логирование:
-    ✅ console.error во всех catch на сервере
-    🟡 Нет структурированного логирования (winston/pino) — console.error без уровней/транспортов
+    ✅ Winston (error/warn/info/debug, console + error.log + combined.log, ротация 10MB)
 
   Обработка ошибок:
     ✅ Глобальный error handler на сервере
     ✅ Error Boundary на клиенте (src/components/ErrorBoundary.tsx)
-    ✅ API-интерцептор (api.ts) — централизованный fetch с обработкой 401/403/500 + toast
-    🟡 Не все страницы переведены на api.ts (часть использует прямой fetch)
+    ✅ API-интерцептор (api.ts) — централизованный fetch на всех страницах с обработкой 401/403/500 + toast
 
   UI / a11y / i18n:
     ✅ Нижняя мобильная навигация, тёмная тема, i18n-файлы полные
@@ -261,8 +264,7 @@
     ✅ Redis для Socket.io (опционально, fallback in-memory)
     ✅ Redis-кэш для GET /api/tickets (TTL 120s) и /api/employees (TTL 300s), инвалидация на мутациях
     ✅ WebSocket rate-limit: 5 msg/sec, exponential backoff (×2, max 60s)
-    ✅ Серверная пагинация: tickets (LIMIT/OFFSET + messages отдельно),
-      news (с фильтрами ?important&q=), wiki, files, polls (без N+1)
+    ✅ Серверная пагинация: tickets, news, wiki, files, polls
     ✅ CREATE INDEX (16 шт) в seed.sql
     ✅ N+1 в polls.js исправлен (IN() вместо цикла)
     ✅ News.tsx на серверной пагинации
@@ -307,7 +309,35 @@
 
   ПЛАН ДОРАБОТКИ ПО ЭТАПАМ
 
-  ✅ Все 23 этапа выполнены. Проект готов к эксплуатации.
+  ✅ Все 23 этапа выполнены. Текущий план закрыт, проект стабилен для пилотной эксплуатации.
+  Следующий этап — развитие SLA- и workflow-логики тикетов, выделение сервисного слоя и усиление тестов.
+  Выполнено по этапам (приоритет):
+    ✅ Этап 1: Базовый SLA + AUTO_ASSIGN + кэш-инвалидация настроек
+    ✅ Этап 2: Контроль SLA-просрочек + эскалации + endpoint просроченных тикетов
+    ✅ Этап 3: Частичная унификация API-ответов (tickets/admin/notifications) + совместимость фронта
+    ✅ Этап 4: Начат сервисный слой tickets (server/src/services/tickets.service.js), роуты tickets частично переведены на service-функции
+
+  ЧТО НУЖНО ДОДЕЛАТЬ (приоритетный backlog)
+
+  🔴 Высокий приоритет (для enterprise-ready):
+    [~] SLA-логика тикетов: due_at/first_response_at/resolved_at + контроль просрочек/эскалации добавлены, осталось: правила дедлайнов по категориям и policy-матрица
+    [~] Автоназначение тикетов (AUTO_ASSIGN): выбор по нагрузке добавлен, осталось: round-robin/гибкие правила
+    [~] Унифицировать формат ответов API: { success, data, error } (критичные роуты partially done: tickets/admin/notifications)
+    [~] Выделить сервисный слой (controllers → services → repositories), убрать бизнес-логику из routes (tickets started)
+    [ ] Повысить покрытие тестов до 70%+ для критичных модулей (auth, tickets, chats, files, admin)
+
+  🟡 Средний приоритет (масштабирование и поддержка):
+    [ ] Завершить переход на единый подход миграций (Prisma Migrate или Knex, без смешанной схемы)
+    [ ] Перевести загрузку файлов тикетов и wiki на S3/MinIO (сейчас adapter есть, но локальное хранение ещё используется)
+    [ ] Оптимизировать GET /api/tickets: отдельные эндпоинты list/detail, пагинация сообщений в деталях
+    [ ] Убрать fallback на DEMO-данные при ошибках API в production-сценариях
+    [ ] Добавить роль requester/user и ограничение «видит только свои тикеты»
+
+  🟢 Низкий приоритет (улучшения продукта):
+    [ ] Отчётность по SLA/MTTR/нагрузке по агентам в админ-дашборде
+    [ ] Шаблоны тикетов и макросы ответов для ускорения работы поддержки
+    [ ] Расширенные workflow-статусы (например, waiting_customer / on_hold) с бизнес-правилами переходов
+    [ ] Расширить e2e-сценарии: эскалация SLA, автоназначение, экспорт и массовые операции
 
 ────────────────────────────────────────────────────────────────────────────
 

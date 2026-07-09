@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import knex from '../db.js'
 import { authenticateToken } from '../middleware.js'
+import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken)
@@ -15,7 +16,7 @@ router.get('/', async (req, res) => {
     `)
     res.json(rows)
   } catch (err) {
-    console.error('Chats list error:', err)
+    logger.error('Chats list error:', err)
     res.status(500).json({ message: 'Failed to fetch chats' })
   }
 })
@@ -31,7 +32,7 @@ router.get('/:id', async (req, res) => {
     chat.messages = messages
     res.json(chat)
   } catch (err) {
-    console.error('Chat detail error:', err)
+    logger.error('Chat detail error:', err)
     res.status(500).json({ message: 'Failed to fetch chat' })
   }
 })
@@ -62,7 +63,7 @@ router.post('/:id/messages', async (req, res) => {
     }
     res.status(201).json(msg)
   } catch (err) {
-    console.error('Send message error:', err)
+    logger.error('Send message error:', err)
     res.status(500).json({ message: 'Failed to send message' })
   }
 })
@@ -96,7 +97,7 @@ router.post('/personal/:userId', async (req, res) => {
     const [[chat]] = await knex.raw('SELECT * FROM chat_rooms WHERE id = ?', [result.insertId])
     res.status(201).json(chat)
   } catch (err) {
-    console.error('Create personal chat error:', err)
+    logger.error('Create personal chat error:', err)
     res.status(500).json({ message: 'Failed to create chat' })
   }
 })

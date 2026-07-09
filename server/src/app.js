@@ -5,6 +5,8 @@ import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import os from 'os'
+import logger from './logger.js'
+import { requestId } from './middleware/requestId.js'
 import ticketsRouter from './routes/tickets.js'
 import employeesRouter from './routes/employees.js'
 import calendarRouter from './routes/calendar.js'
@@ -26,7 +28,6 @@ import jwt from 'jsonwebtoken'
 import { JWT_SECRET, authenticateToken } from './middleware.js'
 import { cacheMiddleware } from './cache.js'
 import { auditLogMiddleware } from './audit.js'
-import multer from 'multer'
 
 const app = express()
 const server = createServer(app)
@@ -46,6 +47,7 @@ app.use(cors({
   credentials: true,
 }))
 app.use(helmet())
+app.use(requestId)
 app.use(express.json())
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -97,7 +99,7 @@ app.get('/api/system-info', authenticateToken, (req, res) => {
 })
 
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err)
+  logger.error('Unhandled error', { error: err.message, stack: err.stack, requestId: req.id })
   res.status(500).json({ message: 'Internal server error' })
 })
 

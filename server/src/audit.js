@@ -1,4 +1,5 @@
 import knex from './db.js'
+import logger from './logger.js'
 
 export async function logAudit({ userId, userName, action, entityType, entityId, details }) {
   try {
@@ -7,7 +8,7 @@ export async function logAudit({ userId, userName, action, entityType, entityId,
       [userId, userName || 'Unknown', action, entityType, entityId, details ? JSON.stringify(details) : null],
     )
   } catch (err) {
-    console.error('Audit log error:', err)
+    logger.error('Audit log error:', err)
   }
 }
 

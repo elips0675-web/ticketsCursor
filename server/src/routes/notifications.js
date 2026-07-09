@@ -2,6 +2,7 @@ import { Router } from 'express'
 import knex from '../db.js'
 import { authenticateToken } from '../middleware.js'
 import { getIO } from '../socket.js'
+import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken)
@@ -15,7 +16,7 @@ export async function createNotification({ userId, type, title, body, link }) {
     const [[notif]] = await knex.raw('SELECT * FROM notifications WHERE id = ?', [result.insertId])
     getIO()?.emit(`notification:${userId}`, notif)
   } catch (err) {
-    console.error('Notification create error:', err)
+    logger.error('Notification create error:', err)
   }
 }
 

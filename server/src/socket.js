@@ -3,6 +3,7 @@ import { createAdapter } from '@socket.io/redis-adapter'
 import jwt from 'jsonwebtoken'
 import knex from './db.js'
 import { JWT_SECRET } from './middleware.js'
+import logger from './logger.js'
 
 let io
 
@@ -115,7 +116,7 @@ export async function setupSocket(server) {
           })
         }
       } catch (err) {
-        console.error('WS message error:', err)
+        logger.error('WS message error:', err)
       }
     })
 
@@ -132,7 +133,7 @@ export async function setupSocket(server) {
         await knex.raw('DELETE FROM chat_messages WHERE id = ?', [msgId])
         io.to(`chat:${chatId}`).emit('message:removed', msgId)
       } catch (err) {
-        console.error('WS delete error:', err)
+        logger.error('WS delete error:', err)
       }
     })
 

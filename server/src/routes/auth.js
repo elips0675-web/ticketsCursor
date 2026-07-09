@@ -8,6 +8,7 @@ import { JWT_SECRET, authenticateToken, requireRole } from '../middleware.js'
 import { sendTicketNotification } from '../email.js'
 import { loginValidation, registerValidation, handleErrors } from '../validate.js'
 import { authenticateLDAP } from '../auth/ldap.js'
+import logger from '../logger.js'
 
 const router = Router()
 
@@ -37,7 +38,7 @@ router.post('/login', loginValidation, async (req, res) => {
       },
     })
   } catch (err) {
-    console.error('Login error:', err)
+    logger.error('Login error:', err)
     res.status(500).json({ message: 'Internal server error' })
   }
 })
@@ -60,14 +61,14 @@ router.post('/register', authenticateToken, requireRole('admin'), registerValida
       employee: { id: result.insertId, name, email, role: 'agent' },
     })
   } catch (err) {
-    console.error('Register error:', err)
+    logger.error('Register error:', err)
     res.status(500).json({ message: 'Ошибка регистрации' })
   }
 })
 
-// Dev auto-login (only in non-production)
 router.post('/ldap-login', authenticateLDAP)
 
+// Dev auto-login (only in non-production)
 router.post('/dev-login', (req, res) => {
   if (process.env.NODE_ENV === 'production') {
     return res.status(404).json({ message: 'Not found' })
@@ -97,7 +98,7 @@ router.post('/forgot-password', body('email').isEmail(), handleErrors, async (re
     })
     res.json({ message: 'If the email exists, a reset link has been sent' })
   } catch (err) {
-    console.error('Forgot password error:', err)
+    logger.error('Forgot password error:', err)
     res.status(500).json({ message: 'Internal server error' })
   }
 })
@@ -116,7 +117,7 @@ router.post('/reset-password', body('token').isLength({ min: 1 }), body('passwor
     await knex.raw('DELETE FROM password_resets WHERE token = ?', [token])
     res.json({ message: 'Password reset successfully' })
   } catch (err) {
-    console.error('Reset password error:', err)
+    logger.error('Reset password error:', err)
     res.status(500).json({ message: 'Internal server error' })
   }
 })

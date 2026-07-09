@@ -2,6 +2,7 @@ import { Router } from 'express'
 import knex from '../db.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { createNewsValidation } from '../validate.js'
+import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken)
@@ -24,7 +25,7 @@ router.get('/', async (req, res) => {
     )
     res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
   } catch (err) {
-    console.error('News list error:', err)
+    logger.error('News list error:', err)
     res.status(500).json({ message: 'Failed to fetch news' })
   }
 })
@@ -39,7 +40,7 @@ router.post('/', requireRole('admin', 'senior_agent'), createNewsValidation, asy
     const [[post]] = await knex.raw('SELECT * FROM news_posts WHERE id = ?', [result.insertId])
     res.status(201).json(post)
   } catch (err) {
-    console.error('Create news error:', err)
+    logger.error('Create news error:', err)
     res.status(500).json({ message: 'Failed to create news' })
   }
 })

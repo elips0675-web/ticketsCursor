@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import knex from '../db.js'
 import { authenticateToken } from '../middleware.js'
+import logger from '../logger.js'
 
 const router = Router()
 
@@ -13,7 +14,7 @@ router.get('/', async (req, res) => {
     )
     res.json(rows)
   } catch (err) {
-    console.error('Employees list error:', err)
+    logger.error('Employees list error:', err)
     res.status(500).json({ message: 'Failed to fetch employees' })
   }
 })

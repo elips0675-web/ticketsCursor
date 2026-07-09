@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url'
 import knex from '../db.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { createWikiValidation } from '../validate.js'
+import logger from '../logger.js'
+import { validateUpload } from '../middleware/validateUpload.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const wikiUploads = path.join(__dirname, '..', '..', 'uploads', 'wiki')
@@ -43,7 +45,7 @@ router.get('/', async (req, res) => {
     )
     res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
   } catch (err) {
-    console.error('Wiki list error:', err)
+    logger.error('Wiki list error:', err)
     res.status(500).json({ message: 'Failed to fetch articles' })
   }
 })
@@ -68,12 +70,12 @@ router.post('/', requireRole('admin', 'senior_agent'), createWikiValidation, asy
     const [[article]] = await knex.raw('SELECT * FROM wiki_articles WHERE id = ?', [result.insertId])
     res.status(201).json(article)
   } catch (err) {
-    console.error('Create article error:', err)
+    logger.error('Create article error:', err)
     res.status(500).json({ message: 'Failed to create article' })
   }
 })
 
-router.post('/upload-image', requireRole('admin', 'senior_agent'), upload.single('image'), (req, res) => {
+router.post('/upload-image', requireRole('admin', 'senior_agent'), upload.single('image'), validateUpload, (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' })
   const url = `/uploads/wiki/${req.file.filename}`
   res.json({ url })

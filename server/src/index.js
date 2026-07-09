@@ -4,10 +4,11 @@ import knexConfig from '../knexfile.js'
 import { app, server } from './app.js'
 import { setupSocket } from './socket.js'
 import { initTelegram } from './telegram.js'
+import logger from './logger.js'
 
 if (!process.env.JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET environment variable is required')
-  console.error('Generate one: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"')
+  logger.error('FATAL: JWT_SECRET environment variable is required')
+  logger.error('Generate one: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"')
   process.exit(1)
 }
 
@@ -24,7 +25,7 @@ initTelegram()
     console.log('Migrations up to date')
     await migrator.destroy()
   } catch (e) {
-    console.error('Migration error:', e.message)
+    logger.error('Migration error:', e.message)
   }
 })()
 
@@ -36,7 +37,7 @@ async function cleanupOldNotifications() {
     const [r] = await knex.raw("DELETE FROM notifications WHERE created_at < NOW() - INTERVAL 90 DAY")
     if (r.affectedRows > 0) console.log(`Cleaned ${r.affectedRows} old notifications`)
   } catch (e) {
-    console.error('Notification cleanup error:', e.message)
+    logger.error('Notification cleanup error:', e.message)
   }
 }
 cleanupOldNotifications()

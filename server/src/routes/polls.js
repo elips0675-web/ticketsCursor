@@ -2,6 +2,7 @@ import { Router } from 'express'
 import knex from '../db.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { createPollValidation, voteValidation } from '../validate.js'
+import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken)
@@ -49,7 +50,7 @@ router.get('/', async (req, res) => {
     }
     res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
   } catch (err) {
-    console.error('Polls list error:', err)
+    logger.error('Polls list error:', err)
     res.status(500).json({ message: 'Failed to fetch polls' })
   }
 })
@@ -71,7 +72,7 @@ router.post('/', requireRole('admin', 'senior_agent'), createPollValidation, asy
     const [opts] = await knex.raw('SELECT * FROM poll_options WHERE poll_id = ?', [insertId])
     res.status(201).json({ ...poll, options: opts, totalVotes: 0, myVotes: [], multipleChoice: !!poll.multiple_choice })
   } catch (err) {
-    console.error('Create poll error:', err)
+    logger.error('Create poll error:', err)
     res.status(500).json({ message: 'Failed to create poll' })
   }
 })
@@ -125,7 +126,7 @@ router.post('/:id/vote', voteValidation, async (req, res) => {
     res.json({ ...updated, options: opts, totalVotes, multipleChoice: !!updated.multiple_choice })
   } catch (err) {
     if (err.status === 404) return res.status(404).json({ message: 'Not found' })
-    console.error('Vote error:', err)
+    logger.error('Vote error:', err)
     res.status(500).json({ message: 'Failed to vote' })
   }
 })

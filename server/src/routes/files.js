@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url'
 import multer from 'multer'
 import knex from '../db.js'
 import { authenticateToken } from '../middleware.js'
+import logger from '../logger.js'
+import { validateUpload } from '../middleware/validateUpload.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fileUploads = path.join(__dirname, '..', '..', 'uploads', 'files')
@@ -50,7 +52,7 @@ router.get('/folders', async (req, res) => {
     }
     res.json(folders)
   } catch (err) {
-    console.error('Files list error:', err)
+    logger.error('Files list error:', err)
     res.status(500).json({ message: 'Failed to fetch files' })
   }
 })
@@ -66,12 +68,12 @@ router.post('/folders', async (req, res) => {
     const [[folder]] = await knex.raw('SELECT * FROM file_folders WHERE id = ?', [result.insertId])
     res.status(201).json(folder)
   } catch (err) {
-    console.error('Create folder error:', err)
+    logger.error('Create folder error:', err)
     res.status(500).json({ message: 'Failed to create folder' })
   }
 })
 
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', upload.single('file'), validateUpload, async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'Файл не загружен' })
   const { folderId } = req.body
   const name = req.file.originalname
@@ -92,7 +94,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     )
     res.status(201).json(file)
   } catch (err) {
-    console.error('Upload error:', err)
+    logger.error('Upload error:', err)
     res.status(500).json({ message: 'Failed to upload file' })
   }
 })

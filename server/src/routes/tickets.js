@@ -13,6 +13,8 @@ import {
   notifyTicketAssigned, notifyTicketMessage,
 } from '../notify.js'
 import { createTicketValidation, updateStatusValidation, updatePriorityValidation, assignTicketValidation, addMessageValidation } from '../validate.js'
+import logger from '../logger.js'
+import { validateUpload } from '../middleware/validateUpload.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ticketUploads = path.join(__dirname, '..', '..', 'uploads', 'tickets')
@@ -71,7 +73,7 @@ router.get('/', async (req, res) => {
     }
     res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
   } catch (err) {
-    console.error('Tickets list error:', err)
+    logger.error('Tickets list error:', err)
     res.status(500).json({ message: 'Failed to fetch tickets' })
   }
 })
@@ -94,7 +96,7 @@ router.get('/:id', async (req, res) => {
     ticket.messages = messages
     res.json(ticket)
   } catch (err) {
-    console.error('Ticket detail error:', err)
+    logger.error('Ticket detail error:', err)
     res.status(500).json({ message: 'Failed to fetch ticket' })
   }
 })
@@ -119,7 +121,7 @@ router.post('/', createTicketValidation, async (req, res) => {
     invalidateCache('cache:/api/tickets*')
     res.status(201).json(ticket[0])
   } catch (err) {
-    console.error('Create ticket error:', err)
+    logger.error('Create ticket error:', err)
     res.status(500).json({ message: 'Failed to create ticket' })
   }
 })
@@ -174,7 +176,7 @@ router.put('/:id/assign', requireRole('admin', 'senior_agent'), assignTicketVali
 })
 
 // POST /api/tickets/upload — file upload for messages
-router.post('/upload', upload.single('file'), (req, res) => {
+router.post('/upload', upload.single('file'), validateUpload, (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file' })
   res.json({
     url: `/uploads/tickets/${req.file.filename}`,
@@ -213,7 +215,7 @@ router.delete('/:id/messages/:msgId', async (req, res) => {
     getIO()?.emit('ticket:message-removed', { ticketId: Number(req.params.id), msgId: Number(req.params.msgId) })
     res.json({ success: true })
   } catch (err) {
-    console.error('Delete message error:', err)
+    logger.error('Delete message error:', err)
     res.status(500).json({ message: 'Failed to delete message' })
   }
 })

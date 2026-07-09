@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import knex from '../db.js'
 import { authenticateToken, requireRole } from '../middleware.js'
+import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken, requireRole('admin'))
@@ -19,7 +20,7 @@ router.get('/settings', async (req, res) => {
     for (const r of rows) settings[r.key] = r.value
     res.json(settings)
   } catch (err) {
-    console.error('Settings get error:', err)
+    logger.error('Settings get error:', err)
     res.status(500).json({ message: 'Failed to fetch settings' })
   }
 })
@@ -35,7 +36,7 @@ router.put('/settings', async (req, res) => {
     }
     res.json({ success: true })
   } catch (err) {
-    console.error('Settings update error:', err)
+    logger.error('Settings update error:', err)
     res.status(500).json({ message: 'Failed to update settings' })
   }
 })
@@ -50,7 +51,7 @@ router.get('/users', async (req, res) => {
     )
     res.json(rows)
   } catch (err) {
-    console.error('Admin users list error:', err)
+    logger.error('Admin users list error:', err)
     res.status(500).json({ message: 'Failed to fetch users' })
   }
 })
@@ -81,7 +82,7 @@ router.put('/users/:id', async (req, res) => {
     await knex.raw(`UPDATE employees SET ${updates.join(', ')} WHERE id = ?`, params)
     res.json({ success: true })
   } catch (err) {
-    console.error('Admin user update error:', err)
+    logger.error('Admin user update error:', err)
     res.status(500).json({ message: 'Failed to update user' })
   }
 })
@@ -100,7 +101,7 @@ router.get('/audit', async (req, res) => {
     const [rows] = await knex.raw(sql, params)
     res.json(rows)
   } catch (err) {
-    console.error('Audit log error:', err)
+    logger.error('Audit log error:', err)
     res.status(500).json({ message: 'Failed to fetch audit log' })
   }
 })

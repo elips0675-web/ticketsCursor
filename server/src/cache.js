@@ -54,7 +54,8 @@ if (process.env.REDIS_URL) {
 export function cacheMiddleware(ttl = 300) {
   return async (req, res, next) => {
     if (req.method !== 'GET') return next()
-    const key = `cache:${req.originalUrl}`
+    const token = (req.headers.authorization || '').slice(0, 20)
+    const key = `cache:${token}:${req.originalUrl}`
     const cached = await cache.get(key)
     if (cached) return res.json(cached)
     const originalJson = res.json.bind(res)

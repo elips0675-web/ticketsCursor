@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import logger from './logger.js'
 
 let transporter = null
 
@@ -29,6 +30,6 @@ export async function sendTicketNotification({ to, subject, text }) {
     })
     console.log(`Email sent to ${to}: ${subject}`)
   } catch (err) {
-    console.error('Email send error:', err)
+    logger.error('Email send error:', err)
   }
 }

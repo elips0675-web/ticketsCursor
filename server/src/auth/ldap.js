@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import knex from '../db.js'
 import { getSettings } from '../settings.js'
 import { JWT_SECRET } from '../middleware.js'
+import logger from '../logger.js'
 
 export async function authenticateLDAP(req, res) {
   const { username, password } = req.body
@@ -65,7 +66,7 @@ export async function authenticateLDAP(req, res) {
             const token = jwt.sign({ userId: employee.id, role: employee.role }, JWT_SECRET, { expiresIn: '24h' })
             resolve(res.json({ token, employee: { id: employee.id, name: employee.name, email: employee.email, role: employee.role } }))
           } catch (err) {
-            console.error('LDAP auto-provision error:', err)
+            logger.error('LDAP auto-provision error:', err)
             resolve(res.status(500).json({ message: 'Internal server error' }))
           }
         })

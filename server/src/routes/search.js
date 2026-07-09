@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import knex from '../db.js'
 import { authenticateToken } from '../middleware.js'
+import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken)
@@ -38,7 +39,7 @@ router.get('/', async (req, res) => {
     )
     res.json({ tickets, employees, wiki, news, chats, files })
   } catch (err) {
-    console.error('Search error:', err)
+    logger.error('Search error:', err)
     res.status(500).json({ message: 'Search failed' })
   }
 })

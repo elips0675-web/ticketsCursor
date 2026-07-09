@@ -2,6 +2,7 @@ import { Router } from 'express'
 import webpush from 'web-push'
 import knex from '../db.js'
 import { authenticateToken, requireRole } from '../middleware.js'
+import logger from '../logger.js'
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY
@@ -24,7 +25,7 @@ router.get('/subscription', async (req, res) => {
     const [rows] = await knex.raw('SELECT subscription_json FROM push_subscriptions WHERE user_id = ?', [req.user.userId])
     res.json(rows.map(r => JSON.parse(r.subscription_json)))
   } catch (err) {
-    console.error('Get subscriptions error:', err)
+    logger.error('Get subscriptions error:', err)
     res.status(500).json({ message: 'Failed to get subscriptions' })
   }
 })
@@ -39,7 +40,7 @@ router.post('/subscribe', async (req, res) => {
     )
     res.status(201).json({ ok: true })
   } catch (err) {
-    console.error('Subscribe error:', err)
+    logger.error('Subscribe error:', err)
     res.status(500).json({ message: 'Failed to subscribe' })
   }
 })
@@ -49,7 +50,7 @@ router.delete('/unsubscribe', async (req, res) => {
     await knex.raw('DELETE FROM push_subscriptions WHERE user_id = ?', [req.user.userId])
     res.json({ ok: true })
   } catch (err) {
-    console.error('Unsubscribe error:', err)
+    logger.error('Unsubscribe error:', err)
     res.status(500).json({ message: 'Failed to unsubscribe' })
   }
 })
@@ -80,7 +81,7 @@ router.post('/send', requireRole('admin', 'senior_agent'), async (req, res) => {
 
     res.json({ sent, failed, total: rows.length })
   } catch (err) {
-    console.error('Send push error:', err)
+    logger.error('Send push error:', err)
     res.status(500).json({ message: 'Failed to send push notifications' })
   }
 })

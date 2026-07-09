@@ -25,16 +25,16 @@ router.get('/', async (req, res) => {
       [like, like],
     )
     const [news] = await pool.query(
-      'SELECT id, title, created_at FROM news WHERE title LIKE ? OR content LIKE ? ORDER BY created_at DESC LIMIT 10',
+      'SELECT id, title, created_at FROM news_posts WHERE title LIKE ? OR content LIKE ? ORDER BY created_at DESC LIMIT 10',
       [like, like],
     )
     const [chats] = await pool.query(
-      'SELECT id, name FROM chats WHERE name LIKE ? LIMIT 10',
+      'SELECT id, name, type FROM chat_rooms WHERE name LIKE ? LIMIT 10',
       [like],
     )
     const [files] = await pool.query(
-      'SELECT id, name, original_name, size, mime_type, created_at FROM files WHERE name LIKE ? OR original_name LIKE ? ORDER BY created_at DESC LIMIT 10',
-      [like, like],
+      'SELECT id, name, size, type, created_at FROM files WHERE name LIKE ? ORDER BY created_at DESC LIMIT 10',
+      [like],
     )
     res.json({ tickets, employees, wiki, news, chats, files })
   } catch (err) {

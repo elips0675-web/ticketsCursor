@@ -464,6 +464,10 @@
 - [x] `/api/...` сохранён для обратной совместимости
 - [x] `/api/v1/docs` + `/api/docs` — Swagger
 
+### 🐛 Исправление импортов в Chats.tsx
+- [x] `Hash` — добавлен в импорт из lucide-react
+- [x] `Avatar`, `AvatarFallback` — добавлен импорт из shadcn/ui
+
 ### 🔍 Meilisearch Fuzzy Search ✅
 - [x] `meilisearch` сервис в docker-compose (v1.8, порт 7700)
 - [x] `search-sync.js` — fullSync при старте + syncEntity для CRUD

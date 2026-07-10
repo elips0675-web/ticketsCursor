@@ -1,4 +1,4 @@
-import { MeiliSearch } from 'meilisearch'
+import { Meilisearch } from 'meilisearch'
 import prisma from './prisma.js'
 import logger from './logger.js'
 
@@ -10,7 +10,7 @@ let client = null
 function getClient() {
   if (!client && MEILI_URL) {
     try {
-      client = new MeiliSearch({ host: MEILI_URL, apiKey: MEILI_KEY })
+      client = new Meilisearch({ host: MEILI_URL, apiKey: MEILI_KEY })
     } catch {
       logger.warn('Meilisearch not available, using FULLTEXT fallback')
     }

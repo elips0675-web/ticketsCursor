@@ -601,6 +601,60 @@ async function notify({ type, recipients, title, message, ticketId }) {
 
 ---
 
+### Meilisearch (fuzzy search)
+
+Опциональный поисковый движок с поддержкой:
+- **Fuzzy search** — опечатки и неточности
+- **Typo tolerance** — поиск с ошибками
+- **Faceted search/filtering**
+- **Мгновенная индексация** при CRUD операциях
+
+### Настройка
+
+```yaml
+# docker-compose.yml (уже добавлен)
+meilisearch:
+  image: getmeili/meilisearch:v1.8
+  ports:
+    - "7700:7700"
+```
+
+```bash
+# .env
+MEILISEARCH_URL=http://localhost:7700
+MEILI_MASTER_KEY=meilisearch-master-key
+```
+
+### Архитектура
+
+```
+MySQL ──► search-sync.js ──► Meilisearch
+                │
+                └── fullSync() — при старте сервера
+                └── syncEntity() — при CRUD (upsert/delete)
+
+Client ──► GET /api/search?q= ──► Meilisearch (если доступен)
+                                    │ fallback
+                                    └──► MySQL FULLTEXT
+                                           │ fallback
+                                           └──► MySQL LIKE
+```
+
+### Индексы
+
+| Индекс | Поля | Первичный ключ |
+|--------|------|----------------|
+| `tickets` | title, description, status, priority, category | id |
+| `employees` | name, email, department | id |
+| `wiki` | title, content, category | id |
+| `news` | title, content | id |
+| `chats` | name | id |
+| `files` | name | id |
+
+Без Meilisearch — прозрачный fallback на FULLTEXT → LIKE.
+
+---
+
 ## Кэширование
 
 ### MySQL Read Replicas (docker-compose)

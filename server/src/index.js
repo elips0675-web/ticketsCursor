@@ -18,6 +18,9 @@ const PORT = process.env.PORT || 4000
 setupSocket(server)
 initTelegram()
 
+import { initSearchSync } from './search-sync.js'
+initSearchSync()
+
 // Auto-run migrations on startup
 ;(async () => {
   try {

@@ -53,10 +53,11 @@
 - **Docker**
   - Multi-stage Dockerfile (node:20-alpine)
   - Non-root USER node
-  - docker-compose: mysql 8.4 + mysql_replica + redis + api + frontend (nginx) + prometheus + grafana
+  - docker-compose: mysql 8.4 + mysql_replica + redis + api + frontend (nginx) + prometheus + grafana + meilisearch
   - Healthcheck для всех сервисов
   - `seed.sql` инициализация
   - MySQL репликация (primary/replica) + ежедневные mysqldump бэкапы
+  - Meilisearch для fuzzy search (опционально, fallback FULLTEXT → LIKE)
 
 - **Graceful shutdown**
   - Обработка SIGTERM/SIGINT
@@ -442,6 +443,13 @@
 - [x] `mysql/replica.cnf` — relay_log, `read_only=1`
 - [x] `mysql/init-replica.sh` — автонастройка репликации при старте
 - [x] `db_backup` — alpine-контейнер: mysqldump ежедневно, хранение 7 дней
+
+### 🔍 Meilisearch Fuzzy Search ✅
+- [x] `meilisearch` сервис в docker-compose (v1.8, порт 7700)
+- [x] `search-sync.js` — fullSync при старте + syncEntity для CRUD
+- [x] 6 индексов: tickets, employees, wiki, news, chats, files
+- [x] Прозрачный fallback: Meilisearch → FULLTEXT → LIKE
+- [x] `MEILISEARCH_URL` + `MEILI_MASTER_KEY` в env
 
 ---
 

@@ -2,6 +2,7 @@ import { Router } from 'express'
 import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
+import { searchMeilisearch } from '../search-sync.js'
 
 const router = Router()
 router.use(authenticateToken)
@@ -16,6 +17,12 @@ router.get('/', async (req, res) => {
   if (!q || q.length < 2) {
     return res.json({ success: true, data: { tickets: [], employees: [], wiki: [], news: [], chats: [], files: [] } })
   }
+
+  const meili = await searchMeilisearch(q)
+  if (meili) {
+    return res.json({ success: true, data: meili })
+  }
+
   try {
     const tickets = await prisma.$queryRaw`
       SELECT id, title, status, priority, created_at FROM tickets

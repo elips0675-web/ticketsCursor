@@ -19,6 +19,7 @@ import { validateUpload } from '../middleware/validateUpload.js'
 import {
   listTickets,
   listOverdueSlaTickets,
+  getSlaStats,
   getTicketById,
   getTicketMessages,
   createTicket,
@@ -72,6 +73,16 @@ router.get('/sla/overdue', requireRole('admin', 'senior_agent'), async (req, res
   } catch (err) {
     logger.error('SLA overdue list error:', err)
     res.status(500).json({ success: false, message: 'Failed to fetch overdue SLA tickets' })
+  }
+})
+
+router.get('/sla/stats', requireRole('admin', 'senior_agent'), async (req, res) => {
+  try {
+    const data = await getSlaStats()
+    res.json({ success: true, data })
+  } catch (err) {
+    logger.error('SLA stats error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch SLA stats' })
   }
 })
 

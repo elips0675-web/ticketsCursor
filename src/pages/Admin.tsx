@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Shield, Users, Ticket, Activity, UserCog, ShieldCheck, RefreshCw } from "lucide-react"
+import { Shield, Users, Ticket, Activity, UserCog, ShieldCheck, RefreshCw, Clock, AlertTriangle, CheckCircle2, XCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 interface Employee {
@@ -27,11 +27,19 @@ interface Stats {
   critical: number
 }
 
+interface SlaStats {
+  total: number
+  overdue: number
+  onTime: number
+  noSla: number
+}
+
 export default function Admin() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [employees, setEmployees] = useState<Employee[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
+  const [slaStats, setSlaStats] = useState<SlaStats | null>(null)
   const [loading, setLoading] = useState(true)
 
   const unwrapApiData = <T,>(payload: T | { success?: boolean; data?: T } | null): T | null => {
@@ -46,9 +54,10 @@ export default function Admin() {
     setLoading(true)
     const token = localStorage.getItem("token")
     try {
-      const [empRes, statsRes] = await Promise.all([
+      const [empRes, statsRes, slaRes] = await Promise.all([
         fetch("/api/admin/users", { headers: { Authorization: `Bearer ${token}` } }),
         fetch("/api/employees/stats", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/tickets/sla/stats", { headers: { Authorization: `Bearer ${token}` } }),
       ])
       if (empRes.ok) {
         const raw = await empRes.json()
@@ -57,6 +66,10 @@ export default function Admin() {
       if (statsRes.ok) {
         const body = await statsRes.json()
         setStats(body.data || body)
+      }
+      if (slaRes.ok) {
+        const body = await slaRes.json()
+        setSlaStats(body.data || body)
       }
     } catch (err) {
       console.error("Admin fetch error:", err)
@@ -206,6 +219,51 @@ export default function Admin() {
           </div>
         </CardContent>
       </Card>
+
+      {slaStats && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              {t("admin.slaTitle")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="flex items-center gap-3 bg-green-50 dark:bg-green-950/30 rounded-lg p-4">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+                <div>
+                  <div className="text-xl font-bold text-green-700 dark:text-green-400">{slaStats.onTime}</div>
+                  <p className="text-xs text-muted-foreground">{t("admin.slaOnTime")}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-red-50 dark:bg-red-950/30 rounded-lg p-4">
+                <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+                <div>
+                  <div className="text-xl font-bold text-red-700 dark:text-red-400">{slaStats.overdue}</div>
+                  <p className="text-xs text-muted-foreground">{t("admin.slaOverdue")}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-muted/30 rounded-lg p-4">
+                <XCircle className="w-5 h-5 text-muted-foreground shrink-0" />
+                <div>
+                  <div className="text-xl font-bold">{slaStats.noSla}</div>
+                  <p className="text-xs text-muted-foreground">{t("admin.slaNoSla")}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4">
+                <Activity className="w-5 h-5 text-blue-600 shrink-0" />
+                <div>
+                  <div className="text-xl font-bold text-blue-700 dark:text-blue-400">
+                    {(() => { const d = slaStats.total - slaStats.noSla; return d > 0 ? Math.round((slaStats.onTime / d) * 100) : 0 })()}%
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t("admin.slaCompliance")}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

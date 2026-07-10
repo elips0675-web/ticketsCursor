@@ -8,20 +8,12 @@ function parseBooleanSetting(value) {
   return ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase())
 }
 
-function getSlaHours(priority, settings) {
+function getSlaHours(priority, category, settings) {
   const raw = Number(settings.SLA_RESPONSE_HOURS)
   const base = Number.isFinite(raw) && raw > 0 ? raw : 4
-  switch (priority) {
-    case 'critical':
-      return Math.max(1, Math.round(base * 0.5))
-    case 'high':
-      return base
-    case 'low':
-      return base * 4
-    case 'medium':
-    default:
-      return base * 2
-  }
+  const categoryMult = { incident: 0.5, bug: 0.75, support: 1, feature: 2, other: 1 }[category] || 1
+  const priorityMult = { critical: 0.5, high: 1, medium: 2, low: 4 }[priority] || 2
+  return Math.max(1, Math.round(base * categoryMult * priorityMult))
 }
 
 function getResolvedAt(status, currentResolvedAt) {
@@ -112,6 +104,15 @@ export async function listOverdueSlaTickets(limit) {
   return rows.map(mapTicketRow)
 }
 
+export async function getSlaStats() {
+  const now = new Date()
+  const total = await prisma.tickets.count({ where: { status: { in: ['open', 'in_progress', 'resolved', 'closed'] } } })
+  const overdue = await prisma.tickets.count({ where: { status: { in: ['open', 'in_progress'] }, due_at: { lt: now, not: null } } })
+  const onTime = await prisma.tickets.count({ where: { status: { in: ['resolved', 'closed'] }, due_at: { gte: now } } })
+  const noSla = await prisma.tickets.count({ where: { due_at: null } })
+  return { total, overdue, onTime, noSla }
+}
+
 export async function getTicketById(id, messagePage = 1, messageLimit = 50) {
   const ticket = await prisma.tickets.findUnique({
     where: { id },
@@ -147,7 +148,7 @@ export async function getTicketMessages(id, page = 1, limit = 50) {
 export async function createTicket({ title, description, priority, category, createdBy }) {
   const settings = await getSettings().catch(() => ({}))
   const normalizedPriority = priority || 'medium'
-  const dueAt = new Date(Date.now() + getSlaHours(normalizedPriority, settings) * 60 * 60 * 1000)
+  const dueAt = new Date(Date.now() + getSlaHours(normalizedPriority, category, settings) * 60 * 60 * 1000)
   const autoAssignEnabled = parseBooleanSetting(settings.AUTO_ASSIGN)
   const autoAssignedTo = autoAssignEnabled ? await getLeastLoadedAssignee() : null
   const ticket = await prisma.tickets.create({

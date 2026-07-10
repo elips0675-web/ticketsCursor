@@ -550,4 +550,5 @@ PRODUCTION PROMPT ДОРАБОТАТЬ
       ✅ Multi-stage Dockerfile — улучшен (Prisma generate, wget healthcheck)
 
       [ ] Fuzzy search / Elasticsearch / Meilisearch
-      [ ] MySQL read replicas + автоматические бэкапы
+      ✅ MySQL read replicas — docker-compose (primary + replica + init-replica.sh)
+      ✅ Автоматические бэкапы — db_backup сервис (mysqldump раз в 24ч, хранение 7 дней, volume mysql_backup)

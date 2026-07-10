@@ -53,9 +53,10 @@
 - **Docker**
   - Multi-stage Dockerfile (node:20-alpine)
   - Non-root USER node
-  - docker-compose: mysql 8.4 + redis + api + frontend (nginx)
+  - docker-compose: mysql 8.4 + mysql_replica + redis + api + frontend (nginx) + prometheus + grafana
   - Healthcheck для всех сервисов
   - `seed.sql` инициализация
+  - MySQL репликация (primary/replica) + ежедневные mysqldump бэкапы
 
 - **Graceful shutdown**
   - Обработка SIGTERM/SIGINT
@@ -434,6 +435,13 @@
 
 ### 🐳 Dockerfile ✅
 - [x] Prisma generate, wget, multi-stage
+
+### 🗄️ MySQL Read Replica + Backups ✅
+- [x] `mysql_replica` — сервис с `server_id=2`, `read_only=1`, порт 3308
+- [x] `mysql/primary.cnf` — binlog, `server_id=1`
+- [x] `mysql/replica.cnf` — relay_log, `read_only=1`
+- [x] `mysql/init-replica.sh` — автонастройка репликации при старте
+- [x] `db_backup` — alpine-контейнер: mysqldump ежедневно, хранение 7 дней
 
 ---
 

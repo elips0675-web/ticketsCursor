@@ -451,9 +451,10 @@ PRODUCTION PROMPT ДОРАБОТАТЬ
   ✅ Sentry — SDK на фронт (@sentry/react) и бэк (@sentry/node), опционально через SENTRY_DSN
   ✅ S3/MinIO — storage.js адаптер (S3 при S3_ENDPOINT, иначе локальный диск)
   ✅ ClamAV — интеграция в validateUpload (опционально, CLAMAV_ENABLED=true)
-
-Не реализовано (требует внешних сервисов или дальнейшей доработки):
-
   ✅ Prisma ORM — knex.raw заменён на Prisma во всех 13 роутах + 4 модулях
   ✅ Исправление сайдбара — super_admin добавлен во все roles массивы navItems
   ✅ Исправление лейаута — {children} заменён на <Outlet /> в AppLayout и AdminLayout (React Router v6)
+
+Не реализовано (требует внешних сервисов или дальнейшей доработки):
+
+  — (пусто — все пункты выполнены)

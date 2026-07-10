@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/react"
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useState } from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Toaster } from "sonner"
 import { AppLayout } from "@/components/layout/app-layout"
 import { AdminLayout } from "@/components/layout/admin-layout"
@@ -54,7 +55,18 @@ const SentryRoutes = typeof Sentry.withSentryReactRouterV6Routing === 'function'
   : Routes
 
 export default function App() {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 30_000,
+        retry: 1,
+        refetchOnWindowFocus: false,
+      },
+    },
+  }))
+
   return (
+    <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
       <SocketProvider>
@@ -103,5 +115,6 @@ export default function App() {
       </SocketProvider>
       </AuthProvider>
     </TooltipProvider>
+    </QueryClientProvider>
   )
 }

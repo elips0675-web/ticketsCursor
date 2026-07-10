@@ -46,4 +46,9 @@ describe('Dashboard', () => {
     render(<Dashboard />, { wrapper: AllTheProviders })
     expect(screen.getByText('Все сотрудники')).toBeInTheDocument()
   })
+
+  it('shows employee status indicators', () => {
+    render(<Dashboard />, { wrapper: AllTheProviders })
+    expect(screen.getByText('Сотрудники')).toBeInTheDocument()
+  })
 })

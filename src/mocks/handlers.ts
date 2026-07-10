@@ -193,4 +193,62 @@ export const handlers = [
       employee: { id: 1, name: 'Admin User', email: 'admin@test.com', role: 'admin' },
     })
   }),
+
+  // ── Tickets mutations ──
+  http.put(`${API}/tickets/:id/status`, ({ params }) => {
+    return HttpResponse.json({ success: true, data: { id: Number(params.id), status: 'resolved' } })
+  }),
+
+  http.put(`${API}/tickets/:id/priority`, ({ params }) => {
+    return HttpResponse.json({ success: true, data: { id: Number(params.id), priority: 'high' } })
+  }),
+
+  http.put(`${API}/tickets/:id/assign`, () => {
+    return HttpResponse.json({ success: true })
+  }),
+
+  http.post(`${API}/tickets/:id/messages`, () => {
+    return HttpResponse.json({
+      data: { id: 10, ticket_id: 1, sender_id: 1, sender_name: 'Admin', text: 'Новое сообщение', created_at: '2026-07-09T12:00:00Z', is_internal: 0 },
+    })
+  }),
+
+  http.post(`${API}/tickets`, () => {
+    return HttpResponse.json({
+      data: { id: 3, title: 'Новый тикет', description: 'Описание', status: 'open', priority: 'medium', category: 'support', created_by: 1, created_by_name: 'Admin', created_at: '2026-07-09T12:00:00Z', updated_at: '2026-07-09T12:00:00Z', messages: [], messages_count: 0, assigned_to: null, assigned_name: null, assigned_email: null, assigned_avatar: null },
+    })
+  }),
+
+  // ── Admin ──
+  http.get(`${API}/admin/stats`, () => {
+    return HttpResponse.json({
+      totalUsers: 5, totalTickets: 20, openTickets: 8, resolvedToday: 3, slaCompliance: 85,
+    })
+  }),
+
+  http.get(`${API}/admin/users`, () => {
+    return HttpResponse.json([
+      { id: 1, name: 'Admin', email: 'admin@test.com', role: 'admin', isBlocked: false, createdAt: '2026-01-01' },
+      { id: 2, name: 'User', email: 'user@test.com', role: 'agent', isBlocked: false, createdAt: '2026-01-02' },
+    ])
+  }),
+
+  http.get(`${API}/tickets/sla/stats`, () => {
+    return HttpResponse.json({
+      onTime: 15, overdue: 3, noSla: 2, complianceRate: 83.3,
+    })
+  }),
+
+  // ── Register ──
+  http.post(`${API}/auth/register`, () => {
+    return HttpResponse.json({
+      token: 'new-token-456',
+      employee: { id: 4, name: 'New User', email: 'new@test.com', role: 'agent' },
+    })
+  }),
+
+  // ── Files upload ──
+  http.post(`${API}/files/folders`, () => {
+    return HttpResponse.json({ id: 3, name: 'Новая папка', user_id: 1, is_shared: false, files: [], totalFiles: 0 })
+  }),
 ]

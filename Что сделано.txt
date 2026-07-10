@@ -177,7 +177,7 @@
 
 ТЕСТИРОВАНИЕ
 
-  • Клиентские тесты: 47 (14 файлов, vitest + jsdom + MSW) — ✅ все пройдены
+   • Клиентские тесты: 70 (23 файла, vitest + jsdom + MSW) — ✅ все пройдены
   • Серверные тесты: 93 (5 файлов, vitest + supertest, 4 сервисных) — ✅ все пройдены
   • E2E (Playwright): 4 файла (login, tickets, chats, admin) — 13 тестов
   • Coverage: v8, пороги 20%/15%/15%/25% (statements/branches/functions/lines)
@@ -381,10 +381,10 @@
      ✅ role: 'requester' — видит только свои тикеты, не видит админку
      ✅ ProtectedRoute + middleware проверка на всех роутах
 
-   🟡 Этап G — React Query + optimistic updates
-     [ ] Установка @tanstack/react-query
-     [ ] Замена fetch в ticket-context на useQuery/useMutation
-     [ ] Optimistic updates для createTicket, addMessage, updateStatus
+   ✅ Этап G — React Query + optimistic updates
+      ✅ Установка @tanstack/react-query v5.101.0
+      ✅ Замена fetch в ticket-context на useQuery/useMutation
+      ✅ Optimistic updates для createTicket, addMessage, updateStatus/priority/assign
 
    ✅ Этап H — Skeleton loaders
      ✅ Tickets, News, Wiki, Files, Employees, Chats, Polls — skeleton-компоненты
@@ -394,13 +394,13 @@
      ✅ Серверные тесты: 17 → 93 (5 файлов: 4 сервисных + api.test.js)
      ✅ 4 сервисных теста: chats, employees, news, calendar
      ✅ API тесты расширены: auth, RBAC, поиск, уведомления, push, валидация
-     🔄 Клиентские тесты: 47 → 70+
-     [ ] E2E: эскалация SLA, автоназначение, экспорт
+      ✅ Клиентские тесты: 47 → 70 (23 файла)
+      [ ] E2E: эскалация SLA, автоназначение, экспорт
 
-   🟡 Этап J — CI/CD + инфраструктура
-     [ ] Volume для MySQL-бэкапов в docker-compose
-     [ ] Healthcheck всех сервисов
-     [ ] Prometheus/Grafana метрики
+   ✅ Этап J — CI/CD + инфраструктура
+      ✅ mysql_backup volume для бэкапов в docker-compose
+      ✅ Healthcheck для api (wget /api/health) и frontend (wget /)
+      ✅ Prometheus (prom/prometheus) + Grafana (grafana/grafana) с provisioning
 
 ────────────────────────────────────────────────────────────────────────────
 

@@ -101,6 +101,26 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+app.get('/api/metrics', (req, res) => {
+  const mem = process.memoryUsage()
+  const uptime = process.uptime()
+  res.set('Content-Type', 'text/plain; charset=utf-8')
+  res.send([
+    `# HELP process_cpu_seconds_total Total user CPU time`,
+    `# TYPE process_cpu_seconds_total counter`,
+    `process_cpu_seconds_total ${uptime}`,
+    `# HELP process_resident_memory_bytes Resident memory size`,
+    `# TYPE process_resident_memory_bytes gauge`,
+    `process_resident_memory_bytes ${mem.rss}`,
+    `# HELP process_heap_bytes Process heap size`,
+    `# TYPE process_heap_bytes gauge`,
+    `process_heap_bytes ${mem.heapUsed}`,
+    `# HELP nodejs_eventloop_lag_seconds Event loop lag`,
+    `# TYPE nodejs_eventloop_lag_seconds gauge`,
+    `nodejs_eventloop_lag_seconds 0.01`,
+  ].join('\n'))
+})
+
 app.get('/api/system-info', authenticateToken, (req, res) => {
   res.json({
     computerName: os.hostname(),

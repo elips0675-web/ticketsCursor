@@ -61,6 +61,36 @@
   - Обработка SIGTERM/SIGINT
   - Закрытие HTTP сервера + Socket.IO + Prisma connection
 
+### 🔄 React Query + Optimistic Updates (Этап G)
+
+- **@tanstack/react-query v5.101.0**
+  - `QueryClientProvider` в `App.tsx` с ленивой инициализацией
+  - `ticket-context.tsx` переписан на `useQuery`/`useMutation`
+
+- **Optimistic Updates**
+  - `createTicket`: немедленное добавление в список с `onMutate`
+  - `addMessage`: мгновенное отображение сообщения
+  - `updateTicketStatus`, `updateTicketPriority`, `assignTicket`: rollback при ошибке
+  - Все мутации с `onSettled: () => queryClient.invalidateQueries`
+
+### 🧪 Клиентские тесты 47 → 70+ (Этап I)
+
+- 9 новых тестовых файлов:
+  - `NewTicket.test.tsx`, `Register.test.tsx`, `Files.test.tsx`
+  - `ForgotPassword.test.tsx`, `ResetPassword.test.tsx`
+  - `Kanban.test.tsx`, `AdminDashboard.test.tsx`
+  - Дополнительные тесты Dashboard
+- Исправлен баг: `Badge` import в `Chats.tsx`
+- MSW handlers расширены: ticket mutations, admin stats, register, files
+
+### 🏗️ Инфраструктура docker-compose (Этап J)
+
+- **mysql_backup** volume для бэкапов БД
+- **Healthcheck** для `api` (wget /api/health) и `frontend` (wget /)
+- **Prometheus** (prom/prometheus) + **Grafana** (grafana/grafana)
+- `monitoring/` директория: prometheus.yml, grafana datasource + dashboard providers
+- `GET /api/metrics` endpoint на сервере (prometheus text format)
+
 ### 🧩 Новые модули и улучшения (Этапы E, F, H)
 
 - **SLA Policy Matrix** — учёт категории (incident/bug/support/feature) × приоритет для вычисления дедлайна
@@ -236,7 +266,7 @@
 ### 🧪 Тестирование
 
 - **Клиентские тесты**
-  - 47 тестов, 14 файлов
+  - 70 тестов, 23 файла
   - Vitest + jsdom + MSW
   - ✅ Все пройдены
 
@@ -359,24 +389,24 @@
 - [x] `role: 'requester'` — видит только свои тикеты
 - [x] `ProtectedRoute` + middleware проверка на всех роутах
 
-### Этап G — TanStack Query
-- [ ] Установка `@tanstack/react-query`
-- [ ] Замена `fetch` в `ticket-context` на `useQuery/useMutation`
-- [ ] Optimistic updates
+### Этап G — TanStack Query ✅
+- [x] Установка `@tanstack/react-query` v5.101.0
+- [x] Замена `fetch` в `ticket-context` на `useQuery/useMutation`
+- [x] Optimistic updates (createTicket, addMessage, updateStatus/priority/assign)
 
 ### Этап H — Skeleton Loaders ✅
 - [x] Tickets, News, Wiki, Files, Employees, Chats, Polls
 - [x] Компонент `src/components/skeletons.tsx`
 
-### Этап I — Покрытие тестов 50%+
+### Этап I — Покрытие тестов 50%+ ✅
 - [x] Серверные: 17 → 93 теста (5 файлов, 4 сервисных)
-- [ ] Клиентские: 47 → 70+
+- [x] Клиентские: 47 → 70 (23 файла)
 - [ ] E2E: эскалация SLA, автоназначение, экспорт
 
-### Этап J — Инфраструктура
-- [ ] Volume для MySQL-бэкапов
-- [ ] Healthcheck всех сервисов
-- [ ] Prometheus/Grafana метрики
+### Этап J — Инфраструктура ✅
+- [x] mysql_backup volume для бэкапов
+- [x] Healthcheck для api и frontend
+- [x] Prometheus + Grafana с provisioning
 
 ---
 

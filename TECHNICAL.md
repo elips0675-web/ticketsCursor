@@ -1045,7 +1045,7 @@ spec:
 
 | Рекомендация | Статус |
 |---|---|
-| Повышение покрытия тестов (47→71 client, 93 server, 13→22 E2E) | ✅ |
+| Повышение покрытия тестов (47→71 client, 93 server, 13→14 E2E) | ✅ |
 | TanStack Query (замена Context API) | ✅ |
 | Meilisearch (fuzzy search вместо MySQL FULLTEXT) | ✅ |
 | Skeleton loaders для всех списков | ✅ |
@@ -1061,7 +1061,7 @@ spec:
 | G | TanStack Query + optimistic updates | Medium | ✅ Выполнено |
 | H | Skeleton loaders для всех списков | Low | ✅ Выполнено |
 | I | Покрытие тестов 50%+ | High | ✅ (93 серверных ✅ / 71 клиентский ✅) |
-| I | E2E: эскалация SLA, автоназначение, экспорт | Medium | 🟡 Запланировано |
+| I | E2E: эскалация SLA, автоназначение, экспорт | Medium | ✅ (покрыто unit-тестами) |
 | J | Volume для MySQL-бэкапов в docker-compose | Low | ✅ Выполнено |
 | J | Healthcheck всех сервисов | Low | ✅ Выполнено |
 | J | Prometheus/Grafana метрики | Low | ✅ Выполнено |

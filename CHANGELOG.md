@@ -468,6 +468,15 @@
 - [x] `Hash` — добавлен в импорт из lucide-react
 - [x] `Avatar`, `AvatarFallback` — добавлен импорт из shadcn/ui
 
+### 🧪 E2E: globalSetup + storageState
+- [x] `e2e/global-setup.ts` — единая авторизация для всех тестов
+- [x] `playwright.config.ts` — storageState + globalSetup
+- [x] Все тесты переписаны: 14/14 проходят
+- [x] `check-console.mjs` — скрипт быстрой проверки 6 страниц
+
+### 🔧 search-sync.js
+- [x] `MeiliSearch` → `Meilisearch` (неверное имя экспорта)
+
 ### 🔍 Meilisearch Fuzzy Search ✅
 - [x] `meilisearch` сервис в docker-compose (v1.8, порт 7700)
 - [x] `search-sync.js` — fullSync при старте + syncEntity для CRUD

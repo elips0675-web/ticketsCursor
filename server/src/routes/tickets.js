@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page) || 1)
   const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 50))
   try {
-    const payload = await listTickets({ page, limit })
+    const payload = await listTickets({ page, limit, userId: req.user.userId, role: req.user.role })
     res.json({ success: true, ...payload })
   } catch (err) {
     logger.error('Tickets list error:', err)

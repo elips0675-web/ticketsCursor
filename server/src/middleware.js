@@ -20,7 +20,7 @@ export function authenticateToken(req, res, next) {
   }
 }
 
-const ROLE_HIERARCHY = ['agent', 'senior_agent', 'admin', 'super_admin']
+const ROLE_HIERARCHY = ['requester', 'agent', 'senior_agent', 'admin', 'super_admin']
 
 export function requireRole(...roles) {
   return (req, res, next) => {

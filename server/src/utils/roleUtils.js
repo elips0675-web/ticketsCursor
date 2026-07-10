@@ -1,4 +1,4 @@
-export const ROLE_HIERARCHY = ['agent', 'senior_agent', 'admin', 'super_admin']
+export const ROLE_HIERARCHY = ['requester', 'agent', 'senior_agent', 'admin', 'super_admin']
 
 export function hasRole(userRole, minRole) {
   const userLevel = ROLE_HIERARCHY.indexOf(userRole)

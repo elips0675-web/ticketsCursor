@@ -1,10 +1,11 @@
 import { Router } from 'express'
-import { authenticateToken } from '../middleware.js'
+import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
 import { getChats, getChatById, createMessage, getChatParticipants, markRead, findOrCreatePersonalChat } from '../services/chats.service.js'
 
 const router = Router()
 router.use(authenticateToken)
+router.use(requireRole('agent'))
 
 router.get('/', async (req, res) => {
   try {

@@ -84,8 +84,12 @@ function MobileHeader({ onMenuClick }: { onMenuClick: () => void }) {
 
 function MobileBottomNav({ onMenuClick }: { onMenuClick: () => void }) {
   const nav = useNavigate()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const location = useLocation()
+  const filteredNav = bottomNavItems.filter(item => {
+    if (user?.role === 'requester') return item.to === '/' || item.to === '/tickets'
+    return true
+  })
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/"
@@ -94,7 +98,7 @@ function MobileBottomNav({ onMenuClick }: { onMenuClick: () => void }) {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t flex items-center justify-around py-1">
-      {bottomNavItems.map((item) => (
+      {filteredNav.map((item) => (
         <button
           key={item.to}
           onClick={() => nav(item.to)}

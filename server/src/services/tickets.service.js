@@ -62,10 +62,15 @@ export async function getLeastLoadedAssignee() {
   return rows?.[0]?.id || null
 }
 
-export async function listTickets({ page, limit }) {
+export async function listTickets({ page, limit, userId, role }) {
+  const where = {}
+  if (role === 'requester') {
+    where.created_by = userId
+  }
   const offset = (page - 1) * limit
-  const total = await prisma.tickets.count()
+  const total = await prisma.tickets.count({ where })
   const rows = await prisma.tickets.findMany({
+    where,
     skip: offset,
     take: limit,
     orderBy: { updated_at: 'desc' },

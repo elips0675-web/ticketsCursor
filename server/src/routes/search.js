@@ -1,10 +1,11 @@
 import { Router } from 'express'
 import prisma from '../prisma.js'
-import { authenticateToken } from '../middleware.js'
+import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken)
+router.use(requireRole('agent'))
 
 function toPlain(v) {
   return JSON.parse(JSON.stringify(v, (_k, val) => typeof val === 'bigint' ? Number(val) : val))

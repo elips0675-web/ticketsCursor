@@ -32,6 +32,7 @@ const upload = multer({
 
 const router = Router()
 router.use(authenticateToken)
+router.use(requireRole('agent'))
 
 router.get('/', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page) || 1)

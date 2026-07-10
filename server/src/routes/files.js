@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
 import multer from 'multer'
-import { authenticateToken } from '../middleware.js'
+import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
 import { validateUpload } from '../middleware/validateUpload.js'
 import { saveFile, S3_ENABLED } from '../storage.js'
@@ -32,6 +32,7 @@ const upload = multer({
 
 const router = Router()
 router.use(authenticateToken)
+router.use(requireRole('agent'))
 
 router.get('/folders', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page) || 1)

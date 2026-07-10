@@ -36,7 +36,7 @@ interface User {
   id: number
   name: string
   email: string
-  role: "super_admin" | "admin" | "senior_agent" | "agent"
+  role: "super_admin" | "admin" | "senior_agent" | "agent" | "requester"
 }
 
 interface AuthContextType {

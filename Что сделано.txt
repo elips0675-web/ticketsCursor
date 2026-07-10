@@ -343,12 +343,23 @@
      [ ] Перевести загрузку файлов на S3/MinIO для всех модулей
      [ ] Убрать fallback на DEMO-данные при ошибках API в production
      [ ] Добавить роль requester/user с ограничением «видит только свои тикеты»
+     [ ] TanStack Query (React Query) для server state + optimistic updates
+     [ ] Redis Adapter для Socket.IO (документация, при REDIS_URL — адаптер)
+     [ ] Graceful shutdown (SIGTERM) для Express + Socket.IO
+     [ ] Retry-логика для email-уведомлений (bullmq или очередь)
+     [ ] Многостадийный Dockerfile (builder → production)
+     [ ] Volume для MySQL-бэкапов + healthcheck всех сервисов
+     [ ] Prometheus/Grafana метрики (кол-во тикетов, время ответа, ошибки)
 
    🟢 Низкий приоритет (улучшения продукта):
      [ ] Отчётность по SLA/MTTR/нагрузке по агентам
      [ ] Шаблоны тикетов и макросы ответов
      [ ] Расширенные workflow-статусы (waiting_customer / on_hold)
      [ ] E2E-сценарии: эскалация SLA, автоназначение, экспорт
+     [ ] Skeleton loaders для списковых экранов
+     [ ] React Error Boundaries на уровне модулей
+     [ ] Fuzzy search / Elasticsearch / Meilisearch при >100K тикетов
+     [ ] MySQL read replicas для тяжёлых отчётов
 
 ────────────────────────────────────────────────────────────────────────────
 
@@ -457,4 +468,44 @@ PRODUCTION PROMPT ДОРАБОТАТЬ
 
 Не реализовано (требует внешних сервисов или дальнейшей доработки):
 
-  — (пусто — все пункты выполнены)
+   — (пусто — все пункты выполнены)
+
+────────────────────────────────────────────────────────────────────────────
+
+АУДИТ PRODUCTION PROMPT (2026-07)
+
+   Оценка промпта как roadmap:
+     Полнота покрытия:       8/10
+     Чёткость требований:    9/10
+     Практическая применимость: 8/10
+     Архитектурная зрелость: 7/10
+     Масштабируемость:       6/10
+
+   Что учтено в проекте:
+
+     ✅ Backend: Prisma, Zod, JWT+refresh, RBAC, CORS, Winston, миграции
+     ✅ Real-time: Socket.IO, комнаты, эмиты ticket/chat/message
+     ✅ Файлы: multer + fileFilter + ClamAV, storage.js адаптер (S3/локально)
+     ✅ Тесты: 47 клиентских + 17 серверных + E2E (Playwright)
+     ✅ CI/CD: GitHub Actions, husky + lint-staged
+     ✅ Мониторинг: Sentry (front+back), Winston, rate-limit
+     ✅ Кэш: Redis (TTL 120s tickets, 300s employees), in-memory fallback
+     ✅ Пагинация: tickets, news, wiki, files, polls
+     ✅ Поиск: FULLTEXT INDEX + MATCH AGAINST + fallback LIKE
+     ✅ Экспорт: CSV (UTF-8 BOM) + PDF (jsPDF)
+     ✅ Аудит: audit_log + auditLogMiddleware на ключевых роутах
+     ✅ Docker: compose (mysql 8.4 + api + frontend), Dockerfile multi-stage
+     ✅ Socket.IO Redis adapter: @socket.io/redis-adapter + ioredis
+     ✅ Graceful shutdown: SIGTERM обработка (server/src/index.js)
+     ✅ Audit: таблица audit_log, middleware на ключевых роутах
+
+   Что рекомендуется добавить при следующей итерации:
+
+     [ ] TanStack Query (React Query) для server state + optimistic updates
+     [ ] Retry-логика для email (bullmq или очередь с exponential backoff)
+     [ ] Skeleton loaders для всех списковых экранов
+     [ ] React Error Boundaries на уровне модулей
+     [ ] Prometheus/Grafana метрики
+     [ ] Fuzzy search / Elasticsearch / Meilisearch
+     [ ] MySQL read replicas + автоматические бэкапы
+     [ ] Multi-stage Dockerfile (уже есть, но можно улучшить)

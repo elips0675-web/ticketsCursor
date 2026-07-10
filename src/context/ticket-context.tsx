@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import type { Ticket, TicketStats, Employee, TicketStatus, TicketPriority } from "@/types"
 import { useAuth } from "@/context/AuthContext"
 import { useSocket } from "@/context/SocketContext"
-import { DEMO_TICKETS, DEMO_EMPLOYEES } from "@/lib/demo-data"
 
 const API = "http://localhost:4000/api"
 
@@ -67,7 +66,7 @@ export function TicketProvider({ children }: { children: ReactNode }) {
         const { data } = await tRes.json()
         setTickets(data.map(mapTicket))
       } else {
-        setTickets(DEMO_TICKETS)
+        setTickets([])
       }
       if (eRes.ok) {
         const data = await eRes.json()
@@ -83,11 +82,11 @@ export function TicketProvider({ children }: { children: ReactNode }) {
           resolvedToday: e.resolvedToday || 0,
         })))
       } else {
-        setEmployees(DEMO_EMPLOYEES)
+        setEmployees([])
       }
     } catch {
-      setTickets(DEMO_TICKETS)
-      setEmployees(DEMO_EMPLOYEES)
+      setTickets([])
+      setEmployees([])
     }
     setLoading(false)
   }, [token])

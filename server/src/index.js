@@ -72,3 +72,21 @@ setInterval(checkOverdueSlaTickets, 15 * 60 * 1000)
 server.listen(PORT, () => {
   console.log(`Service Desk API running on port ${PORT}`)
 })
+
+// Graceful shutdown
+async function shutdown(signal) {
+  console.log(`\nReceived ${signal}, shutting down gracefully...`)
+  server.close(() => {
+    console.log('HTTP server closed')
+  })
+  const { getIO } = await import('./socket.js')
+  const io = getIO()
+  if (io) {
+    io.close(() => console.log('Socket.IO closed'))
+  }
+  await prisma.$disconnect().catch(() => {})
+  logger.info(`Server shut down (${signal})`)
+  process.exit(0)
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'))
+process.on('SIGINT', () => shutdown('SIGINT'))

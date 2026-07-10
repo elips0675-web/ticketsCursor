@@ -329,37 +329,49 @@
      Создана утилита server/src/utils/roleUtils.js.
      Обновлён фронтенд: TicketDetail.tsx, ticket-context.tsx, Tickets.tsx, Kanban.tsx, types/index.ts.
 
-   ЧТО НУЖНО ДОДЕЛАТЬ (приоритетный backlog)
+   ПЛАН ДОРАБОТКИ ДО PRODUCTION (приоритет)
 
-   🔴 Высокий приоритет (для enterprise-ready):
-     [ ] SLA policy-матрица по категориям и приоритетам
-     [ ] Гибкие правила автоназначения (round-robin)
-     [ ] Унификация ответов во всех оставшихся роутах (chats, files, polls, wiki, news, employees)
-     [ ] Полный сервисный слой для всех модулей
-     [ ] Повысить покрытие тестов до 70%+ для критичных модулей
+   🔴 ✅ Этап A — Убрать DEMO-fallback при ошибках API
+     ✅ ticket-context — пустые массивы вместо DEMO_TICKETS/DEMO_EMPLOYEES
+     ✅ demo-data.ts — удалён (модуль больше не нужен)
 
-   🟡 Средний приоритет (масштабирование и поддержка):
-     [ ] Завершить переход на единый подход миграций (Prisma Migrate или Knex)
-     [ ] Перевести загрузку файлов на S3/MinIO для всех модулей
-     [ ] Убрать fallback на DEMO-данные при ошибках API в production
-     [ ] Добавить роль requester/user с ограничением «видит только свои тикеты»
-     [ ] TanStack Query (React Query) для server state + optimistic updates
-     [ ] Redis Adapter для Socket.IO (документация, при REDIS_URL — адаптер)
-     [ ] Graceful shutdown (SIGTERM) для Express + Socket.IO
-     [ ] Retry-логика для email-уведомлений (bullmq или очередь)
-     [ ] Многостадийный Dockerfile (builder → production)
-     [ ] Volume для MySQL-бэкапов + healthcheck всех сервисов
-     [ ] Prometheus/Grafana метрики (кол-во тикетов, время ответа, ошибки)
+   🔴 ✅ Этап B — Graceful shutdown (SIGTERM)
+     ✅ server/src/index.js — shutdown(signal) с закрытием HTTP + Socket.IO + Prisma
+     ✅ Обработка SIGTERM/SIGINT
 
-   🟢 Низкий приоритет (улучшения продукта):
-     [ ] Отчётность по SLA/MTTR/нагрузке по агентам
-     [ ] Шаблоны тикетов и макросы ответов
-     [ ] Расширенные workflow-статусы (waiting_customer / on_hold)
-     [ ] E2E-сценарии: эскалация SLA, автоназначение, экспорт
-     [ ] Skeleton loaders для списковых экранов
-     [ ] React Error Boundaries на уровне модулей
-     [ ] Fuzzy search / Elasticsearch / Meilisearch при >100K тикетов
-     [ ] MySQL read replicas для тяжёлых отчётов
+   🔴 Этап C — Унификация API-ответов во всех роутах
+     [ ] chats, files, polls, wiki, news, employees, calendar, search, auth
+     [ ] Единый формат: { success, data } / { success, message }
+
+   🔴 Этап D — Сервисный слой для всех модулей
+     [ ] chats.service.js, files.service.js, polls.service.js, wiki.service.js
+     [ ] news.service.js, employees.service.js, calendar.service.js
+
+   🟡 Этап E — SLA policy-матрица
+     [ ] Деадлайны по категориям (bug/feature/support/incident) + приоритетам
+     [ ] Отчётность по SLA в админ-дашборде
+
+   🟡 Этап F — Роль requester
+     [ ] role: 'requester' — видит только свои тикеты, не видит админку
+     [ ] ProtectedRoute + middleware проверка
+
+   🟡 Этап G — React Query + optimistic updates
+     [ ] Установка @tanstack/react-query
+     [ ] Замена fetch в ticket-context на useQuery/useMutation
+     [ ] Optimistic updates для createTicket, addMessage, updateStatus
+
+   🟢 Этап H — Skeleton loaders
+     [ ] Tickets, News, Wiki, Files, Employees, Chats — skeleton-компоненты
+
+   🔴 Этап I — Покрытие тестов 50%+
+     [ ] Серверные тесты: 17 → 50 (auth, tickets, chats, files, admin)
+     [ ] Клиентские тесты: 47 → 70+
+     [ ] E2E: эскалация SLA, автоназначение, экспорт
+
+   🟡 Этап J — CI/CD + инфраструктура
+     [ ] Volume для MySQL-бэкапов в docker-compose
+     [ ] Healthcheck всех сервисов
+     [ ] Prometheus/Grafana метрики
 
 ────────────────────────────────────────────────────────────────────────────
 

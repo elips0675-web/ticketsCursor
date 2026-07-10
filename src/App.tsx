@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/react"
-import { lazy, Suspense, useState } from "react"
+import { lazy, Suspense, useState, ReactNode } from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Toaster } from "sonner"
@@ -9,6 +9,8 @@ import { TicketProvider } from "@/context/ticket-context"
 import { AuthProvider } from "@/context/AuthContext"
 import { SocketProvider } from "@/context/SocketContext"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import ErrorBoundary from "@/components/ErrorBoundary"
+import ProtectedRoute from "@/components/ProtectedRoute"
 import "./i18n/index"
 import Dashboard from "@/pages/Dashboard"
 import Tickets from "@/pages/Tickets"
@@ -38,7 +40,10 @@ const AdminAudit = lazy(() => import("@/pages/AdminAudit"))
 const WikiPage = lazy(() => import("@/pages/Wiki"))
 const SearchPage = lazy(() => import("@/pages/Search"))
 const FilesPage = lazy(() => import("@/pages/Files"))
-import ProtectedRoute from "@/components/ProtectedRoute"
+
+function Page({ children }: { children: ReactNode }) {
+  return <ErrorBoundary>{children}</ErrorBoundary>
+}
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
@@ -75,38 +80,38 @@ export default function App() {
           <Suspense fallback={<div className="flex items-center justify-center h-screen text-muted-foreground text-sm">Загрузка…</div>}>
           <Toaster position="top-right" richColors closeButton />
           <SentryRoutes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Page><Login /></Page>} />
+            <Route path="/forgot-password" element={<Page><ForgotPassword /></Page>} />
+            <Route path="/reset-password" element={<Page><ResetPassword /></Page>} />
+            <Route path="/register" element={<Page><Register /></Page>} />
 
             <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
-              <Route index element={<Admin />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="push" element={<AdminPush />} />
-              <Route path="settings" element={<AdminSettings />} />
-              <Route path="audit" element={<AdminAudit />} />
+              <Route index element={<Page><Admin /></Page>} />
+              <Route path="users" element={<Page><AdminUsers /></Page>} />
+              <Route path="push" element={<Page><AdminPush /></Page>} />
+              <Route path="settings" element={<Page><AdminSettings /></Page>} />
+              <Route path="audit" element={<Page><AdminAudit /></Page>} />
             </Route>
 
             <Route element={<AppLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="tickets" element={<Tickets />} />
-              <Route path="tickets/new" element={<NewTicket />} />
-              <Route path="tickets/:id" element={<TicketDetail />} />
-              <Route path="employees" element={<Employees />} />
-              <Route path="calendar" element={<CalendarPage />} />
-              <Route path="polls" element={<PollsPage />} />
-              <Route path="chats" element={<ChatsPage />} />
-              <Route path="chats/:id" element={<ChatDetail />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="news" element={<NewsPage />} />
-              <Route path="notifications" element={<NotificationsPage />} />
-              <Route path="calculator" element={<CalculatorPage />} />
-              <Route path="kanban" element={<KanbanPage />} />
-              <Route path="wiki" element={<WikiPage />} />
-              <Route path="files" element={<FilesPage />} />
-              <Route path="search" element={<SearchPage />} />
-              <Route path="*" element={<NotFound />} />
+              <Route index element={<Page><Dashboard /></Page>} />
+              <Route path="tickets" element={<Page><Tickets /></Page>} />
+              <Route path="tickets/new" element={<Page><NewTicket /></Page>} />
+              <Route path="tickets/:id" element={<Page><TicketDetail /></Page>} />
+              <Route path="employees" element={<Page><Employees /></Page>} />
+              <Route path="calendar" element={<Page><CalendarPage /></Page>} />
+              <Route path="polls" element={<Page><PollsPage /></Page>} />
+              <Route path="chats" element={<Page><ChatsPage /></Page>} />
+              <Route path="chats/:id" element={<Page><ChatDetail /></Page>} />
+              <Route path="profile" element={<Page><ProfilePage /></Page>} />
+              <Route path="news" element={<Page><NewsPage /></Page>} />
+              <Route path="notifications" element={<Page><NotificationsPage /></Page>} />
+              <Route path="calculator" element={<Page><CalculatorPage /></Page>} />
+              <Route path="kanban" element={<Page><KanbanPage /></Page>} />
+              <Route path="wiki" element={<Page><WikiPage /></Page>} />
+              <Route path="files" element={<Page><FilesPage /></Page>} />
+              <Route path="search" element={<Page><SearchPage /></Page>} />
+              <Route path="*" element={<Page><NotFound /></Page>} />
             </Route>
           </SentryRoutes>
           </Suspense>

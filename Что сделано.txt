@@ -540,13 +540,14 @@ PRODUCTION PROMPT ДОРАБОТАТЬ
      ✅ Graceful shutdown: SIGTERM обработка (server/src/index.js)
      ✅ Audit: таблица audit_log, middleware на ключевых роутах
 
-   Что рекомендуется добавить при следующей итерации:
+   Рекомендации на следующую итерацию:
 
-     [ ] TanStack Query (React Query) для server state + optimistic updates
-     [ ] Retry-логика для email (bullmq или очередь с exponential backoff)
-     [ ] Skeleton loaders для всех списковых экранов
-     [ ] React Error Boundaries на уровне модулей
-     [ ] Prometheus/Grafana метрики
-     [ ] Fuzzy search / Elasticsearch / Meilisearch
-     [ ] MySQL read replicas + автоматические бэкапы
-     [ ] Multi-stage Dockerfile (уже есть, но можно улучшить)
+      ✅ TanStack Query (React Query) + optimistic updates — выполнено (Этап G)
+      ✅ Retry-логика для email — выполнена (exponential backoff в notify.js)
+      ✅ Skeleton loaders — выполнены (Этап H)
+      ✅ React Error Boundaries на уровне модулей — выполнены (App.tsx, все 23 страницы)
+      ✅ Prometheus/Grafana метрики — выполнены (Этап J)
+      ✅ Multi-stage Dockerfile — улучшен (Prisma generate, wget healthcheck)
+
+      [ ] Fuzzy search / Elasticsearch / Meilisearch
+      [ ] MySQL read replicas + автоматические бэкапы

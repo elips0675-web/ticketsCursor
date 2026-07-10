@@ -1,4 +1,4 @@
-exports.up = function (knex) {
+export function up(knex) {
   return knex.schema
     .alterTable('polls', (table) => {
       table.dateTime('ends_at').nullable()
@@ -6,7 +6,7 @@ exports.up = function (knex) {
     })
 }
 
-exports.down = function (knex) {
+export function down(knex) {
   return knex.schema
     .alterTable('polls', (table) => {
       table.dropColumn('show_results')

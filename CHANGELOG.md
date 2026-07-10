@@ -283,6 +283,24 @@
 - **Coverage (v8)**
   - Пороги: statements 20%, branches 15%, functions 15%, lines 25%
 
+### 🛡️ Error Boundaries
+
+- **Модульные ErrorBoundary** — каждая страница обёрнута в `<ErrorBoundary>`
+  - Крах одного модуля не ломает другие
+  - UI: кнопка «Перезагрузить», сообщение об ошибке, stack trace
+
+### 📧 Retry-логика email
+
+- **Экспоненциальный backoff** (×2, max 10s, до 3 попыток)
+- `retryWithBackoff()` + `safeSend()` — все email-уведомления защищены
+- Логирование каждой попытки через `logger.warn`
+
+### 🐳 Dockerfile улучшен
+
+- `prisma generate` в build stage
+- `wget` добавлен для healthcheck
+- Prisma schema скопирована в production образ
+
 ### 🔄 CI/CD
 
 - **GitHub Actions**
@@ -407,6 +425,15 @@
 - [x] mysql_backup volume для бэкапов
 - [x] Healthcheck для api и frontend
 - [x] Prometheus + Grafana с provisioning
+
+### 🛡️ Error Boundaries ✅
+- [x] `<ErrorBoundary>` на всех 23 страницах
+
+### 📧 Retry email ✅
+- [x] Exponential backoff в notify.js
+
+### 🐳 Dockerfile ✅
+- [x] Prisma generate, wget, multi-stage
 
 ---
 

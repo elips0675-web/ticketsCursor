@@ -9,7 +9,7 @@
 
   ✅ Аутентификация и RBAC
     • JWT-логин / регистрация / dev-login + refresh-токены (15мин access + 7дней refresh httpOnly cookie)
-    • Четыре роли: super_admin, admin, senior_agent, agent (иерархия в middleware)
+    • Пять ролей: super_admin, admin, senior_agent, agent, requester (иерархия в middleware)
     • requireRole() middleware на бэкенде (Zod-валидация)
     • ProtectedRoute + скрытие UI элементов по роли
     • Восстановление пароля (nodemailer)
@@ -178,7 +178,7 @@
 ТЕСТИРОВАНИЕ
 
   • Клиентские тесты: 47 (14 файлов, vitest + jsdom + MSW) — ✅ все пройдены
-  • Серверные тесты: 17 (vitest + supertest) — ✅ все пройдены
+  • Серверные тесты: 93 (5 файлов, vitest + supertest, 4 сервисных) — ✅ все пройдены
   • E2E (Playwright): 4 файла (login, tickets, chats, admin) — 13 тестов
   • Coverage: v8, пороги 20%/15%/15%/25% (statements/branches/functions/lines)
   • Сборка (vite build + PWA): ✅ успешно
@@ -253,7 +253,7 @@
     ✅ Dropzone с клавиатурной a11y (tabIndex, onKeyDown, aria-label, aria-live)
 
   Функциональные дыры:
-    ✅ RBAC: super_admin / admin / senior_agent / agent (requireRole + ProtectedRoute)
+    ✅ RBAC: super_admin / admin / senior_agent / agent / requester (requireRole + ProtectedRoute)
     ✅ WebSocket: Socket.io с комнатами, эмиты ticket/chat/message
     ✅ Уведомления: notify.js (in-app + email + Telegram) на все события
     ✅ Аудит: audit_log + auditLogMiddleware на ключевых роутах
@@ -277,7 +277,11 @@
 
 ────────────────────────────────────────────────────────────────────────────
 
-  ПРОВЕРКА КРИТИЧНЫХ ПУНКТОВ (по ревью)
+   ✅ Requester role: middleware фильтрация тикетов по created_by, requireRole('agent') на 8 модулях
+   ✅ Skeleton loaders: Tickets, News, Wiki, Files, Chats, Polls, Employees
+   ✅ SLA stats: GET /api/tickets/sla/stats, админ-карточка с compliance rate
+
+   ПРОВЕРКА КРИТИЧНЫХ ПУНКТОВ (по ревью)
 
   Из того же списка — проверка всех пунктов по коду:
 
@@ -290,7 +294,7 @@
     ✅ Multer: fileFilter по MIME-типам (запрет .exe/.js/.html)
 
   Функциональность:
-    ✅ RBAC: super_admin / admin / senior_agent / agent, requireRole(), ProtectedRoute
+    ✅ RBAC: super_admin / admin / senior_agent / agent / requester, requireRole(), ProtectedRoute
     ✅ WebSocket: Socket.io, комнаты, эмиты ticket/chat
     ✅ Уведомления: notify.js на создание/статус/назначение/сообщение
     ✅ Аудит: audit_log + middleware
@@ -298,7 +302,7 @@
     ✅ Миграции БД: knex
     ✅ Prisma: все 13 роутов + socket/audit/settings на Prisma
     ✅ CI/CD: GitHub Actions
-    ✅ Тесты: 47 клиентских (14 файлов, MSW) + 93 серверных (5 файлов) + E2E (4 файла)
+    ✅ Тесты: 47 клиентских (14 файлов, MSW) + 93 серверных (5 файлов: 4 сервисных + api.test.js) + E2E (4 файла)
     ✅ Покрытие: v8 с порогами
     ✅ LDAP/AD: ldapjs, auto-provisioning, админка
 
@@ -369,21 +373,22 @@
      ✅ calendar.service.js — listEvents, createEvent, updateEvent, deleteEvent
      ✅ Роуты переписаны: импорт сервисов, роуты тонкие (auth/validation/response)
 
-   🟡 Этап E — SLA policy-матрица
-     [ ] Деадлайны по категориям (bug/feature/support/incident) + приоритетам
-     [ ] Отчётность по SLA в админ-дашборде
+   ✅ Этап E — SLA policy-матрица
+     ✅ Деадлайны по категориям (bug/feature/support/incident) + приоритетам
+     ✅ Отчётность по SLA в админ-дашборде (GET /api/tickets/sla/stats)
 
-   🟡 Этап F — Роль requester
-     [ ] role: 'requester' — видит только свои тикеты, не видит админку
-     [ ] ProtectedRoute + middleware проверка
+   ✅ Этап F — Роль requester
+     ✅ role: 'requester' — видит только свои тикеты, не видит админку
+     ✅ ProtectedRoute + middleware проверка на всех роутах
 
    🟡 Этап G — React Query + optimistic updates
      [ ] Установка @tanstack/react-query
      [ ] Замена fetch в ticket-context на useQuery/useMutation
      [ ] Optimistic updates для createTicket, addMessage, updateStatus
 
-   🟢 Этап H — Skeleton loaders
-     [ ] Tickets, News, Wiki, Files, Employees, Chats — skeleton-компоненты
+   ✅ Этап H — Skeleton loaders
+     ✅ Tickets, News, Wiki, Files, Employees, Chats, Polls — skeleton-компоненты
+     ✅ src/components/skeletons.tsx (SkeletonCard, SkeletonCardGrid, SkeletonTableRow, SkeletonChatRow)
 
    🔴 🔄 Этап I — Покрытие тестов 50%+
      ✅ Серверные тесты: 17 → 93 (5 файлов: 4 сервисных + api.test.js)

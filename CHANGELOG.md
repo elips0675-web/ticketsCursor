@@ -1,0 +1,384 @@
+# Changelog — Service Desk
+
+> Все значимые изменения проекта документируются в этом файле.
+> Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
+
+---
+
+## [1.0.0] — 2026-07-10
+
+### 🎉 Релиз production-ready версии
+
+---
+
+### 🔐 Инфраструктура и безопасность
+
+- **Prisma ORM** — полная замена ручных SQL-запросов
+  - 17 моделей с типобезопасностью
+  - Все `knex.raw()` заменены на `prisma.$queryRaw` / `prisma.model.findMany`
+  - Миграции через Knex (FULLTEXT + refresh_tokens) + Prisma Migrate
+
+- **Zod валидация** — 15 схем на всех API роутах
+  - `auth`, `tickets`, `wiki`, `polls`, `news`, `admin`, `calendar`, `chats`, `employees`, `files`, `search`, `push`, `notifications`
+  - Централизованные `validate()` и `validateQuery()` middleware
+
+- **JWT + Refresh токены**
+  - Access: 15 минут (Bearer в заголовке)
+  - Refresh: 7 дней (httpOnly cookie)
+  - Endpoint `/api/auth/refresh` для обновления access
+
+- **RBAC — 5 ролей с иерархией**
+  - `super_admin` > `admin` > `senior_agent` > `agent` > `requester`
+  - `hasRole()` utility — иерархическая проверка
+  - `super_admin` проходит ВСЕ проверки
+  - `requireRole()` middleware на защищённых роутах
+  - `ProtectedRoute` + скрытие UI по роли на фронтенде
+  - `requester`: видит только свои тикеты, дашборд и профиль
+
+- **Rate Limiting**
+  - Auth: 10 запросов/60с
+  - API: 100 запросов/60с
+  - Admin: 30 запросов/60с
+
+- **Helmet + CORS**
+  - Security headers через helmet
+  - CORS whitelist origins
+
+- **Winston логирование**
+  - Уровни: error, warn, info, debug
+  - Транспорты: console + error.log + combined.log
+  - Ротация: 10MB, 5 файлов
+  - `requestId` middleware (UUID + X-Request-Id)
+
+- **Docker**
+  - Multi-stage Dockerfile (node:20-alpine)
+  - Non-root USER node
+  - docker-compose: mysql 8.4 + redis + api + frontend (nginx)
+  - Healthcheck для всех сервисов
+  - `seed.sql` инициализация
+
+- **Graceful shutdown**
+  - Обработка SIGTERM/SIGINT
+  - Закрытие HTTP сервера + Socket.IO + Prisma connection
+
+### 🧩 Новые модули и улучшения (Этапы E, F, H)
+
+- **SLA Policy Matrix** — учёт категории (incident/bug/support/feature) × приоритет для вычисления дедлайна
+  - `GET /api/tickets/sla/stats` — статистика соблюдения SLA для админ-дашборда
+  - Карточка SLA в админке (on time / overdue / no SLA / compliance rate)
+
+- **Роль Requester** — пятая роль в иерархии RBAC
+  - Доступ: только свои тикеты, дашборд, поиск, профиль
+  - Серверная фильтрация `listTickets` по `created_by`
+  - `requireRole('agent')` на chats/employees/calendar/polls/wiki/news/files
+  - Скрытие недоступных разделов в sidebar и мобильной навигации
+
+- **Skeleton Loaders** — каркасы загрузки для всех списковых экранов
+  - Tickets, News, Wiki, Files, Chats, Polls, Employees
+  - Компоненты: `SkeletonCard`, `SkeletonCardGrid`, `SkeletonTableRow`, `SkeletonChatRow`
+
+- **Тесты** — серверные расширены с 17 до 93 тестов
+  - 4 новых сервисных теста (chats, employees, news, calendar)
+  - `api.test.js`: auth, RBAC, валидация, push, search, уведомления
+
+### 💬 Real-time (WebSocket)
+
+- **Socket.IO интеграция**
+  - JWT-аутентификация на handshake
+  - Комнаты: `chat:{id}`, `ticket:{id}`, `employee:{id}`, `online`
+  - Эмиты: `message:new`, `message:removed`, `ticket:created`, `ticket:updated`, `ticket:message`
+
+- **Чаты**
+  - Общие и личные чаты
+  - Отправка/удаление сообщений в реальном времени
+  - Поиск по чатам и внутри чата
+  - Реакции (эмодзи)
+  - Непрочитанные сообщения (бейдж)
+  - Пагинация истории (50 сообщений)
+
+- **Rate limiting WebSocket**
+  - 5 сообщений/сек
+  - Exponential backoff (×2, max 60s)
+
+- **Redis adapter**
+  - `@socket.io/redis-adapter` при `REDIS_URL`
+  - Fallback на in-memory (масштабируемость на 1 ноду)
+
+### 📁 Файловое хранилище
+
+- **Multer + валидация**
+  - Лимиты: files 50MB, wiki 10MB, tickets 20MB
+  - `fileFilter` по MIME-типам (запрет .exe/.js/.html)
+  - Magic bytes проверка (file-type)
+
+- **Storage Adapter Pattern**
+  - S3/MinIO при `S3_ENDPOINT`
+  - Локальный диск fallback
+  - Presigned URL для загрузки/скачивания
+
+- **ClamAV**
+  - Опциональное сканирование (`CLAMAV_ENABLED=true`)
+  - Интеграция в `validateUpload`
+
+### 🎫 Тикеты
+
+- **CRUD + статусы**
+  - `open` → `in_progress` → `resolved` → `closed`
+  - Приоритеты: low / medium / high / critical
+
+- **SLA**
+  - `due_at` при создании
+  - `first_response_at` при первом `in_progress`
+  - `resolved_at` при `resolved`/`closed`
+  - Сброс `resolved_at` при `reopened`
+
+- **Автоназначение (AUTO_ASSIGN)**
+  - Выбор наименее загруженного `agent`/`senior_agent`
+  - Переписан на чистый Prisma (без raw SQL)
+
+- **SLA-мониторинг**
+  - `GET /api/tickets/sla/overdue` (admin/senior_agent)
+  - Фоновая проверка каждые 15 минут
+  - Эскалация: in-app / email / telegram
+  - Дедупликация 24 часа
+
+- **Чат внутри тикета**
+  - Внутренние заметки (`isInternal`)
+  - Пагинация сообщений (`GET /:id/messages` с `take/skip`)
+
+- **Вложения**
+  - Multer → uploads/tickets/
+  - WebSocket-эмиты изменений
+
+- **Экспорт**
+  - CSV (UTF-8 BOM) на всех страницах
+  - PDF (jsPDF + html2canvas) на тикетах
+
+### 🔍 Глобальный поиск
+
+- **FULLTEXT INDEX**
+  - `MATCH ... AGAINST` по 6 таблицам
+  - Fallback на `LIKE` при ошибке FULLTEXT
+
+- **UI**
+  - `Ctrl+K` горячая клавиша
+  - Боковое меню поиска
+  - Группировка результатов по разделам
+
+### 🔔 Уведомления
+
+- **Единый сервис `notify.js`**
+  - In-app + Email + Telegram + Web Push
+  - Автотриггеры: создание, статус, приоритет, назначение, сообщение
+
+- **Email (nodemailer)**
+  - Настраиваемый транспорт через админку
+
+- **Telegram (node-telegram-bot-api)**
+  - Бот, настраиваемый токен/канал через админку
+
+- **Web Push**
+  - VAPID ключи
+  - Подписка/отписка
+  - PWA + service worker
+
+- **Автоочистка**
+  - Удаление уведомлений старше 90 дней (каждые 6 часов)
+
+### 👥 Сотрудники
+
+- **Список**
+  - Онлайн-статус (WebSocket)
+  - Поиск, фильтр по роли/отделу
+  - Карточки / таблица (Radix Tabs)
+  - CSV экспорт (UTF-8 BOM)
+
+### 📚 Wiki / Новости / Календарь / Опросы
+
+- **Wiki**
+  - Статьи, категории, поиск
+  - Загрузка изображений (multer → uploads/wiki/)
+  - CSV экспорт
+
+- **Новости**
+  - Лента с фильтром «Важные»
+  - Создание (senior_agent+)
+  - Серверная пагинация
+  - CSV экспорт (лимит 10 000)
+
+- **Календарь**
+  - Сетка с навигацией по месяцам
+  - Создание/удаление событий
+  - Ближайшие события (виджет)
+  - CSV экспорт
+
+- **Опросы**
+  - Список, создание, голосование
+  - Прогресс-бары результатов
+  - Исправлен N+1 (IN() вместо цикла)
+
+### 🎛️ Админ-панель
+
+- Дашборд статистики
+- Управление пользователями (роли, блокировка)
+- Push-уведомления (подписка/отправка)
+- Настройки интеграций (email, telegram, LDAP)
+- Аудит действий
+
+### 🔐 LDAP / Active Directory
+
+- **ldapjs**
+  - Bind + search
+  - Настройка через админку
+  - `POST /api/auth/ldap-login`
+  - Auto-provisioning сотрудника при первом входе
+
+### 🧪 Тестирование
+
+- **Клиентские тесты**
+  - 47 тестов, 14 файлов
+  - Vitest + jsdom + MSW
+  - ✅ Все пройдены
+
+- **Серверные тесты**
+  - 93 теста, 5 файлов
+  - Vitest + Supertest
+  - 4 сервисных теста: chats, employees, news, calendar
+  - ✅ Все пройдены
+
+- **E2E (Playwright)**
+  - 4 файла: login, tickets, chats, admin
+  - 13 тестов
+
+- **Coverage (v8)**
+  - Пороги: statements 20%, branches 15%, functions 15%, lines 25%
+
+### 🔄 CI/CD
+
+- **GitHub Actions**
+  - Линтинг, typecheck, сборка, серверные тесты
+  - Поднятие MySQL 8.4 + seed.sql
+
+- **Husky + lint-staged**
+  - Pre-commit хуки
+
+### 📱 PWA
+
+- `injectManifest`
+- Кастомный service worker
+- Push-уведомления (web-push)
+- Install prompt (`beforeinstallprompt`)
+
+### 🖥️ Десктоп (Tauri)
+
+- Конфигурация
+- Rust-заглушка
+
+### 🌐 i18n
+
+- Русский / Английский
+- `LanguageDetector` + переключатель
+- Полные переводы на всех страницах
+
+### ♿ Доступность (a11y)
+
+- Нижняя мобильная навигация
+- Тёмная тема
+- `htmlFor/id` на всех формах
+- Error messages с `role="alert"`
+- `aria-label` на icon-only кнопках
+- Keyboard + `role="button"` + `tabIndex` на кликабельных карточках
+- Radix Tabs (Employees)
+- Dropzone с клавиатурной a11y
+
+---
+
+## [0.9.0] — 2026-06-15
+
+### Code Review Fixes (Этап 24)
+
+- ✅ Формат API-ответов — убраны spread-операторы
+- ✅ Уведомления — все `notify*` с `await` + `try/catch`
+- ✅ Сервисный слой — `updatePriority`/`updateAssign` вынесены
+- ✅ Права чтения — `GET /:id` проверяет `canView`
+- ✅ `hasRole()` утилита — иерархическая проверка
+- ✅ `getLeastLoadedAssignee` — переписан на чистый Prisma
+- ✅ Пагинация сообщений — `listTickets` без сообщений, `getTicketById` с `take/skip`
+- ✅ `getResolvedAt` — сброс в `null` при `reopened`
+- ✅ `createTicket` — fallback настроек
+- ✅ `crypto.randomUUID()` — вместо `Math.random()`
+- ✅ Логирование — `logger.error` во всех `catch`
+- ✅ Проверка тикета — `POST /:id/messages` проверяет существование
+
+---
+
+## [0.8.0] — 2026-05-20
+
+### Унификация и сервисный слой (Этапы C-D)
+
+- ✅ Унификация API-ответов во всех роутах
+  - Единый формат: `{ success, data }` / `{ success: false, message }`
+  - Обновлён фронтенд: извлечение `.data` из ответов
+
+- ✅ Сервисный слой для всех модулей
+  - `chats.service.js`, `files.service.js`, `polls.service.js`
+  - `wiki.service.js`, `news.service.js`, `employees.service.js`, `calendar.service.js`
+  - Роуты переписаны: импорт сервисов, тонкие контроллеры
+
+---
+
+## [0.7.0] — 2026-04-10
+
+### Инфраструктура (Этапы A-B)
+
+- ✅ Убран DEMO-fallback при ошибках API
+- ✅ Graceful shutdown (SIGTERM/SIGINT)
+- ✅ Docker + docker-compose
+- ✅ Kubernetes manifests
+- ✅ Vercel конфигурация (SPA routing)
+
+---
+
+## [0.1.0] — 2026-01-15
+
+### Начало проекта
+
+- Базовый стек: React 18 + Express + MySQL
+- Модули: Дашборд, Тикеты, Сотрудники, Календарь, Опросы, Файлы, Чаты, Профиль, Авторизация
+- Проблемы: нет ORM, нет WebSocket, нет RBAC, нет Docker, dev-логин без пароля
+
+---
+
+## 📋 План развития
+
+### Этап E — SLA Policy Matrix ✅
+- [x] Деадлайны по категориям (bug/feature/support/incident) + приоритетам
+- [x] Отчётность по SLA в админ-дашборде
+
+### Этап F — Роль Requester ✅
+- [x] `role: 'requester'` — видит только свои тикеты
+- [x] `ProtectedRoute` + middleware проверка на всех роутах
+
+### Этап G — TanStack Query
+- [ ] Установка `@tanstack/react-query`
+- [ ] Замена `fetch` в `ticket-context` на `useQuery/useMutation`
+- [ ] Optimistic updates
+
+### Этап H — Skeleton Loaders ✅
+- [x] Tickets, News, Wiki, Files, Employees, Chats, Polls
+- [x] Компонент `src/components/skeletons.tsx`
+
+### Этап I — Покрытие тестов 50%+
+- [x] Серверные: 17 → 93 теста (5 файлов, 4 сервисных)
+- [ ] Клиентские: 47 → 70+
+- [ ] E2E: эскалация SLA, автоназначение, экспорт
+
+### Этап J — Инфраструктура
+- [ ] Volume для MySQL-бэкапов
+- [ ] Healthcheck всех сервисов
+- [ ] Prometheus/Grafana метрики
+
+---
+
+*Автор: [elips0675-web](https://github.com/elips0675-web)*
+*Репозиторий: [ticketsCursor](https://github.com/elips0675-web/ticketsCursor)*

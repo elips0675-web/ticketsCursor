@@ -13,7 +13,7 @@ function toPlain(v) {
 router.get('/', async (req, res) => {
   const q = req.query.q?.trim()
   if (!q || q.length < 2) {
-    return res.json({ tickets: [], employees: [], wiki: [], news: [], chats: [], files: [] })
+    return res.json({ success: true, data: { tickets: [], employees: [], wiki: [], news: [], chats: [], files: [] } })
   }
   try {
     const tickets = await prisma.$queryRaw`

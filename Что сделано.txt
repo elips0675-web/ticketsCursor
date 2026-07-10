@@ -358,9 +358,15 @@
      ✅ ticket-context.tsx (employees), Profile.tsx (employees), Admin.tsx (stats)
      ✅ Chats.tsx, Login.tsx (login/ldap/dev-login), Register.tsx, use-push.ts
 
-   🔴 Этап D — Сервисный слой для всех модулей
-     [ ] chats.service.js, files.service.js, polls.service.js, wiki.service.js
-     [ ] news.service.js, employees.service.js, calendar.service.js
+   🔴 ✅ Этап D — Сервисный слой для всех модулей
+     ✅ chats.service.js — getChats, getChatById, createMessage, getChatParticipants, markRead, findOrCreatePersonalChat
+     ✅ files.service.js — getFolders, createFolder, createFile, deleteFile
+     ✅ polls.service.js — listPolls, createPoll, votePoll, deletePoll
+     ✅ wiki.service.js — listArticles, getArticleById, createArticle
+     ✅ news.service.js — listNews, createNews
+     ✅ employees.service.js — listEmployees, getStats
+     ✅ calendar.service.js — listEvents, createEvent, updateEvent, deleteEvent
+     ✅ Роуты переписаны: импорт сервисов, роуты тонкие (auth/validation/response)
 
    🟡 Этап E — SLA policy-матрица
      [ ] Деадлайны по категориям (bug/feature/support/incident) + приоритетам

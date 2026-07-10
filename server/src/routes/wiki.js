@@ -3,11 +3,11 @@ import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
-import prisma from '../prisma.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { createWikiValidation } from '../validate.js'
 import logger from '../logger.js'
 import { validateUpload } from '../middleware/validateUpload.js'
+import { listArticles, getArticleById, createArticle } from '../services/wiki.service.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const wikiUploads = path.join(__dirname, '..', '..', 'uploads', 'wiki')
@@ -36,15 +36,9 @@ router.use(authenticateToken)
 router.get('/', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page) || 1)
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50))
-  const offset = (page - 1) * limit
   try {
-    const total = await prisma.wiki_articles.count()
-    const rows = await prisma.wiki_articles.findMany({
-      orderBy: { updated_at: 'desc' },
-      skip: offset,
-      take: limit,
-    })
-    res.json({ success: true, data: { data: rows, total, page, totalPages: Math.ceil(total / limit) } })
+    const result = await listArticles(page, limit)
+    res.json({ success: true, data: result })
   } catch (err) {
     logger.error('Wiki list error:', err)
     res.status(500).json({ message: 'Failed to fetch articles' })
@@ -53,9 +47,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const article = await prisma.wiki_articles.findUnique({
-      where: { id: Number(req.params.id) },
-    })
+    const article = await getArticleById(Number(req.params.id))
     if (!article) return res.status(404).json({ message: 'Article not found' })
     res.json({ success: true, data: article })
   } catch (err) {
@@ -66,15 +58,10 @@ router.get('/:id', async (req, res) => {
 router.post('/', requireRole('admin', 'senior_agent'), createWikiValidation, async (req, res) => {
   const { title, content, category, tags } = req.body
   try {
-    const article = await prisma.wiki_articles.create({
-      data: {
-        title,
-        content,
-        category: category || 'Другое',
-        tags: tags || [],
-        author_id: req.user.userId,
-        author_name: req.user.name || 'User',
-      },
+    const article = await createArticle({
+      title, content, category, tags,
+      userId: req.user.userId,
+      userName: req.user.name,
     })
     res.status(201).json({ success: true, data: article })
   } catch (err) {

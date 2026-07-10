@@ -1,33 +1,15 @@
 import { Router } from 'express'
-import prisma from '../prisma.js'
 import { authenticateToken } from '../middleware.js'
 import logger from '../logger.js'
+import { getChats, getChatById, createMessage, getChatParticipants, markRead, findOrCreatePersonalChat } from '../services/chats.service.js'
 
 const router = Router()
 router.use(authenticateToken)
 
 router.get('/', async (req, res) => {
   try {
-    const rooms = await prisma.chat_rooms.findMany({
-      include: {
-        chat_messages: {
-          take: 1,
-          orderBy: { created_at: 'desc' },
-        },
-      },
-    })
-    const rows = rooms
-      .map(({ chat_messages, ...c }) => ({
-        ...c,
-        last_message: chat_messages[0]?.text || null,
-        last_time: chat_messages[0]?.created_at || null,
-      }))
-      .sort((a, b) => {
-        if (!a.last_time) return 1
-        if (!b.last_time) return -1
-        return new Date(b.last_time) - new Date(a.last_time)
-      })
-    res.json({ success: true, data: rows })
+    const data = await getChats()
+    res.json({ success: true, data })
   } catch (err) {
     logger.error('Chats list error:', err)
     res.status(500).json({ message: 'Failed to fetch chats' })
@@ -36,15 +18,8 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const chat = await prisma.chat_rooms.findUnique({
-      where: { id: Number(req.params.id) },
-    })
+    const chat = await getChatById(Number(req.params.id))
     if (!chat) return res.status(404).json({ message: 'Chat not found' })
-    const messages = await prisma.chat_messages.findMany({
-      where: { chat_id: Number(req.params.id) },
-      orderBy: { created_at: 'asc' },
-    })
-    chat.messages = messages
     res.json({ success: true, data: chat })
   } catch (err) {
     logger.error('Chat detail error:', err)
@@ -56,22 +31,13 @@ router.post('/:id/messages', async (req, res) => {
   const { text } = req.body
   if (!text?.trim()) return res.status(400).json({ message: 'Text required' })
   try {
-    const msg = await prisma.chat_messages.create({
-      data: {
-        chat_id: Number(req.params.id),
-        sender_id: req.user.userId,
-        sender_name: req.user.name || 'User',
-        text,
-      },
+    const msg = await createMessage({
+      chatId: Number(req.params.id),
+      userId: req.user.userId,
+      userName: req.user.name || 'User',
+      text,
     })
-    const participants = await prisma.chat_messages.findMany({
-      where: {
-        chat_id: Number(req.params.id),
-        sender_id: { not: req.user.userId },
-      },
-      distinct: ['sender_id'],
-      select: { sender_id: true },
-    })
+    const participants = await getChatParticipants(Number(req.params.id), req.user.userId)
     const { createNotification } = await import('./notifications.js')
     for (const p of participants) {
       await createNotification({
@@ -91,10 +57,7 @@ router.post('/:id/messages', async (req, res) => {
 
 router.put('/:id/read', async (req, res) => {
   try {
-    await prisma.chat_rooms.update({
-      where: { id: Number(req.params.id) },
-      data: { unread: 0 },
-    })
+    await markRead(Number(req.params.id))
     res.json({ success: true, data: { ok: true } })
   } catch (err) {
     res.status(500).json({ message: 'Failed to mark read' })
@@ -106,22 +69,10 @@ router.post('/personal/:userId', async (req, res) => {
   const myId = req.user.userId
   if (Number(userId) === myId) return res.status(400).json({ message: 'Cannot chat with yourself' })
   try {
-    const user = await prisma.employees.findUnique({
-      where: { id: Number(userId) },
-      select: { name: true },
-    })
-    if (!user) return res.status(404).json({ message: 'User not found' })
-    const existing = await prisma.chat_rooms.findFirst({
-      where: { type: 'personal', name: user.name },
-    })
-    if (existing) return res.json({ success: true, data: existing })
-    const chat = await prisma.chat_rooms.create({
-      data: {
-        name: user.name,
-        type: 'personal',
-      },
-    })
-    res.status(201).json({ success: true, data: chat })
+    const result = await findOrCreatePersonalChat(Number(userId), myId)
+    if (result.error) return res.status(404).json({ message: result.error })
+    const statusCode = result.created ? 201 : 200
+    res.status(statusCode).json({ success: true, data: result.chat })
   } catch (err) {
     logger.error('Create personal chat error:', err)
     res.status(500).json({ message: 'Failed to create chat' })

@@ -3,20 +3,18 @@ import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
 import multer from 'multer'
-import prisma from '../prisma.js'
 import { authenticateToken } from '../middleware.js'
 import logger from '../logger.js'
 import { validateUpload } from '../middleware/validateUpload.js'
 import { saveFile, S3_ENABLED } from '../storage.js'
+import { getFolders, createFolder, createFile, deleteFile } from '../services/files.service.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fileUploads = path.join(__dirname, '..', '..', 'uploads', 'files')
 fs.mkdirSync(fileUploads, { recursive: true })
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, fileUploads)
-  },
+  destination: (req, file, cb) => { cb(null, fileUploads) },
   filename: (req, file, cb) => {
     const unique = Date.now() + '-' + Math.round(Math.random() * 1E9)
     cb(null, unique + '-' + file.originalname)
@@ -38,36 +36,8 @@ router.use(authenticateToken)
 router.get('/folders', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page) || 1)
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50))
-  const offset = (page - 1) * limit
   try {
-    const folders = await prisma.file_folders.findMany({
-      where: {
-        OR: [
-          { user_id: req.user.userId },
-          { is_shared: true },
-        ],
-      },
-      include: {
-        files: {
-          orderBy: { created_at: 'desc' },
-          take: limit,
-          skip: offset,
-        },
-      },
-      orderBy: { name: 'asc' },
-    })
-    for (const f of folders) {
-      f.files = f.files.map(file => ({
-        id: file.id,
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        folderId: file.folder_id,
-        path: file.path,
-        createdAt: file.created_at,
-      }))
-      f.totalFiles = await prisma.files.count({ where: { folder_id: f.id } })
-    }
+    const folders = await getFolders(req.user.userId, page, limit)
     res.json({ success: true, data: folders })
   } catch (err) {
     logger.error('Files list error:', err)
@@ -79,12 +49,7 @@ router.post('/folders', async (req, res) => {
   const { name } = req.body
   if (!name) return res.status(400).json({ message: 'Name required' })
   try {
-    const folder = await prisma.file_folders.create({
-      data: {
-        name,
-        user_id: req.user.userId,
-      },
-    })
+    const folder = await createFolder(name, req.user.userId)
     res.status(201).json({ success: true, data: folder })
   } catch (err) {
     logger.error('Create folder error:', err)
@@ -105,24 +70,15 @@ router.post('/upload', upload.single('file'), validateUpload, async (req, res) =
   try {
     const buffer = fs.readFileSync(req.file.path)
     const { url } = await saveFile('files', req.file.filename, buffer)
-    const file = await prisma.files.create({
-      data: {
-        name,
-        size: sizeKB,
-        type: fileType,
-        folder_id: folderId ? Number(folderId) : null,
-        path: url,
-        user_id: req.user.userId,
-      },
+    const file = await createFile({
+      name, size: sizeKB, type: fileType,
+      folderId: folderId ? Number(folderId) : null,
+      path: url, userId: req.user.userId,
     })
     res.status(201).json({ success: true, data: {
-      id: file.id,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      folderId: file.folder_id,
-      path: file.path,
-      createdAt: file.created_at,
+      id: file.id, name: file.name, size: file.size,
+      type: file.type, folderId: file.folder_id,
+      path: file.path, createdAt: file.created_at,
     } })
   } catch (err) {
     logger.error('Upload error:', err)
@@ -132,7 +88,7 @@ router.post('/upload', upload.single('file'), validateUpload, async (req, res) =
 
 router.delete('/:id', async (req, res) => {
   try {
-    await prisma.files.delete({ where: { id: Number(req.params.id) } })
+    await deleteFile(req.params.id)
     res.json({ success: true, data: { ok: true } })
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete file' })

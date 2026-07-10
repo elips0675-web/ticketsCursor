@@ -23,9 +23,10 @@ describe('POST /api/auth/dev-login', () => {
   it('returns token and employee', async () => {
     const res = await request(app).post('/api/auth/dev-login')
     expect(res.status).toBe(200)
-    expect(res.body).toHaveProperty('token')
-    expect(res.body.employee).toHaveProperty('id', 1)
-    expect(res.body.employee).toHaveProperty('role', 'super_admin')
+    expect(res.body).toHaveProperty('data')
+    expect(res.body.data).toHaveProperty('token')
+    expect(res.body.data.employee).toHaveProperty('id', 1)
+    expect(res.body.data.employee).toHaveProperty('role', 'super_admin')
   })
 })
 
@@ -47,7 +48,7 @@ describe('Protected routes', () => {
     const login = await request(app).post('/api/auth/dev-login')
     const res = await request(app)
       .get('/api/tickets')
-      .set('Authorization', `Bearer ${login.body.token}`)
+      .set('Authorization', `Bearer ${login.body.data.token}`)
     // DB-dependent — skip assert if MySQL unavailable
     expect([200, 500]).toContain(res.status)
   })
@@ -58,22 +59,22 @@ describe('GET /api/search', () => {
     const login = await request(app).post('/api/auth/dev-login')
     const res = await request(app)
       .get('/api/search?q=a')
-      .set('Authorization', `Bearer ${login.body.token}`)
+      .set('Authorization', `Bearer ${login.body.data.token}`)
     expect(res.status).toBe(200)
-    expect(res.body.tickets).toEqual([])
+    expect(res.body.data.tickets).toEqual([])
   })
 
   it('accepts valid search query', async () => {
     const login = await request(app).post('/api/auth/dev-login')
     const res = await request(app)
       .get('/api/search?q=test')
-      .set('Authorization', `Bearer ${login.body.token}`)
+      .set('Authorization', `Bearer ${login.body.data.token}`)
     // DB-dependent — skip assert if MySQL unavailable
     expect([200, 500]).toContain(res.status)
     if (res.status === 200) {
-      expect(res.body).toHaveProperty('tickets')
-      expect(res.body).toHaveProperty('employees')
-      expect(res.body).toHaveProperty('wiki')
+      expect(res.body.data).toHaveProperty('tickets')
+      expect(res.body.data).toHaveProperty('employees')
+      expect(res.body.data).toHaveProperty('wiki')
     }
   })
 })
@@ -83,7 +84,7 @@ describe('POST /api/auth/register validation', () => {
 
   beforeAll(async () => {
     const login = await request(app).post('/api/auth/dev-login')
-    adminToken = login.body.token
+    adminToken = login.body?.data?.token || login.body?.token
   })
 
   it('rejects without auth', async () => {
@@ -102,10 +103,10 @@ describe('RBAC — ticket management', () => {
 
   beforeAll(async () => {
     const admin = await request(app).post('/api/auth/dev-login')
-    adminToken = admin.body.token
+    adminToken = admin.body?.data?.token || admin.body?.token
     // agent: login as employee 2 (senior_agent has elevated perms — use a non-admin employee)
     const agent = await request(app).post('/api/auth/login').send({ email: 'ivan@example.com', password: 'password123' })
-    agentToken = agent.body.token
+    agentToken = agent.body?.data?.token || agent.body?.token
   })
 
   it('admin can update ticket status', async () => {
@@ -154,9 +155,9 @@ describe('RBAC — admin endpoints', () => {
 
   beforeAll(async () => {
     const admin = await request(app).post('/api/auth/dev-login')
-    adminToken = admin.body.token
+    adminToken = admin.body?.data?.token || admin.body?.token
     const agent = await request(app).post('/api/auth/login').send({ email: 'ivan@example.com', password: 'password123' })
-    agentToken = agent.body.token
+    agentToken = agent.body?.data?.token || agent.body?.token
   })
 
   it('admin can list users', async () => {
@@ -183,7 +184,7 @@ describe('DELETE /api/calendar/:id — RBAC', () => {
 
   beforeAll(async () => {
     const agent = await request(app).post('/api/auth/login').send({ email: 'ivan@example.com', password: 'password123' })
-    agentToken = agent.body.token
+    agentToken = agent.body?.data?.token || agent.body?.token
   })
 
   it('rejects agent from deleting calendar events', async () => {

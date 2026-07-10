@@ -17,7 +17,7 @@ router.use(authenticateToken)
 
 router.get('/vapid-key', (req, res) => {
   if (!VAPID_PUBLIC_KEY) return res.status(500).json({ message: 'VAPID not configured' })
-  res.json({ publicKey: VAPID_PUBLIC_KEY })
+  res.json({ success: true, data: { publicKey: VAPID_PUBLIC_KEY } })
 })
 
 router.get('/subscription', async (req, res) => {
@@ -26,7 +26,7 @@ router.get('/subscription', async (req, res) => {
       where: { user_id: req.user.userId },
       select: { subscription_json: true },
     })
-    res.json(rows.map(r => JSON.parse(r.subscription_json)))
+    res.json({ success: true, data: rows.map(r => JSON.parse(r.subscription_json)) })
   } catch (err) {
     logger.error('Get subscriptions error:', err)
     res.status(500).json({ message: 'Failed to get subscriptions' })
@@ -42,7 +42,7 @@ router.post('/subscribe', async (req, res) => {
       update: { subscription_json: JSON.stringify(subscription_json) },
       create: { user_id: req.user.userId, subscription_json: JSON.stringify(subscription_json) },
     })
-    res.status(201).json({ ok: true })
+    res.status(201).json({ success: true, data: { ok: true } })
   } catch (err) {
     logger.error('Subscribe error:', err)
     res.status(500).json({ message: 'Failed to subscribe' })
@@ -52,7 +52,7 @@ router.post('/subscribe', async (req, res) => {
 router.delete('/unsubscribe', async (req, res) => {
   try {
     await prisma.push_subscriptions.deleteMany({ where: { user_id: req.user.userId } })
-    res.json({ ok: true })
+    res.json({ success: true, data: { ok: true } })
   } catch (err) {
     logger.error('Unsubscribe error:', err)
     res.status(500).json({ message: 'Failed to unsubscribe' })
@@ -85,7 +85,7 @@ router.post('/send', requireRole('admin', 'senior_agent'), async (req, res) => {
       }
     }))
 
-    res.json({ sent, failed, total: rows.length })
+    res.json({ success: true, data: { sent, failed, total: rows.length } })
   } catch (err) {
     logger.error('Send push error:', err)
     res.status(500).json({ message: 'Failed to send push notifications' })

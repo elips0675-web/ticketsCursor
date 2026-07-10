@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
         if (!b.last_time) return -1
         return new Date(b.last_time) - new Date(a.last_time)
       })
-    res.json(rows)
+    res.json({ success: true, data: rows })
   } catch (err) {
     logger.error('Chats list error:', err)
     res.status(500).json({ message: 'Failed to fetch chats' })
@@ -45,7 +45,7 @@ router.get('/:id', async (req, res) => {
       orderBy: { created_at: 'asc' },
     })
     chat.messages = messages
-    res.json(chat)
+    res.json({ success: true, data: chat })
   } catch (err) {
     logger.error('Chat detail error:', err)
     res.status(500).json({ message: 'Failed to fetch chat' })
@@ -82,7 +82,7 @@ router.post('/:id/messages', async (req, res) => {
         link: `/chats/${req.params.id}`,
       })
     }
-    res.status(201).json(msg)
+    res.status(201).json({ success: true, data: msg })
   } catch (err) {
     logger.error('Send message error:', err)
     res.status(500).json({ message: 'Failed to send message' })
@@ -95,7 +95,7 @@ router.put('/:id/read', async (req, res) => {
       where: { id: Number(req.params.id) },
       data: { unread: 0 },
     })
-    res.json({ ok: true })
+    res.json({ success: true, data: { ok: true } })
   } catch (err) {
     res.status(500).json({ message: 'Failed to mark read' })
   }
@@ -114,14 +114,14 @@ router.post('/personal/:userId', async (req, res) => {
     const existing = await prisma.chat_rooms.findFirst({
       where: { type: 'personal', name: user.name },
     })
-    if (existing) return res.json(existing)
+    if (existing) return res.json({ success: true, data: existing })
     const chat = await prisma.chat_rooms.create({
       data: {
         name: user.name,
         type: 'personal',
       },
     })
-    res.status(201).json(chat)
+    res.status(201).json({ success: true, data: chat })
   } catch (err) {
     logger.error('Create personal chat error:', err)
     res.status(500).json({ message: 'Failed to create chat' })

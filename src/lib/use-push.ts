@@ -31,7 +31,8 @@ export function usePush() {
       const token = localStorage.getItem('token')
       const res = await fetch('/api/push/vapid-key', { headers: { Authorization: `Bearer ${token}` } })
       if (!res.ok) throw new Error('VAPID key not configured on server')
-      const { publicKey } = await res.json()
+      const body = await res.json()
+      const { publicKey } = body.data || body
 
       const reg = await navigator.serviceWorker.ready
       const sub = await reg.pushManager.subscribe({

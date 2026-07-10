@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
       skip: offset,
       take: limit,
     })
-    res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
+    res.json({ success: true, data: { data: rows, total, page, totalPages: Math.ceil(total / limit) } })
   } catch (err) {
     logger.error('News list error:', err)
     res.status(500).json({ message: 'Failed to fetch news' })
@@ -49,7 +49,7 @@ router.post('/', requireRole('admin', 'senior_agent'), createNewsValidation, asy
         author_name: req.user.name || 'User',
       },
     })
-    res.status(201).json(post)
+    res.status(201).json({ success: true, data: post })
   } catch (err) {
     logger.error('Create news error:', err)
     res.status(500).json({ message: 'Failed to create news' })

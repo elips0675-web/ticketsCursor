@@ -39,7 +39,8 @@ export default function Login() {
         setError('root', { message: json.message || t('auth.loginError') })
         return
       }
-      login(json.token, json.employee)
+      const d = json.data || json
+      login(d.token, d.employee)
       navigate('/', { replace: true })
     } catch {
       setError('root', { message: t('auth.connectionError') })
@@ -56,7 +57,8 @@ export default function Login() {
       })
       const json = await res.json()
       if (res.ok) {
-        login(json.token, json.employee)
+        const d = json.data || json
+        login(d.token, d.employee)
         navigate('/', { replace: true })
         return
       }
@@ -69,7 +71,8 @@ export default function Login() {
     try {
       const res = await fetch('/api/auth/dev-login', { method: 'POST' })
       if (res.ok) {
-        const data = await res.json()
+        const json = await res.json()
+        const data = json.data || json
         login(data.token, data.employee)
         navigate('/', { replace: true })
         return

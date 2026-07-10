@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
       WHERE MATCH(name) AGAINST(${q + '*'} IN BOOLEAN MODE)
       ORDER BY created_at DESC LIMIT 10
     `
-    res.json(toPlain({ tickets, employees, wiki, news, chats, files }))
+    res.json({ success: true, data: toPlain({ tickets, employees, wiki, news, chats, files }) })
   } catch (err) {
     logger.warn('FULLTEXT search failed, falling back to LIKE:', err.message)
     const like = `%${q}%`
@@ -67,7 +67,7 @@ router.get('/', async (req, res) => {
       const files = await prisma.$queryRaw`
         SELECT id, name, size, type, created_at FROM files WHERE name LIKE ${like} ORDER BY created_at DESC LIMIT 10
       `
-      res.json(toPlain({ tickets, employees, wiki, news, chats, files }))
+      res.json({ success: true, data: toPlain({ tickets, employees, wiki, news, chats, files }) })
     } catch (fallbackErr) {
       logger.error('Search fallback also failed:', fallbackErr)
       res.status(500).json({ message: 'Search failed' })

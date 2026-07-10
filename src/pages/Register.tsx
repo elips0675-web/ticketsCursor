@@ -45,7 +45,8 @@ export default function Register() {
         setError('root', { message: json.error || json.message || t('auth.registerError') })
         return
       }
-      login(json.token, json.employee)
+      const d = json.data || json
+      login(d.token, d.employee)
       navigate('/')
     } catch {
       setError('root', { message: t('auth.connectionError') })

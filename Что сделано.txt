@@ -339,9 +339,24 @@
      ✅ server/src/index.js — shutdown(signal) с закрытием HTTP + Socket.IO + Prisma
      ✅ Обработка SIGTERM/SIGINT
 
-   🔴 Этап C — Унификация API-ответов во всех роутах
-     [ ] chats, files, polls, wiki, news, employees, calendar, search, auth
-     [ ] Единый формат: { success, data } / { success, message }
+   🔴 ✅ Этап C — Унификация API-ответов во всех роутах
+     ✅ chats, files, polls, wiki, news, employees, calendar, search, auth, ldap, push
+     ✅ Единый формат: { success, data } / { success: false, message }
+
+     Детально:
+     ✅ auth.js — login/register/refresh/dev-login → { success: true, data: { token, employee } }
+     ✅ employees.js — list (map снейк→кэмел), stats
+     ✅ news.js, polls.js, wiki.js — пагинированные ответы { success: true, data: { data, total, page, totalPages } }
+     ✅ search.js — fulltext + LIKE fallback
+     ✅ files.js — folders, create folder, upload, delete
+     ✅ chats.js — list, detail, send message, mark read, personal chat
+     ✅ calendar.js — list, create, update, delete
+     ✅ push.js — vapid-key, subscription, subscribe/unsubscribe, send
+     ✅ ldap.js — LDAP-логин
+
+     Фронтенд — все raw fetch() поправлены на извлечение .data:
+     ✅ ticket-context.tsx (employees), Profile.tsx (employees), Admin.tsx (stats)
+     ✅ Chats.tsx, Login.tsx (login/ldap/dev-login), Register.tsx, use-push.ts
 
    🔴 Этап D — Сервисный слой для всех модулей
      [ ] chats.service.js, files.service.js, polls.service.js, wiki.service.js

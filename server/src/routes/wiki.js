@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
       skip: offset,
       take: limit,
     })
-    res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
+    res.json({ success: true, data: { data: rows, total, page, totalPages: Math.ceil(total / limit) } })
   } catch (err) {
     logger.error('Wiki list error:', err)
     res.status(500).json({ message: 'Failed to fetch articles' })
@@ -57,7 +57,7 @@ router.get('/:id', async (req, res) => {
       where: { id: Number(req.params.id) },
     })
     if (!article) return res.status(404).json({ message: 'Article not found' })
-    res.json(article)
+    res.json({ success: true, data: article })
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch article' })
   }
@@ -76,7 +76,7 @@ router.post('/', requireRole('admin', 'senior_agent'), createWikiValidation, asy
         author_name: req.user.name || 'User',
       },
     })
-    res.status(201).json(article)
+    res.status(201).json({ success: true, data: article })
   } catch (err) {
     logger.error('Create article error:', err)
     res.status(500).json({ message: 'Failed to create article' })
@@ -86,7 +86,7 @@ router.post('/', requireRole('admin', 'senior_agent'), createWikiValidation, asy
 router.post('/upload-image', requireRole('admin', 'senior_agent'), upload.single('image'), validateUpload, (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' })
   const url = `/uploads/wiki/${req.file.filename}`
-  res.json({ url })
+  res.json({ success: true, data: { url } })
 })
 
 export default router

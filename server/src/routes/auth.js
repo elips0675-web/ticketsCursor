@@ -43,15 +43,7 @@ router.post('/login', loginValidation, async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/api/auth',
     })
-    res.json({
-      token: accessToken,
-      employee: {
-        id: employee.id,
-        name: employee.name,
-        email: employee.email,
-        role: employee.role,
-      },
-    })
+    res.json({ success: true, data: { token: accessToken, employee: { id: employee.id, name: employee.name, email: employee.email, role: employee.role } } })
   } catch (err) {
     logger.error('Login error:', err)
     res.status(500).json({ message: 'Internal server error' })
@@ -69,9 +61,7 @@ router.post('/register', authenticateToken, requireRole('super_admin', 'admin'),
     const employee = await prisma.employees.create({
       data: { name, email, password_hash: hash, role: 'agent', department: department || '', title: title || 'Сотрудник', is_active: true },
     })
-    res.status(201).json({
-      employee: { id: employee.id, name: employee.name, email: employee.email, role: 'agent' },
-    })
+    res.status(201).json({ success: true, data: { employee: { id: employee.id, name: employee.name, email: employee.email, role: 'agent' } } })
   } catch (err) {
     logger.error('Register error:', err)
     res.status(500).json({ message: 'Ошибка регистрации' })
@@ -104,7 +94,7 @@ router.post('/refresh', async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/api/auth',
     })
-    res.json({ token: accessToken })
+    res.json({ success: true, data: { token: accessToken } })
   } catch {
     res.status(403).json({ message: 'Invalid refresh token' })
   }
@@ -117,7 +107,7 @@ router.post('/dev-login', (req, res) => {
     return res.status(404).json({ message: 'Not found' })
   }
   const token = jwt.sign({ userId: 1, role: 'super_admin' }, JWT_SECRET, { expiresIn: '15m' })
-  res.json({ token, employee: { id: 1, name: 'Алексей Петров', email: 'alexey@example.com', role: 'super_admin' } })
+  res.json({ success: true, data: { token, employee: { id: 1, name: 'Алексей Петров', email: 'alexey@example.com', role: 'super_admin' } } })
 })
 
 router.post('/forgot-password', async (req, res) => {

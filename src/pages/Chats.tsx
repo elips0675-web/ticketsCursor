@@ -32,8 +32,9 @@ export default function ChatsPage() {
 
   useEffect(() => {
     fetch(`${API_URL}/chats`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => {
+      .then((res) => (res.ok ? res.json() : { data: [] }))
+      .then((body) => {
+        const data = body.data || body
         setChats(data.map(mapChatRoom))
         setLoading(false)
       })

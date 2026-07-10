@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
       select: { id: true, name: true, email: true, role: true, department: true, avatar: true, online: true, active_tickets: true, resolved_today: true, phone: true },
       orderBy: { name: 'asc' },
     })
-    res.json(rows.map(({ active_tickets, resolved_today, ...rest }) => ({ ...rest, activeTickets: active_tickets, resolvedToday: resolved_today })))
+    res.json({ success: true, data: rows.map(({ active_tickets, resolved_today, ...rest }) => ({ ...rest, activeTickets: active_tickets, resolvedToday: resolved_today })) })
   } catch (err) {
     logger.error('Employees list error:', err)
     res.status(500).json({ message: 'Failed to fetch employees' })
@@ -30,7 +30,7 @@ router.get('/stats', async (req, res) => {
       prisma.tickets.count({ where: { status: 'resolved' } }),
       prisma.tickets.count({ where: { priority: 'critical' } }),
     ])
-    res.json({ total, open, inProgress, resolved, critical })
+    res.json({ success: true, data: { total, open, inProgress, resolved, critical } })
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch stats' })
   }

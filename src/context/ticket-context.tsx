@@ -69,7 +69,8 @@ export function TicketProvider({ children }: { children: ReactNode }) {
         setTickets([])
       }
       if (eRes.ok) {
-        const data = await eRes.json()
+        const body = await eRes.json()
+        const data = body.data || body
         setEmployees(data.map((e: any) => ({
           id: e.id,
           name: e.name,

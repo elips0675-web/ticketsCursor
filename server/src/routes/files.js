@@ -68,7 +68,7 @@ router.get('/folders', async (req, res) => {
       }))
       f.totalFiles = await prisma.files.count({ where: { folder_id: f.id } })
     }
-    res.json(folders)
+    res.json({ success: true, data: folders })
   } catch (err) {
     logger.error('Files list error:', err)
     res.status(500).json({ message: 'Failed to fetch files' })
@@ -85,7 +85,7 @@ router.post('/folders', async (req, res) => {
         user_id: req.user.userId,
       },
     })
-    res.status(201).json(folder)
+    res.status(201).json({ success: true, data: folder })
   } catch (err) {
     logger.error('Create folder error:', err)
     res.status(500).json({ message: 'Failed to create folder' })
@@ -115,7 +115,7 @@ router.post('/upload', upload.single('file'), validateUpload, async (req, res) =
         user_id: req.user.userId,
       },
     })
-    res.status(201).json({
+    res.status(201).json({ success: true, data: {
       id: file.id,
       name: file.name,
       size: file.size,
@@ -123,7 +123,7 @@ router.post('/upload', upload.single('file'), validateUpload, async (req, res) =
       folderId: file.folder_id,
       path: file.path,
       createdAt: file.created_at,
-    })
+    } })
   } catch (err) {
     logger.error('Upload error:', err)
     res.status(500).json({ message: 'Failed to upload file' })
@@ -133,7 +133,7 @@ router.post('/upload', upload.single('file'), validateUpload, async (req, res) =
 router.delete('/:id', async (req, res) => {
   try {
     await prisma.files.delete({ where: { id: Number(req.params.id) } })
-    res.json({ ok: true })
+    res.json({ success: true, data: { ok: true } })
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete file' })
   }

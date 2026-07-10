@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
       select: { id: true, title: true, date: true, time: true, description: true, creator_id: true, created_at: true },
       orderBy: [{ date: 'asc' }, { time: 'asc' }],
     })
-    res.json(events.map(({ creator_id, created_at, ...rest }) => ({ ...rest, creatorId: creator_id, createdAt: created_at })))
+    res.json({ success: true, data: events.map(({ creator_id, created_at, ...rest }) => ({ ...rest, creatorId: creator_id, createdAt: created_at })) })
   } catch (err) {
     logger.error('Calendar list error:', err)
     res.status(500).json({ message: 'Failed to fetch events' })
@@ -41,7 +41,7 @@ router.post('/', createCalendarValidation, async (req, res) => {
       },
       select: { id: true, title: true, date: true, time: true, description: true, creator_id: true, created_at: true },
     })
-    res.status(201).json({ ...event, creatorId: event.creator_id, createdAt: event.created_at, creator_id: undefined, created_at: undefined })
+    res.status(201).json({ success: true, data: { ...event, creatorId: event.creator_id, createdAt: event.created_at, creator_id: undefined, created_at: undefined } })
     const { createNotification } = await import('./notifications.js')
     await createNotification({
       userId: req.user.userId,
@@ -72,7 +72,7 @@ router.put('/:id', requireRole('admin', 'senior_agent'), updateCalendarValidatio
       where: { id: Number(req.params.id) },
       select: { id: true, title: true, date: true, time: true, description: true, creator_id: true, created_at: true },
     })
-    res.json({ ...event, creatorId: event.creator_id, createdAt: event.created_at, creator_id: undefined, created_at: undefined })
+    res.json({ success: true, data: { ...event, creatorId: event.creator_id, createdAt: event.created_at, creator_id: undefined, created_at: undefined } })
   } catch (err) {
     logger.error('Update event error:', err)
     res.status(500).json({ message: 'Failed to update event' })
@@ -82,7 +82,7 @@ router.put('/:id', requireRole('admin', 'senior_agent'), updateCalendarValidatio
 router.delete('/:id', requireRole('admin', 'senior_agent'), deleteEventValidation, async (req, res) => {
   try {
     await prisma.events.delete({ where: { id: Number(req.params.id) } })
-    res.json({ ok: true })
+    res.json({ success: true, data: { ok: true } })
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete event' })
   }

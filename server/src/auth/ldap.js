@@ -61,7 +61,7 @@ export async function authenticateLDAP(req, res) {
               })
             }
             const token = jwt.sign({ userId: employee.id, role: employee.role }, JWT_SECRET, { expiresIn: '24h' })
-            resolve(res.json({ token, employee: { id: employee.id, name: employee.name, email: employee.email, role: employee.role } }))
+            resolve(res.json({ success: true, data: { token, employee: { id: employee.id, name: employee.name, email: employee.email, role: employee.role } } }))
           } catch (err) {
             logger.error('LDAP auto-provision error:', err)
             resolve(res.status(500).json({ message: 'Internal server error' }))

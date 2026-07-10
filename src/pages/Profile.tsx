@@ -27,8 +27,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     fetch(`${API_URL}/employees`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => {
+      .then((res) => (res.ok ? res.json() : { data: [] }))
+      .then((body) => {
+        const data = body.data || body
         const me = data.find((e: any) => e.id === authUser?.id) || {}
         setEmployee(me)
         setForm({

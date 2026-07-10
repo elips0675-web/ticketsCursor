@@ -52,7 +52,7 @@ router.get('/', async (req, res) => {
         poll.isClosed = poll.ends_at ? new Date(poll.ends_at) < new Date() : false
       }
     }
-    res.json({ data: rows, total, page, totalPages: Math.ceil(total / limit) })
+    res.json({ success: true, data: { data: rows, total, page, totalPages: Math.ceil(total / limit) } })
   } catch (err) {
     logger.error('Polls list error:', err)
     res.status(500).json({ message: 'Failed to fetch polls' })
@@ -80,7 +80,7 @@ router.post('/', requireRole('admin', 'senior_agent'), async (req, res) => {
       include: { poll_options: true },
     })
     const created = await prisma.polls.findUnique({ where: { id: poll.id } })
-    res.status(201).json({
+    res.status(201).json({ success: true, data: {
       ...created,
       options: poll.poll_options.map(o => ({ ...o, voted: false })),
       totalVotes: 0,
@@ -88,7 +88,7 @@ router.post('/', requireRole('admin', 'senior_agent'), async (req, res) => {
       multipleChoice: !!created.multiple_choice,
       showResults: created.show_results || 'after_vote',
       isClosed: false,
-    })
+    } })
   } catch (err) {
     logger.error('Create poll error:', err)
     res.status(500).json({ message: 'Failed to create poll' })
@@ -155,14 +155,14 @@ router.post('/:id/vote', async (req, res) => {
     const optsWithVoted = opts.map(o => ({ ...o, voted: votedIds.has(o.id) }))
     const totalVotes = opts.reduce((s, o) => s + (o.votes_count || 0), 0)
     const updated = await prisma.polls.findUnique({ where: { id: Number(req.params.id) } })
-    res.json({
+    res.json({ success: true, data: {
       ...updated,
       options: optsWithVoted,
       totalVotes,
       multipleChoice: !!updated.multiple_choice,
       showResults: updated.show_results || 'after_vote',
       isClosed: updated.ends_at ? new Date(updated.ends_at) < new Date() : false,
-    })
+    } })
   } catch (err) {
     logger.error('Vote error:', err)
     res.status(500).json({ message: 'Failed to vote' })

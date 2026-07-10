@@ -54,7 +54,10 @@ export default function Admin() {
         const raw = await empRes.json()
         setEmployees(unwrapApiData<Employee[]>(raw) || [])
       }
-      if (statsRes.ok) setStats(await statsRes.json())
+      if (statsRes.ok) {
+        const body = await statsRes.json()
+        setStats(body.data || body)
+      }
     } catch (err) {
       console.error("Admin fetch error:", err)
     }

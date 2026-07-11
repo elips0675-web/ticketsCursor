@@ -104,6 +104,7 @@ export async function votePoll(pollId, optionId, userId) {
   const updated = await prisma.polls.findUnique({ where: { id: pollId } })
   return {
     ...updated, options: optsWithVoted, totalVotes,
+    myVotes: userVotes.map(v => v.option_id),
     multipleChoice: !!updated.multiple_choice,
     showResults: updated.show_results || 'after_vote',
     isClosed: updated.ends_at ? new Date(updated.ends_at) < new Date() : false,

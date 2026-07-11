@@ -197,3 +197,11 @@ docker compose up -d --build
 - **seed.sql**: `idx_employees_role_active` для `getLeastLoadedAssignee`
 - **k8s/hpa.yaml**: HPA api 2→8, frontend 2→6, CPU 70% / Memory 80%
 - **use-push.ts**: `.catch()` на unhandled rejection
+
+### Этап 16 — Полный функциональный аудит (Промт тест.txt, ~200 проверок)
+- ✅ Раздел 1: Auth + RBAC — добавлен logout endpoint (инвалидация refresh token)
+- ✅ Раздел 2: Тикеты — VALID_TRANSITIONS (невалидный переход → 400), agent-фильтр (свои + неназначенные), SLA пересчёт при смене приоритета
+- ✅ Раздел 3: Чаты — пагинация сообщений (page/limit/total), валидация длины (max 2000)
+- ✅ Раздел 4: Файлы — role check на DELETE (senior_agent+)
+- ✅ Раздел 9: Админка — super_admin исключён из выбора ролей, запрет self-demotion
+- ✅ Раздел 12: Безопасность — запрет promotion до super_admin через API

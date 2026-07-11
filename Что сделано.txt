@@ -579,3 +579,96 @@ PRODUCTION PROMPT ДОРАБОТАТЬ
       ✅ Fuzzy search — Meilisearch (docker-compose, search-sync.js, fallback FULLTEXT→LIKE)
       ✅ MySQL read replicas — docker-compose (primary + replica + init-replica.sh)
       ✅ Автоматические бэкапы — db_backup сервис (mysqldump раз в 24ч, хранение 7 дней, volume mysql_backup)
+
+   ✅ АУДИТ ПОЛНЫЙ (2026-07-11, ~200 проверок)
+
+     Раздел 1 — Аутентификация и RBAC:
+       ✅ login/register/refresh/forgot/reset — Zod-валидация, rate-limit
+       ✅ logout endpoint — ДОБАВЛЕН (POST /api/auth/logout, инвалидация refresh token)
+       ✅ Frontend logout — fetch к /api/auth/logout перед очисткой localStorage
+       ✅ LDAP — bind+search+auto-provisioning, fallback на обычный логин
+       ✅ RBAC — 5 ролей, иерархия, requireRole на бэкенде
+       ✅ ProtectedRoute — редирект на /login без токена, на / при недостатке прав
+
+     Раздел 2 — Тикеты:
+       ✅ Валидация статусов — ДОБАВЛЕНА (VALID_TRANSITIONS, невалидный переход → 400)
+       ✅ Agent-фильтр — ДОБАВЛЕН (agent видит свои + неназначенные тикеты)
+       ✅ SLA пересчёт — ИСПРАВЛЕН (due_at пересчитывается при изменении приоритета)
+       ✅ listTickets — пагинация, фильтры по роли
+       ✅ Автоназначение (AUTO_ASSIGN) — наименее загруженный agent/senior_agent
+       ✅ SLA — first_response_at, resolved_at, due_at, фоновая проверка 15 мин
+       ✅ Экспорт CSV/PDF — через фронтенд (jsPDF + html2canvas)
+       ✅ WebSocket — эмиты ticket:created/updated/message/message-removed
+
+     Раздел 3 — Чаты:
+       ✅ Пагинация сообщений — ДОБАВЛЕНА (page/limit, total, totalPages)
+       ✅ Валидация длины — ДОБАВЛЕНА (макс 2000 символов, REST + WebSocket)
+       ✅ WebSocket rate-limit — 5 сообщ/сек, exponential backoff (2×, макс 60s)
+       ✅ Typing indicator — через chat:typing event
+       ✅ Онлайн-статус — Prisma update online/last_active, user:status эмит
+       ✅ Удаление сообщений — проверка владельца или admin/senior_agent
+       ✅ Личный чат — защита "нельзя написать себе" (400)
+
+     Раздел 4 — Файловое хранилище:
+       ✅ Magic bytes — validateUpload через file-type + ALLOWED extensions
+       ✅ ClamAV — опционально (CLAMAV_ENABLED)
+       ✅ Multer — diskStorage + ALLOWED_MIMES + fileSize limit
+       ✅ DELETE /:id — ДОБАВЛЕНА проверка роли (requireRole('admin', 'senior_agent'))
+       ✅ Storage adapter — S3/MinIO (при S3_ENDPOINT) или локальный диск
+
+     Раздел 5 — Поиск:
+       ✅ Meilisearch → MySQL FULLTEXT → LIKE fallback
+       ✅ Параметризованные $queryRaw — защита от SQL injection
+       ✅ 6 таблиц: tickets, employees, wiki, news, chats, files
+       ✅ Короткий запрос (<2 символов) → пустой ответ
+
+     Раздел 6 — Уведомления:
+       ✅ GET / — фильтр по user_id, take: 50
+       ✅ PUT /:id/read — проверка владельца
+       ✅ PUT /read-all, DELETE /clear-all
+       ✅ createNotification — Socket.IO эмит + запись в БД
+       ✅ Фоновая очистка >90 дней (каждые 6ч, BullMQ/setInterval)
+
+     Раздел 7 — Сотрудники:
+       ✅ GET / — список, GET /stats
+       ✅ requireRole('agent')
+       ✅ Онлайн-статус через WebSocket
+
+     Раздел 8 — Wiki/Новости/Календарь/Опросы:
+       ✅ CRUD, RBAC (senior_agent+ для создания)
+       ✅ Пагинация, фильтры
+       ✅ Загрузка изображений в wiki (multer + validateUpload)
+
+     Раздел 9 — Админ-панель:
+       ✅ Settings (GET/PUT) — ALLOWED_SETTINGS whitelist
+       ✅ Users (GET/PUT) — CRITICAL FIX: super_admin исключён из выбора ролей
+       ✅ Self-demotion — ЗАПРЕЩЕНА (Cannot modify your own account)
+       ✅ Audit log — фильтры по entityType, entityId
+
+     Раздел 10 — PWA/Desktop/i18n/a11y:
+       ✅ VitePWA (injectManifest), beforeinstallprompt
+       ✅ Tauri — конфиг + Rust
+       ✅ i18n (ru/en), LanguageDetector
+       ✅ Тёмная тема (CSS vars + localStorage)
+       ✅ ErrorBoundary на всех страницах
+
+     Раздел 11 — Производительность:
+       ✅ TanStack Query + staleTime
+       ✅ Redis cache (tickets 120s, employees 300s)
+       ✅ Skeleton loaders, пагинация
+       ✅ Виртуализация (@tanstack/react-virtual)
+
+     Раздел 12 — Безопасность:
+       ✅ Helmet, CORS, rate-limit (auth 10/min, api 100/min, admin 30/min)
+       ✅ JWT — подпись проверяется, alg: none rejected
+       ✅ Параметризованные запросы — SQL injection защита
+       ✅ File upload — MIME + magic bytes + ClamAV
+
+     Раздел 13 — Инфраструктура/DevOps:
+       ✅ Docker Compose (mysql 8.4 + api + frontend + redis + meili)
+       ✅ Kubernetes (8 манифестов, HPA, ConfigMap, Secrets)
+       ✅ GitHub Actions (lint → typecheck → test → build)
+       ✅ Husky + lint-staged
+       ✅ Graceful shutdown (SIGTERM/SIGINT)
+       ✅ Prometheus + Grafana (provisioning)
+       ✅ Backup (mysqldump, ежедневно, 7 дней хранения)

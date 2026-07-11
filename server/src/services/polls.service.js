@@ -23,7 +23,11 @@ export async function listPolls({ page, limit, status, userId }) {
     const optsByPoll = {}
     for (const o of allOpts) {
       if (!optsByPoll[o.poll_id]) optsByPoll[o.poll_id] = []
-      optsByPoll[o.poll_id].push({ ...o, voted: voteOptionIds.has(`${o.poll_id}:${o.id}`) })
+      optsByPoll[o.poll_id].push({
+        id: o.id, pollId: o.poll_id, text: o.text,
+        votesCount: o.votes_count,
+        voted: voteOptionIds.has(`${o.poll_id}:${o.id}`),
+      })
     }
     const votesByPoll = {}
     for (const v of allVotes) {
@@ -57,7 +61,10 @@ export async function createPoll({ title, description, options, multipleChoice, 
   const created = await prisma.polls.findUnique({ where: { id: poll.id } })
   return {
     ...created,
-    options: poll.poll_options.map(o => ({ ...o, voted: false })),
+    options: poll.poll_options.map(o => ({
+      id: o.id, pollId: o.poll_id, text: o.text,
+      votesCount: o.votes_count, voted: false,
+    })),
     totalVotes: 0, myVotes: [],
     multipleChoice: !!created.multiple_choice,
     showResults: created.show_results || 'after_vote',
@@ -99,7 +106,11 @@ export async function votePoll(pollId, optionId, userId) {
     select: { option_id: true },
   })
   const votedIds = new Set(userVotes.map(v => v.option_id))
-  const optsWithVoted = opts.map(o => ({ ...o, voted: votedIds.has(o.id) }))
+  const optsWithVoted = opts.map(o => ({
+    id: o.id, pollId: o.poll_id, text: o.text,
+    votesCount: o.votes_count,
+    voted: votedIds.has(o.id),
+  }))
   const totalVotes = opts.reduce((s, o) => s + (o.votes_count || 0), 0)
   const updated = await prisma.polls.findUnique({ where: { id: pollId } })
   return {

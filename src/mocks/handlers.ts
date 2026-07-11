@@ -13,8 +13,8 @@ export const handlers = [
           description: '',
           multiple_choice: 0,
           options: [
-            { id: 1, text: 'Вариант А', votes_count: 1, voted: 1 },
-            { id: 2, text: 'Вариант Б', votes_count: 0, voted: 0 },
+            { id: 1, pollId: 1, text: 'Вариант А', votesCount: 1, voted: true },
+            { id: 2, pollId: 1, text: 'Вариант Б', votesCount: 0, voted: false },
           ],
           myVotes: [1],
           totalVotes: 1,

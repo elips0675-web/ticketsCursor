@@ -22,8 +22,21 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const saved = localStorage.getItem('sysInfo')
-    if (saved) setSysInfo(JSON.parse(saved))
-  }, [])
+    if (saved) {
+      setSysInfo(JSON.parse(saved))
+      return
+    }
+    fetch(`${API_URL}/system-info`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.computerName || data?.userAccount) {
+          const info = { computerName: data.computerName || '', userAccount: data.userAccount || '' }
+          setSysInfo(info)
+          localStorage.setItem('sysInfo', JSON.stringify(info))
+        }
+      })
+      .catch(() => {})
+  }, [token])
 
   useEffect(() => {
     fetch(`${API_URL}/employees`, { headers: { Authorization: `Bearer ${token}` } })

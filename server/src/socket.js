@@ -90,6 +90,7 @@ export async function setupSocket(server) {
 
     socket.on('message:send', async ({ chatId, text }) => {
       if (!text?.trim()) return
+      if (text.length > 2000) return socket.emit('error', { message: 'Text too long (max 2000 chars)' })
       if (!wsRateLimit(socket)) return socket.emit('rate:limited', { event: 'message:send' })
       try {
         const user = await prisma.employees.findUnique({ where: { id: socket.userId }, select: { name: true } })

@@ -22,14 +22,20 @@ export async function getChats() {
     })
 }
 
-export async function getChatById(id) {
+export async function getChatById(id, page = 1, limit = 50) {
   const chat = await prisma.chat_rooms.findUnique({ where: { id } })
   if (!chat) return null
-  const messages = await prisma.chat_messages.findMany({
-    where: { chat_id: id },
-    orderBy: { created_at: 'asc' },
-  })
-  return { ...chat, messages }
+  const skip = (page - 1) * limit
+  const [messages, total] = await Promise.all([
+    prisma.chat_messages.findMany({
+      where: { chat_id: id },
+      orderBy: { created_at: 'asc' },
+      take: limit,
+      skip,
+    }),
+    prisma.chat_messages.count({ where: { chat_id: id } }),
+  ])
+  return { ...chat, messages, total, page, totalPages: Math.ceil(total / limit) }
 }
 
 export async function createMessage({ chatId, userId, userName, text }) {

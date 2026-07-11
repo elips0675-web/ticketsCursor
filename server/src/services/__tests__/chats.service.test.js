@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 vi.mock('../../prisma.js', () => ({
   default: {
     chat_rooms: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), create: vi.fn(), findFirst: vi.fn() },
-    chat_messages: { create: vi.fn(), findMany: vi.fn() },
+    chat_messages: { create: vi.fn(), findMany: vi.fn(), count: vi.fn() },
     employees: { findUnique: vi.fn() },
   },
 }))
@@ -33,9 +33,11 @@ describe('getChatById', () => {
   it('returns chat with messages when found', async () => {
     prisma.chat_rooms.findUnique.mockResolvedValue({ id: 1, name: 'Test' })
     prisma.chat_messages.findMany.mockResolvedValue([{ id: 1, text: 'hello' }])
+    prisma.chat_messages.count.mockResolvedValue(1)
     const result = await getChatById(1)
     expect(result.name).toBe('Test')
     expect(result.messages).toHaveLength(1)
+    expect(result.total).toBe(1)
   })
 
   it('returns null when chat not found', async () => {

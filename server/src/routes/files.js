@@ -87,8 +87,10 @@ router.post('/upload', upload.single('file'), validateUpload, async (req, res) =
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireRole('admin', 'senior_agent'), async (req, res) => {
   try {
+    const file = await prisma.files.findUnique({ where: { id: Number(req.params.id) } })
+    if (!file) return res.status(404).json({ message: 'File not found' })
     await deleteFile(req.params.id)
     res.json({ success: true, data: { ok: true } })
   } catch (err) {

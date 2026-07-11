@@ -19,7 +19,9 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const chat = await getChatById(Number(req.params.id))
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50))
+    const chat = await getChatById(Number(req.params.id), page, limit)
     if (!chat) return res.status(404).json({ message: 'Chat not found' })
     res.json({ success: true, data: chat })
   } catch (err) {
@@ -31,6 +33,7 @@ router.get('/:id', async (req, res) => {
 router.post('/:id/messages', async (req, res) => {
   const { text } = req.body
   if (!text?.trim()) return res.status(400).json({ message: 'Text required' })
+  if (text.length > 2000) return res.status(400).json({ message: 'Text too long (max 2000 chars)' })
   try {
     const msg = await createMessage({
       chatId: Number(req.params.id),

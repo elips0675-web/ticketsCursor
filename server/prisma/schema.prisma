@@ -12,7 +12,7 @@ model employees {
   name           String    @db.VarChar(255)
   email          String    @unique @db.VarChar(255)
   password_hash  String    @db.VarChar(255)
-  role           String?   @default("agent") @db.VarChar(10)
+  role           String?   @default("agent") @db.VarChar(20)
   department     String?   @default("") @db.VarChar(255)
   avatar         String?   @default("") @db.VarChar(500)
   phone          String?   @default("") @db.VarChar(50)

@@ -63,7 +63,9 @@ export default function Login() {
         return
       }
       setError('root', { message: json.message || t('auth.loginError') })
-    } catch { setError('root', { message: t('auth.connectionError') }) }
+    } catch {
+      setError('root', { message: t('auth.connectionError') })
+    }
     setLdapLoading(false)
   }
 
@@ -106,7 +108,13 @@ export default function Login() {
               <label htmlFor="login-email" className="text-sm font-bold">
                 {t('auth.email')}
               </label>
-              <Input id="login-email" type="email" {...register('email')} placeholder="ivan@company.ru" />
+              <Input
+                id="login-email"
+                type="email"
+                autoComplete="email"
+                {...register('email')}
+                placeholder="ivan@company.ru"
+              />
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-1.5">
@@ -116,6 +124,7 @@ export default function Login() {
               <Input
                 id="login-password"
                 type="password"
+                autoComplete="current-password"
                 {...register('password')}
                 placeholder={t('auth.passwordPlaceholder')}
               />
@@ -138,7 +147,13 @@ export default function Login() {
             <Button variant="outline" size="sm" className="w-full" onClick={devLogin}>
               {t('auth.loginAsAdmin')}
             </Button>
-            <Button variant="outline" size="sm" className="w-full" onClick={handleSubmit(ldapLogin)} disabled={ldapLoading}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={handleSubmit(ldapLogin)}
+              disabled={ldapLoading}
+            >
               {ldapLoading ? t('auth.loggingIn') : 'LDAP / AD'}
             </Button>
           </div>

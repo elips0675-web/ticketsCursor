@@ -1,33 +1,33 @@
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, type ReactNode } from 'react'
 
 function getInitialToken(): string | null {
-  const t = localStorage.getItem("token")
+  const t = localStorage.getItem('token')
   if (!t) return null
   const parts = t.split('.')
   if (parts.length !== 3) return t
   try {
     const payload = JSON.parse(atob(parts[1]))
     if (payload.exp * 1000 < Date.now()) {
-      localStorage.removeItem("token")
-      localStorage.removeItem("user")
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
       return null
     }
     return t
   } catch {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
     return null
   }
 }
 
 function getInitialUser(): User | null {
-  const u = localStorage.getItem("user")
+  const u = localStorage.getItem('user')
   if (!u) return null
   try {
     return JSON.parse(u)
   } catch {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
     return null
   }
 }
@@ -36,7 +36,7 @@ interface User {
   id: number
   name: string
   email: string
-  role: "super_admin" | "admin" | "senior_agent" | "agent" | "requester"
+  role: 'super_admin' | 'admin' | 'senior_agent' | 'agent' | 'requester'
 }
 
 interface AuthContextType {
@@ -50,29 +50,29 @@ interface AuthContextType {
   canManage: boolean
 }
 
-const AuthContext = createContext<AuthContextType | null>(null)
+export const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(getInitialUser)
   const [token, setToken] = useState<string | null>(getInitialToken)
 
   const login = (t: string, u: User) => {
-    localStorage.setItem("token", t)
-    localStorage.setItem("user", JSON.stringify(u))
+    localStorage.setItem('token', t)
+    localStorage.setItem('user', JSON.stringify(u))
     setToken(t)
     setUser(u)
   }
 
   const logout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
     setToken(null)
     setUser(null)
   }
 
-  const isAdmin = user?.role === "admin" || user?.role === "super_admin"
-  const isSenior = user?.role === "senior_agent" || user?.role === "admin" || user?.role === "super_admin"
-  const isSuperAdmin = user?.role === "super_admin"
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin'
+  const isSenior = user?.role === 'senior_agent' || user?.role === 'admin' || user?.role === 'super_admin'
+  const isSuperAdmin = user?.role === 'super_admin'
   const canManage = isAdmin || isSenior
 
   return (
@@ -84,6 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider")
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }

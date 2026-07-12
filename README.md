@@ -42,7 +42,7 @@
 ┌──────────────────────────────┼───────────────────────────────────────┐
 │                         Серверный слой                               │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌───────────┐  │
-│  │  Express 4  │  │   Prisma    │  │ Socket.IO 4 │  │  Zod 15   │  │
+│  │  Express 4  │  │   Prisma    │  │ Socket.IO 4 │  │  Zod v4   │  │
 │  │  Helmet     │  │   ORM 5.22  │  │  Redis Adap │  │  schemas  │  │
 │  │  Rate-limit │  │  17 models  │  │  Rooms/RBAC │  │  validate │  │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └───────────┘  │
@@ -172,7 +172,7 @@ npm run test:e2e
 
 ```
 ticketscursor/
-├── src/                       # React 18 + Vite + Tailwind
+├── src/                       # React 19 + Vite + Tailwind
 │   ├── components/            # UI компоненты (shadcn/ui)
 │   ├── pages/                 # Страницы приложения
 │   ├── hooks/                 # Кастомные хуки
@@ -222,4 +222,4 @@ MIT © 2026
 
 ---
 
-**Стек:** React 19 · TypeScript 5 · Vite 8 · Tailwind CSS 4 · shadcn/ui · Express · Prisma · MySQL 8 · Socket.io · Redis · Docker · Kubernetes · Playwright
+**Стек:** React 19 · TypeScript 5 · Vite 8 · Tailwind CSS 4 · shadcn/ui · Express · Prisma · MySQL 8 · Socket.io · Redis · Docker · Kubernetes · Playwright · Meilisearch

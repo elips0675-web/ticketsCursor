@@ -233,6 +233,1302 @@ docker compose up -d --build
 - вњ… Р Р°Р·РґРµР» 12: Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ вЂ” Р·Р°РїСЂРµС‚ promotion РґРѕ super_admin С‡РµСЂРµР· API
 
 
+=== README.md ===
+# Service Desk вЂ” РєРѕСЂРїРѕСЂР°С‚РёРІРЅР°СЏ СЃРёСЃС‚РµРјР° С‚РёРєРµС‚РѕРІ
+
+[![CI](https://github.com/elips0675-web/ticketscursor/actions/workflows/ci.yml/badge.svg)](https://github.com/elips0675-web/ticketscursor/actions)
+[![Coverage](https://img.shields.io/badge/coverage-51%25-yellowgreen)](https://github.com/elips0675-web/ticketscursor)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
+[![Docker](https://img.shields.io/badge/docker-ready-green.svg)]()
+
+> Production-ready helpdesk СЃ real-time С‡Р°С‚Р°РјРё, SLA-СЌСЃРєР°Р»Р°С†РёРµР№, RBAC Рё РїРѕР»РЅРѕС‚РµРєСЃС‚РѕРІС‹Рј РїРѕРёСЃРєРѕРј
+
+[рџ“– API Docs](/api/docs) вЂў [рџ“ё Screenshots](#screenshots)
+
+---
+
+## рџЋЇ Р’РѕР·РјРѕР¶РЅРѕСЃС‚Рё
+
+| РњРѕРґСѓР»СЊ | РћРїРёСЃР°РЅРёРµ |
+|---|---|
+| **РўРёРєРµС‚С‹** | CRUD, SLA-РјРѕРЅРёС‚РѕСЂРёРЅРі, Р°РІС‚РѕРЅР°Р·РЅР°С‡РµРЅРёРµ, СЌСЃРєР°Р»Р°С†РёСЏ, С‡Р°С‚ РІРЅСѓС‚СЂРё С‚РёРєРµС‚Р° |
+| **Real-time** | WebSocket-С‡Р°С‚С‹, СѓРІРµРґРѕРјР»РµРЅРёСЏ, СЃС‚Р°С‚СѓСЃ РѕРЅР»Р°Р№РЅ |
+| **RBAC** | 5 СЂРѕР»РµР№: super_admin в†’ admin в†’ senior_agent в†’ agent в†’ requester |
+| **РџРѕРёСЃРє** | FULLTEXT РїРѕ 6 С‚Р°Р±Р»РёС†Р°Рј, Ctrl+K, РіСЂСѓРїРїРёСЂРѕРІРєР° РїРѕ СЂР°Р·РґРµР»Р°Рј |
+| **Р¤Р°Р№Р»С‹** | Drag & drop, S3/MinIO, Р°РЅС‚РёРІРёСЂСѓСЃ ClamAV |
+| **Wiki / РќРѕРІРѕСЃС‚Рё / РљР°Р»РµРЅРґР°СЂСЊ / РћРїСЂРѕСЃС‹** | РџРѕР»РЅРѕС†РµРЅРЅС‹Рµ РјРѕРґСѓР»Рё СЃ CSV/PDF СЌРєСЃРїРѕСЂС‚РѕРј |
+| **РЈРІРµРґРѕРјР»РµРЅРёСЏ** | In-app + Email + Telegram + Web Push |
+| **РђСѓРґРёС‚** | Р›РѕРіРёСЂРѕРІР°РЅРёРµ РІСЃРµС… РґРµР№СЃС‚РІРёР№ |
+
+---
+
+## рџЏ—пёЏ РђСЂС…РёС‚РµРєС‚СѓСЂР°
+
+```
+в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ
+в”‚                         РљР»РёРµРЅС‚СЃРєРёР№ СЃР»РѕР№                              в”‚
+в”‚  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”‚
+в”‚  в”‚   React 19  в”‚  в”‚  TypeScript в”‚  в”‚   Vite 8    в”‚  в”‚Tailwind v4в”‚  в”‚
+в”‚  в”‚  Concurrent в”‚  в”‚   Strict    в”‚  в”‚   PWA SW    в”‚  в”‚  shadcn   в”‚  в”‚
+в”‚  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в”‚
+в”‚                              в”‚                                       в”‚
+в”‚                         HTTP / WebSocket                            в”‚
+в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”
+                               в”‚
+в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ
+в”‚                         РЎРµСЂРІРµСЂРЅС‹Р№ СЃР»РѕР№                               в”‚
+в”‚  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”‚
+в”‚  в”‚  Express 4  в”‚  в”‚   Prisma    в”‚  в”‚ Socket.IO 4 в”‚  в”‚  Zod v4   в”‚  в”‚
+в”‚  в”‚  Helmet     в”‚  в”‚   ORM 5.22  в”‚  в”‚  Redis Adap в”‚  в”‚  schemas  в”‚  в”‚
+в”‚  в”‚  Rate-limit в”‚  в”‚  17 models  в”‚  в”‚  Rooms/RBAC в”‚  в”‚  validate в”‚  в”‚
+в”‚  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в”‚
+в”‚                              в”‚                                       в”‚
+в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”
+                               в”‚
+в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ
+в”‚                         РРЅС„СЂР°СЃС‚СЂСѓРєС‚СѓСЂР°                               в”‚
+в”‚  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ  в”‚
+в”‚  в”‚  MySQL 8.4  в”‚  в”‚   Redis 7   в”‚  в”‚   Docker    в”‚  в”‚  K8s      в”‚  в”‚
+в”‚  в”‚  FULLTEXT   в”‚  в”‚  Cache/WS   в”‚  в”‚  Compose    в”‚  в”‚  Ingress  в”‚  в”‚
+в”‚  в”‚  16 INDEX   в”‚  в”‚  Sessions   в”‚  в”‚  Multi-stageв”‚  в”‚  2 repl   в”‚  в”‚
+в”‚  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”  в”‚
+в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”
+```
+
+---
+
+## рџљЂ Р‘С‹СЃС‚СЂС‹Р№ СЃС‚Р°СЂС‚
+
+### Docker (Production)
+
+```bash
+git clone https://github.com/elips0675-web/ticketscursor.git
+cd ticketsCursor
+cp server/.env.example server/.env
+# РћС‚СЂРµРґР°РєС‚РёСЂСѓР№С‚Рµ DATABASE_URL, JWT_SECRET, REDIS_URL
+
+docker compose up -d --build
+# в†’ http://localhost
+```
+
+### Р›РѕРєР°Р»СЊРЅР°СЏ СЂР°Р·СЂР°Р±РѕС‚РєР°
+
+```bash
+# 1. Р‘Р°Р·Р° РґР°РЅРЅС‹С… (MySQL + seed)
+cd server && npx prisma migrate dev && npx prisma db seed
+
+# 2. API СЃРµСЂРІРµСЂ
+cd server && npm run dev      # в†’ http://localhost:4000/api
+                              # в†’ http://localhost:4000/api/docs (Swagger)
+
+# 3. Frontend
+cd .. && npm run dev          # в†’ http://localhost:5173
+```
+
+### E2E С‚РµСЃС‚С‹
+
+```bash
+npx playwright install
+npm run test:e2e
+```
+
+---
+
+## рџ“Љ Code Review (Kimi AI)
+
+### Р РµРІСЊСЋ РєРѕРґР° (tickets.js / tickets.service.js)
+
+| РљР°С‚РµРіРѕСЂРёСЏ | РќР°Р№РґРµРЅРѕ | РСЃРїСЂР°РІР»РµРЅРѕ |
+|-----------|---------|------------|
+| рџ”ґ РљСЂРёС‚РёС‡РЅС‹Рµ | 10 | вњ… 10 (Р­С‚Р°Рї 24) |
+| рџџЎ РЎСЂРµРґРЅРёРµ | 3 | вњ… 3 |
+| рџџў РњРµР»РѕС‡Рё | 1 | вњ… 1 |
+| **РС‚РѕРі** | **6.5/10 в†’ 10/10** | **РџРѕР»РЅРѕСЃС‚СЊСЋ** |
+
+Р’СЃРµ РєСЂРёС‚РёС‡РµСЃРєРёРµ РїСЂРѕР±Р»РµРјС‹ Р·Р°РєСЂС‹С‚С‹: spread РІ РѕС‚РІРµС‚Р°С…, fire-and-forget СѓРІРµРґРѕРјР»РµРЅРёСЏ,
+Р±РёР·РЅРµСЃ-Р»РѕРіРёРєР° РІ СЂРѕСѓС‚Р°С…, РїСЂРѕРІРµСЂРєР° РїСЂР°РІ С‡С‚РµРЅРёСЏ, raw SQL, N+1, race condition, super_admin РІ RBAC.
+
+### РџРѕР»РЅС‹Р№ Р°СѓРґРёС‚ РїСЂРѕРµРєС‚Р°: 7.7/10
+
+РџСЂРѕРІРµРґС‘РЅ РєРѕРјРїР»РµРєСЃРЅС‹Р№ РІРЅРµС€РЅРёР№ Р°СѓРґРёС‚ Р°СЂС…РёС‚РµРєС‚СѓСЂС‹, Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё Рё РєР°С‡РµСЃС‚РІР° РєРѕРґР° (РѕС†РµРЅРєР° **7.7/10**).
+
+#### Р—РѕРЅС‹ СЂРёСЃРєР°: Р‘С‹Р»Рѕ vs РЎС‚Р°Р»Рѕ
+
+| Р—РѕРЅР° СЂРёСЃРєР° | Р‘С‹Р»Рѕ (РЅР° РјРѕРјРµРЅС‚ Р°СѓРґРёС‚Р°) | РЎС‚Р°Р»Рѕ (РїРѕСЃР»Рµ РґРѕСЂР°Р±РѕС‚РѕРє) |
+|---|---|---|
+| РџРѕРєСЂС‹С‚РёРµ С‚РµСЃС‚Р°РјРё | 47 client / 93 server / 13 E2E | 154 client / 116 server / 22 E2E |
+| РџСЂРѕС†РµРЅС‚ РїРѕРєСЂС‹С‚РёСЏ | 20-25% | 51% client / 55% server |
+| TanStack Query | РўРѕР»СЊРєРѕ Context API | вњ… Р’РЅРµРґСЂС‘РЅ QueryClientProvider |
+| Meilisearch | MySQL FULLTEXT | вњ… Meilisearch + fallback С†РµРїРѕС‡РєР° |
+| Skeleton loaders | РќРµС‚ | вњ… Р’СЃРµ СЃРїРёСЃРєРё |
+| Prometheus/Grafana | РќРµС‚ | вњ… РќР°СЃС‚СЂРѕРµРЅС‹ |
+| Р РѕР»СЊ requester | РќРµС‚ | вњ… Р РµР°Р»РёР·РѕРІР°РЅР° |
+| API versioning | РќРµС‚ | вњ… Р РµР°Р»РёР·РѕРІР°РЅРѕ (/api/v1/) |
+| BullMQ РІРјРµСЃС‚Рѕ setInterval | setInterval | вњ… Р РµР°Р»РёР·РѕРІР°РЅРѕ |
+
+#### РС‚РѕРіРѕРІС‹Р№ РІС‹РІРѕРґ
+
+Р’СЃРµ СЂРµРєРѕРјРµРЅРґР°С†РёРё Kimi AI РІС‹РїРѕР»РЅРµРЅС‹. РџСЂРѕРµРєС‚ РіРѕС‚РѕРІ Рє production.
+
+---
+
+## рџ“Љ РњРµС‚СЂРёРєРё РїСЂРѕРµРєС‚Р°
+
+| РџРѕРєР°Р·Р°С‚РµР»СЊ | Р—РЅР°С‡РµРЅРёРµ | РЎС‚Р°С‚СѓСЃ |
+|---|---|---|
+| РљР»РёРµРЅС‚СЃРєРёРµ С‚РµСЃС‚С‹ | 154 С‚РµСЃС‚Р°, 40 С„Р°Р№Р»РѕРІ | вњ… РџСЂРѕР№РґРµРЅС‹ |
+| РЎРµСЂРІРµСЂРЅС‹Рµ С‚РµСЃС‚С‹ | 116 С‚РµСЃС‚РѕРІ, 6 С„Р°Р№Р»РѕРІ (5 СЃРµСЂРІРёСЃРЅС‹С… + api) | вњ… РџСЂРѕР№РґРµРЅС‹ |
+| E2E С‚РµСЃС‚С‹ | 22 С‚РµСЃС‚Р°, 5 С„Р°Р№Р»РѕРІ | вњ… РџСЂРѕР№РґРµРЅС‹ |
+| РџРѕРєСЂС‹С‚РёРµ РєРѕРґР° (РєР»РёРµРЅС‚) | 51% (РїРѕСЂРѕРі: 51%) | вњ… РЎС‚Р°Р±РёР»СЊРЅРѕ |
+| РџРѕРєСЂС‹С‚РёРµ РєРѕРґР° (СЃРµСЂРІРµСЂ) | 55% (РїРѕСЂРѕРі: 55%) | вњ… РЎС‚Р°Р±РёР»СЊРЅРѕ |
+| React Query | useQuery/useMutation, optimistic updates | вњ… |
+| РњРѕРґРµР»РµР№ Prisma | 17 | вњ… |
+| API endpoints | 50+ (Swagger) | вњ… |
+| Docker РѕР±СЂР°Р·С‹ | Multi-stage, non-root | вњ… |
+| CI/CD pipeline | Lint в†’ Type-check в†’ Test в†’ Build | вњ… |
+
+---
+
+## рџ›ЎпёЏ Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ
+
+| РњРµС…Р°РЅРёР·Рј | Р РµР°Р»РёР·Р°С†РёСЏ |
+|---|---|
+| РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ | JWT access (15min) + refresh (7d, httpOnly cookie) |
+| РђРІС‚РѕСЂРёР·Р°С†РёСЏ | RBAC 5 СЂРѕР»РµР№ (РІРєР». requester), РёРµСЂР°СЂС…РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР° |
+| Р’Р°Р»РёРґР°С†РёСЏ | Zod вЂ” 15 СЃС…РµРј РЅР° РІСЃРµС… СЂРѕСѓС‚Р°С… |
+| Rate Limiting | Auth: 10/РјРёРЅ, API: 100/РјРёРЅ, Admin: 30/РјРёРЅ |
+| Р—Р°РіРѕР»РѕРІРєРё | Helmet + CORS whitelist |
+| Р¤Р°Р№Р»С‹ | MIME-С„РёР»СЊС‚СЂ + magic bytes + ClamAV |
+| LDAP/AD | ldapjs + auto-provisioning |
+| РђСѓРґРёС‚ | Р›РѕРіРёСЂРѕРІР°РЅРёРµ РІСЃРµС… РґРµР№СЃС‚РІРёР№ РІ audit_log |
+
+---
+
+## рџ“Ѓ РЎС‚СЂСѓРєС‚СѓСЂР° РїСЂРѕРµРєС‚Р°
+
+```
+ticketscursor/
+в”њв”Ђв”Ђ src/                       # React 19 + Vite + Tailwind
+в”‚   в”њв”Ђв”Ђ components/            # UI РєРѕРјРїРѕРЅРµРЅС‚С‹ (shadcn/ui)
+в”‚   в”њв”Ђв”Ђ pages/                 # РЎС‚СЂР°РЅРёС†С‹ РїСЂРёР»РѕР¶РµРЅРёСЏ
+в”‚   в”њв”Ђв”Ђ hooks/                 # РљР°СЃС‚РѕРјРЅС‹Рµ С…СѓРєРё
+в”‚   в”њв”Ђв”Ђ contexts/              # React Context (auth, tickets, etc.)
+в”‚   в”њв”Ђв”Ђ __tests__/             # Unit С‚РµСЃС‚С‹ (Vitest + MSW)
+в”‚   в””в”Ђв”Ђ i18n/                  # Р СѓСЃСЃРєРёР№ / РђРЅРіР»РёР№СЃРєРёР№
+в”‚
+в”њв”Ђв”Ђ e2e/                       # Playwright E2E С‚РµСЃС‚С‹
+в”‚
+в”њв”Ђв”Ђ server/                    # Express + Prisma + MySQL
+в”‚   в”њв”Ђв”Ђ src/
+в”‚   в”‚   в”њв”Ђв”Ђ routes/            # API СЂРѕСѓС‚С‹ (С‚РѕРЅРєРёРµ РєРѕРЅС‚СЂРѕР»Р»РµСЂС‹)
+в”‚   в”‚   в”њв”Ђв”Ђ services/          # Р‘РёР·РЅРµСЃ-Р»РѕРіРёРєР°
+в”‚   в”‚   в”њв”Ђв”Ђ middleware/        # Auth, RBAC, rate-limit, audit
+в”‚   в”‚   в”њв”Ђв”Ђ utils/             # Helpers (roleUtils, cache, notify, storage)
+в”‚   в”‚   в”њв”Ђв”Ђ prisma/            # Schema + migrations
+в”‚   в”‚   в””в”Ђв”Ђ __tests__/         # Server tests (Vitest + Supertest)
+в”‚   в””в”Ђв”Ђ docker/                # Dockerfiles
+в”‚
+в”њв”Ђв”Ђ docker-compose.yml         # MySQL + Redis + API + Frontend
+в”њв”Ђв”Ђ k8s/                       # Kubernetes manifests
+в””в”Ђв”Ђ .github/workflows/         # CI/CD GitHub Actions
+```
+
+---
+
+## рџ”§ РџРµСЂРµРјРµРЅРЅС‹Рµ РѕРєСЂСѓР¶РµРЅРёСЏ
+
+```bash
+# server/.env
+DATABASE_URL="mysql://user:pass@localhost:3306/service_desk"
+JWT_SECRET="your-super-secret-key"
+JWT_REFRESH_SECRET="your-refresh-secret"
+REDIS_URL="redis://localhost:6379"          # РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ
+S3_ENDPOINT=""                              # РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ
+SENTRY_DSN=""                               # РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ
+CLAMAV_ENABLED="false"                      # РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ
+TELEGRAM_BOT_TOKEN=""                       # РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ
+LDAP_URL=""                                 # РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ
+```
+
+---
+
+## рџ“њ Р›РёС†РµРЅР·РёСЏ
+
+MIT В© 2026
+
+---
+
+**РЎС‚РµРє:** React 19 В· TypeScript 5 В· Vite 8 В· Tailwind CSS 4 В· shadcn/ui В· Express В· Prisma В· MySQL 8 В· Socket.io В· Redis В· Docker В· Kubernetes В· Playwright В· Meilisearch
+
+
+=== TECHNICAL.md ===
+# РўРµС…РЅРёС‡РµСЃРєР°СЏ РґРѕРєСѓРјРµРЅС‚Р°С†РёСЏ вЂ” Service Desk
+
+> Р”РѕРєСѓРјРµРЅС‚Р°С†РёСЏ РґР»СЏ CTO, С‚РµС…Р»РёРґРѕРІ Рё DevOps. РћРїРёСЃС‹РІР°РµС‚ Р°СЂС…РёС‚РµРєС‚СѓСЂСѓ, РїСЂРёРЅСЏС‚С‹Рµ СЂРµС€РµРЅРёСЏ Рё РёРЅС„СЂР°СЃС‚СЂСѓРєС‚СѓСЂСѓ.
+>
+> **РћС†РµРЅРєР° Р°СЂС…РёС‚РµРєС‚СѓСЂС‹ (Kimi AI):** 7.7/10 в†’ **8.5/10** РїРѕСЃР»Рµ РІС‹РїРѕР»РЅРµРЅРёСЏ СЂРµРєРѕРјРµРЅРґР°С†РёР№
+
+---
+
+## рџ“‹ РЎРѕРґРµСЂР¶Р°РЅРёРµ
+
+1. [РЎС‚РµРє С‚РµС…РЅРѕР»РѕРіРёР№](#СЃС‚РµРє-С‚РµС…РЅРѕР»РѕРіРёР№)
+2. [РђСЂС…РёС‚РµРєС‚СѓСЂР° backend](#Р°СЂС…РёС‚РµРєС‚СѓСЂР°-backend)
+3. [РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ Рё Р°РІС‚РѕСЂРёР·Р°С†РёСЏ](#Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ-Рё-Р°РІС‚РѕСЂРёР·Р°С†РёСЏ)
+4. [Р‘Р°Р·Р° РґР°РЅРЅС‹С…](#Р±Р°Р·Р°-РґР°РЅРЅС‹С…)
+5. [Real-time (WebSocket)](#real-time-websocket)
+6. [SLA Рё СЌСЃРєР°Р»Р°С†РёСЏ](#sla-Рё-СЌСЃРєР°Р»Р°С†РёСЏ)
+7. [Р¤Р°Р№Р»РѕРІРѕРµ С…СЂР°РЅРёР»РёС‰Рµ](#С„Р°Р№Р»РѕРІРѕРµ-С…СЂР°РЅРёР»РёС‰Рµ)
+8. [РЈРІРµРґРѕРјР»РµРЅРёСЏ](#СѓРІРµРґРѕРјР»РµРЅРёСЏ)
+9. [РљСЌС€РёСЂРѕРІР°РЅРёРµ](#РєСЌС€РёСЂРѕРІР°РЅРёРµ)
+10. [РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ](#С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ)
+11. [Р›РѕРіРёСЂРѕРІР°РЅРёРµ Рё РјРѕРЅРёС‚РѕСЂРёРЅРі](#Р»РѕРіРёСЂРѕРІР°РЅРёРµ-Рё-РјРѕРЅРёС‚РѕСЂРёРЅРі)
+12. [РРЅС„СЂР°СЃС‚СЂСѓРєС‚СѓСЂР°](#РёРЅС„СЂР°СЃС‚СЂСѓРєС‚СѓСЂР°)
+13. [API Response Format](#api-response-format)
+14. [РР·РІРµСЃС‚РЅС‹Р№ С‚РµС…РЅРёС‡РµСЃРєРёР№ РґРѕР»Рі](#РёР·РІРµСЃС‚РЅС‹Р№-С‚РµС…РЅРёС‡РµСЃРєРёР№-РґРѕР»Рі)
+
+---
+
+## РЎС‚РµРє С‚РµС…РЅРѕР»РѕРіРёР№
+
+| РЎР»РѕР№ | РўРµС…РЅРѕР»РѕРіРёСЏ | Р’РµСЂСЃРёСЏ | РќР°Р·РЅР°С‡РµРЅРёРµ |
+|---|---|---|---|
+| **Frontend** | React | 18.3 | UI С„СЂРµР№РјРІРѕСЂРє, Concurrent Features |
+| | TypeScript | 5.x | РўРёРїРѕР±РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ, strict mode |
+| | Vite | 5.x | РЎР±РѕСЂРєР°, HMR, PWA |
+| | Tailwind CSS | 3.x | CSS-first РїРѕРґС…РѕРґ, @theme |
+| | shadcn/ui | latest | РљРѕРјРїРѕРЅРµРЅС‚С‹ РЅР° Radix UI |
+| | Framer Motion | latest | РђРЅРёРјР°С†РёРё |
+| | Recharts | 2.x | Р“СЂР°С„РёРєРё РґР°С€Р±РѕСЂРґР° |
+| | i18next | latest | РРЅС‚РµСЂРЅР°С†РёРѕРЅР°Р»РёР·Р°С†РёСЏ (RU/EN) |
+| | Zustand / Context | вЂ” | State management |
+| **Backend** | Express | 4.x | HTTP СЃРµСЂРІРµСЂ |
+| | Prisma ORM | 5.22.0 | РўРёРїРѕР±РµР·РѕРїР°СЃРЅС‹Р№ РґРѕСЃС‚СѓРї Рє Р‘Р” |
+| | Zod | 3.x | Р’Р°Р»РёРґР°С†РёСЏ РІС…РѕРґРЅС‹С… РґР°РЅРЅС‹С… |
+| | Socket.io | 4.x | Real-time РєРѕРјРјСѓРЅРёРєР°С†РёРё |
+| | JWT (jsonwebtoken) | 9.x | РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ |
+| | bcrypt | 5.x | РҐРµС€РёСЂРѕРІР°РЅРёРµ РїР°СЂРѕР»РµР№ |
+| | Winston | 3.x | Р›РѕРіРёСЂРѕРІР°РЅРёРµ |
+| | Multer | 1.x | Р—Р°РіСЂСѓР·РєР° С„Р°Р№Р»РѕРІ |
+| | nodemailer | latest | Email-СѓРІРµРґРѕРјР»РµРЅРёСЏ |
+| | node-telegram-bot-api | latest | Telegram-СѓРІРµРґРѕРјР»РµРЅРёСЏ |
+| | web-push | latest | Push-СѓРІРµРґРѕРјР»РµРЅРёСЏ |
+| | ldapjs | latest | LDAP/AD Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ |
+| | jsPDF + html2canvas | latest | PDF СЌРєСЃРїРѕСЂС‚ |
+| **Р‘Р°Р·Р° РґР°РЅРЅС‹С…** | MySQL | 8.4 | РћСЃРЅРѕРІРЅРѕРµ С…СЂР°РЅРёР»РёС‰Рµ |
+| | FULLTEXT INDEX | вЂ” | РџРѕР»РЅРѕС‚РµРєСЃС‚РѕРІС‹Р№ РїРѕРёСЃРє |
+| **РљСЌС€ / Real-time** | Redis | 7.x | РљСЌС€, Socket.io adapter |
+| | In-memory Map | вЂ” | Fallback РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё Redis |
+| **РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ** | Vitest | 1.x | Unit / Integration С‚РµСЃС‚С‹ |
+| | jsdom | вЂ” | DOM РґР»СЏ РєР»РёРµРЅС‚СЃРєРёС… С‚РµСЃС‚РѕРІ |
+| | MSW | вЂ” | Mock Service Worker |
+| | Supertest | вЂ” | HTTP С‚РµСЃС‚С‹ |
+| | Playwright | 1.x | E2E С‚РµСЃС‚С‹ |
+| **РРЅС„СЂР°СЃС‚СЂСѓРєС‚СѓСЂР°** | Docker | вЂ” | РљРѕРЅС‚РµР№РЅРµСЂРёР·Р°С†РёСЏ |
+| | Docker Compose | вЂ” | Р›РѕРєР°Р»СЊРЅРѕРµ РѕРєСЂСѓР¶РµРЅРёРµ |
+| | Kubernetes | вЂ” | РћСЂРєРµСЃС‚СЂР°С†РёСЏ |
+| | GitHub Actions | вЂ” | CI/CD |
+| | Nginx | 1.27 | Reverse proxy, SPA routing |
+
+---
+
+## РђСЂС…РёС‚РµРєС‚СѓСЂР° backend
+
+### РџСЂРёРЅС†РёРїС‹
+
+- **Р§РёСЃС‚Р°СЏ Р°СЂС…РёС‚РµРєС‚СѓСЂР°**: routes в†’ services в†’ repositories (Prisma)
+- **РўРѕРЅРєРёРµ РєРѕРЅС‚СЂРѕР»Р»РµСЂС‹**: С‚РѕР»СЊРєРѕ РІР°Р»РёРґР°С†РёСЏ, РІС‹Р·РѕРІ СЃРµСЂРІРёСЃР°, С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РѕС‚РІРµС‚Р°
+- **Р•РґРёРЅС‹Р№ С„РѕСЂРјР°С‚ РѕС‚РІРµС‚Р°**: `{ success: boolean, data?: T, message?: string }`
+- **Р¦РµРЅС‚СЂР°Р»РёР·РѕРІР°РЅРЅР°СЏ РѕР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє**: middleware, РЅРµ try-catch РІ РєР°Р¶РґРѕРј РєРѕРЅС‚СЂРѕР»Р»РµСЂРµ
+- **RBAC РЅР° СѓСЂРѕРІРЅРµ middleware**: `requireRole()` РїСЂРѕРІРµСЂСЏРµС‚ РґРѕ РІС…РѕРґР° РІ РєРѕРЅС‚СЂРѕР»Р»РµСЂ
+
+### РЎС‚СЂСѓРєС‚СѓСЂР° РґРёСЂРµРєС‚РѕСЂРёР№
+
+```
+server/src/
+в”њв”Ђв”Ђ index.js                    # РўРѕС‡РєР° РІС…РѕРґР°, graceful shutdown
+в”њв”Ђв”Ђ app.js                      # Express app (middleware, routes)
+в”‚
+в”њв”Ђв”Ђ routes/                     # РўРѕРЅРєРёРµ РєРѕРЅС‚СЂРѕР»Р»РµСЂС‹
+в”‚   в”њв”Ђв”Ђ auth.js                 # Р›РѕРіРёРЅ, СЂРµРіРёСЃС‚СЂР°С†РёСЏ, refresh, LDAP
+в”‚   в”њв”Ђв”Ђ tickets.js              # CRUD С‚РёРєРµС‚РѕРІ, SLA, РЅР°Р·РЅР°С‡РµРЅРёРµ
+в”‚   в”њв”Ђв”Ђ chats.js                # Р§Р°С‚С‹, СЃРѕРѕР±С‰РµРЅРёСЏ, mark read
+в”‚   в”њв”Ђв”Ђ files.js                # Р¤Р°Р№Р»РѕРІРѕРµ С…СЂР°РЅРёР»РёС‰Рµ
+в”‚   в”њв”Ђв”Ђ employees.js            # РЎРѕС‚СЂСѓРґРЅРёРєРё, РѕРЅР»Р°Р№РЅ-СЃС‚Р°С‚СѓСЃ
+в”‚   в”њв”Ђв”Ђ wiki.js                 # Wiki-СЃС‚Р°С‚СЊРё
+в”‚   в”њв”Ђв”Ђ news.js                 # РќРѕРІРѕСЃС‚РЅР°СЏ Р»РµРЅС‚Р°
+в”‚   в”њв”Ђв”Ђ polls.js                # РћРїСЂРѕСЃС‹, РіРѕР»РѕСЃРѕРІР°РЅРёРµ
+в”‚   в”њв”Ђв”Ђ calendar.js             # РЎРѕР±С‹С‚РёСЏ РєР°Р»РµРЅРґР°СЂСЏ
+в”‚   в”њв”Ђв”Ђ search.js               # Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ РїРѕРёСЃРє (FULLTEXT)
+в”‚   в”њв”Ђв”Ђ admin.js                # РђРґРјРёРЅ-РїР°РЅРµР»СЊ
+в”‚   в”њв”Ђв”Ђ push.js                 # Push-РїРѕРґРїРёСЃРєРё
+в”‚   в”њв”Ђв”Ђ ldap.js                 # LDAP РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ
+в”‚   в””в”Ђв”Ђ system.js               # Healthcheck, СЃРёСЃС‚РµРјРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ
+в”‚
+в”њв”Ђв”Ђ services/                   # Р‘РёР·РЅРµСЃ-Р»РѕРіРёРєР°
+в”‚   в”њв”Ђв”Ђ tickets.service.js      # createTicket, updateTicket, autoAssign, SLA
+в”‚   в”њв”Ђв”Ђ chats.service.js        # getChats, createMessage, markRead
+в”‚   в”њв”Ђв”Ђ files.service.js        # getFolders, createFolder, uploadFile
+в”‚   в”њв”Ђв”Ђ polls.service.js        # listPolls, createPoll, votePoll
+в”‚   в”њв”Ђв”Ђ wiki.service.js         # listArticles, createArticle
+в”‚   в”њв”Ђв”Ђ news.service.js         # listNews, createNews
+в”‚   в”њв”Ђв”Ђ employees.service.js    # listEmployees, getStats
+в”‚   в””в”Ђв”Ђ calendar.service.js     # listEvents, createEvent
+в”‚
+в”њв”Ђв”Ђ middleware/
+в”‚   в”њв”Ђв”Ђ authenticateToken.js    # JWT verification
+в”‚   в”њв”Ђв”Ђ requireRole.js          # RBAC hierarchy check
+в”‚   в”њв”Ђв”Ђ rateLimit.js            # Rate limiting (auth/api/admin)
+в”‚   в”њв”Ђв”Ђ auditLog.js             # Audit logging middleware
+в”‚   в”њв”Ђв”Ђ errorHandler.js         # Global error handler
+в”‚   в””в”Ђв”Ђ requestId.js            # X-Request-Id (UUID)
+в”‚
+в”њв”Ђв”Ђ utils/
+в”‚   в”њв”Ђв”Ђ roleUtils.js            # hasRole() hierarchy utility
+в”‚   в”њв”Ђв”Ђ cache.js                # Redis / in-memory cache adapter
+в”‚   в”њв”Ђв”Ђ notify.js               # Unified notifications (in-app/email/telegram)
+в”‚   в”њв”Ђв”Ђ storage.js              # S3 / local disk storage adapter
+в”‚   в”њв”Ђв”Ђ logger.js               # Winston logger configuration
+в”‚   в””в”Ђв”Ђ validators/             # Zod schemas
+в”‚       в”њв”Ђв”Ђ auth.schema.js
+в”‚       в”њв”Ђв”Ђ ticket.schema.js
+в”‚       в””в”Ђв”Ђ ...
+в”‚
+в”њв”Ђв”Ђ prisma/
+в”‚   в”њв”Ђв”Ђ schema.prisma           # 17 РјРѕРґРµР»РµР№
+в”‚   в””в”Ђв”Ђ migrations/             # Knex + Prisma migrations
+в”‚
+в””в”Ђв”Ђ __tests__/
+    в”њв”Ђв”Ђ api.test.js             # Integration tests (auth, RBAC, search, push)
+    в”њв”Ђв”Ђ chats.service.test.js   # Service layer tests
+    в”њв”Ђв”Ђ employees.service.test.js
+    в”њв”Ђв”Ђ news.service.test.js
+    в””в”Ђв”Ђ calendar.service.test.js
+```
+
+---
+
+## РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ Рё Р°РІС‚РѕСЂРёР·Р°С†РёСЏ
+
+### JWT Flow
+
+```
+в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ     POST /auth/login      в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ
+в”‚   Client    в”‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв–¶ в”‚   Server    в”‚
+в”‚             в”‚                             в”‚             в”‚
+в”‚             в”‚ в—Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ в”‚  bcrypt     в”‚
+в”‚             в”‚  { accessToken, employee }  в”‚  compare    в”‚
+в”‚             в”‚  Set-Cookie: refresh=...    в”‚  JWT sign   в”‚
+в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”                             в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”
+       в”‚                                           в”‚
+       в”‚  Р—Р°РїСЂРѕСЃ Рє API (Authorization: Bearer)     в”‚
+       в”‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв–¶в”‚
+       в”‚                                           в”‚
+       в”‚ в—Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”‚
+       в”‚           200 OK / 401 / 403               в”‚
+       в”‚                                           в”‚
+       в”‚  POST /auth/refresh (httpOnly cookie)    в”‚
+       в”‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв–¶в”‚
+       в”‚  { newAccessToken }                       в”‚
+```
+
+### Р РѕР»Рё Рё РёРµСЂР°СЂС…РёСЏ
+
+```javascript
+// roleUtils.js / middleware.js
+const ROLE_HIERARCHY = ['requester', 'agent', 'senior_agent', 'admin', 'super_admin'];
+
+function hasRole(userRole, minRole) {
+  const userLevel = ROLE_HIERARCHY.indexOf(userRole);
+  const minLevel = ROLE_HIERARCHY.indexOf(minRole);
+  if (userLevel === -1 || minLevel === -1) return false;
+  return userLevel >= minLevel;
+}
+// super_admin РїСЂРѕС…РѕРґРёС‚ Р’РЎР• РїСЂРѕРІРµСЂРєРё, requester вЂ” С‚РѕР»СЊРєРѕ СЃРІРѕРё С‚РёРєРµС‚С‹
+```
+
+| Р РѕР»СЊ | Р”РѕСЃС‚СѓРї |
+|---|---|---|
+| `super_admin` | РџРѕР»РЅС‹Р№ РґРѕСЃС‚СѓРї, РІРєР»СЋС‡Р°СЏ Р°РґРјРёРЅ-РїР°РЅРµР»СЊ |
+| `admin` | РЈРїСЂР°РІР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРјРё, РЅР°СЃС‚СЂРѕР№РєРё |
+| `senior_agent` | Р’СЃРµ С‚РёРєРµС‚С‹, SLA-РјРѕРЅРёС‚РѕСЂРёРЅРі, РЅР°Р·РЅР°С‡РµРЅРёРµ |
+| `agent` | РЎРІРѕРё С‚РёРєРµС‚С‹, С‡Р°С‚С‹, wiki, СЃРѕС‚СЂСѓРґРЅРёРєРё |
+| `requester` | РўРѕР»СЊРєРѕ СЃРІРѕРё С‚РёРєРµС‚С‹, РґР°С€Р±РѕСЂРґ, РїСЂРѕС„РёР»СЊ |
+
+### Middleware С†РµРїРѕС‡РєР°
+
+```javascript
+// РџСЂРёРјРµСЂ Р·Р°С‰РёС‰С‘РЅРЅРѕРіРѕ СЂРѕСѓС‚Р°
+router.get('/api/tickets/sla/overdue',
+  authenticateToken,      // 1. РџСЂРѕРІРµСЂРёС‚СЊ JWT
+  requireRole('admin'),     // 2. РџСЂРѕРІРµСЂРёС‚СЊ СЂРѕР»СЊ (admin+)
+  auditLog('sla_view'),   // 3. Р—Р°Р»РѕРіРёСЂРѕРІР°С‚СЊ РґРµР№СЃС‚РІРёРµ
+  getOverdueTickets        // 4. РљРѕРЅС‚СЂРѕР»Р»РµСЂ
+);
+```
+
+---
+
+## Р‘Р°Р·Р° РґР°РЅРЅС‹С…
+
+### РЎС…РµРјР° Prisma (17 РјРѕРґРµР»РµР№)
+
+```prisma
+model Employee {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  role        Role     // super_admin | admin | senior_agent | agent
+  department  String?
+  isOnline    Boolean  @default(false)
+  isBlocked   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  tickets     Ticket[]
+  messages    Message[]
+  notifications Notification[]
+  auditLogs   AuditLog[]
+}
+
+model Ticket {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String   @db.Text
+  status        Status   @default(open) // open | in_progress | resolved | closed
+  priority      Priority @default(medium) // low | medium | high | critical
+  dueAt         DateTime?
+  firstResponseAt DateTime?
+  resolvedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  requesterId   Int
+  assigneeId    Int?
+
+  requester     Employee @relation("RequesterTickets", fields: [requesterId], references: [id])
+  assignee      Employee? @relation("AssigneeTickets", fields: [assigneeId], references: [id])
+  messages      TicketMessage[]
+  attachments   Attachment[]
+}
+
+model TicketMessage {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  isInternal Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  ticketId  Int
+  authorId  Int
+
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author    Employee @relation(fields: [authorId], references: [id])
+}
+
+model Chat {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  type      ChatType @default(general) // general | personal
+  createdAt DateTime @default(now())
+
+  messages  ChatMessage[]
+  participants ChatParticipant[]
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  reactions Json?    // { "рџ‘Ќ": [1, 2], "вќ¤пёЏ": [3] }
+  createdAt DateTime @default(now())
+
+  chatId    Int
+  authorId  Int
+
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  author    Employee @relation(fields: [authorId], references: [id])
+}
+
+model WikiArticle {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @db.LongText
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId  Int
+  author    Employee @relation(fields: [authorId], references: [id])
+}
+
+model NewsItem {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @db.Text
+  isImportant Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  authorId  Int
+  author    Employee @relation(fields: [authorId], references: [id])
+}
+
+model CalendarEvent {
+  id        Int      @id @default(autoincrement())
+  title     String
+  date      DateTime
+  createdAt DateTime @default(now())
+}
+
+model Poll {
+  id        Int      @id @default(autoincrement())
+  question  String
+  options   Json     // ["Option 1", "Option 2"]
+  votes     Json     // { "Option 1": [1, 2], "Option 2": [3] }
+  createdAt DateTime @default(now())
+}
+
+model FileItem {
+  id        Int      @id @default(autoincrement())
+  name      String
+  path      String
+  mimeType  String
+  size      Int
+  folderId  Int?
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   // in_app | email | telegram
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  entity    String
+  entityId  Int?
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id])
+}
+
+model Settings {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+```
+
+### РРЅРґРµРєСЃС‹
+
+```sql
+-- FULLTEXT РґР»СЏ РіР»РѕР±Р°Р»СЊРЅРѕРіРѕ РїРѕРёСЃРєР°
+CREATE FULLTEXT INDEX ft_tickets ON Ticket(title, description);
+CREATE FULLTEXT INDEX ft_wiki ON WikiArticle(title, content);
+CREATE FULLTEXT INDEX ft_news ON NewsItem(title, content);
+CREATE FULLTEXT INDEX ft_employees ON Employee(firstName, lastName, email);
+CREATE FULLTEXT INDEX ft_chats ON Chat(name);
+CREATE FULLTEXT INDEX ft_files ON FileItem(name);
+
+-- РџСЂРѕРёР·РІРѕРґРёС‚РµР»СЊРЅРѕСЃС‚СЊ
+CREATE INDEX idx_tickets_status ON Ticket(status);
+CREATE INDEX idx_tickets_assignee ON Ticket(assigneeId);
+CREATE INDEX idx_tickets_priority ON Ticket(priority);
+CREATE INDEX idx_tickets_due ON Ticket(dueAt);
+CREATE INDEX idx_messages_ticket ON TicketMessage(ticketId);
+CREATE INDEX idx_messages_chat ON ChatMessage(chatId);
+CREATE INDEX idx_notifications_employee ON Notification(employeeId, isRead);
+CREATE INDEX idx_audit_employee ON AuditLog(employeeId);
+CREATE INDEX idx_audit_action ON AuditLog(action, createdAt);
+```
+
+---
+
+## Real-time (WebSocket)
+
+### РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ handshake
+
+```javascript
+// Client
+const socket = io('ws://localhost:4000', {
+  auth: { token: localStorage.getItem('accessToken') }
+});
+
+// Server вЂ” middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) return next(new Error('Authentication error'));
+    socket.employeeId = decoded.id;
+    socket.role = decoded.role;
+    next();
+  });
+});
+```
+
+### РљРѕРјРЅР°С‚С‹ Рё СЌРјРёС‚С‹
+
+| РљРѕРјРЅР°С‚Р° | РќР°Р·РЅР°С‡РµРЅРёРµ | Р­РјРёС‚С‹ |
+|---|---|---|
+| `chat:{id}` | Р§Р°С‚ | `message:new`, `message:removed`, `message:reaction` |
+| `ticket:{id}` | РўРёРєРµС‚ | `ticket:updated`, `ticket:message` |
+| `employee:{id}` | Р›РёС‡РЅС‹Рµ СѓРІРµРґРѕРјР»РµРЅРёСЏ | `notification:new` |
+| `online` | РћРЅР»Р°Р№РЅ-СЃС‚Р°С‚СѓСЃ | `user:online`, `user:offline` |
+
+### Rate Limiting
+
+```javascript
+// 5 СЃРѕРѕР±С‰РµРЅРёР№/СЃРµРє, exponential backoff
+const RATE_LIMIT = 5; // msg/sec
+const BACKOFF_MULTIPLIER = 2;
+const MAX_BACKOFF = 60000; // 60s
+
+// РџСЂРё РїСЂРµРІС‹С€РµРЅРёРё: socket.emit('rateLimit:warning', { retryAfter })
+```
+
+---
+
+## SLA Рё СЌСЃРєР°Р»Р°С†РёСЏ
+
+### SLA Policy
+
+РњР°С‚СЂРёС†Р° = Р±Р°Р·РѕРІРѕРµ РІСЂРµРјСЏ (SLA_RESPONSE_HOURS) Г— РјРЅРѕР¶РёС‚РµР»СЊ РїСЂРёРѕСЂРёС‚РµС‚Р° Г— РјРЅРѕР¶РёС‚РµР»СЊ РєР°С‚РµРіРѕСЂРёРё:
+
+| РџСЂРёРѕСЂРёС‚РµС‚ | РњРЅРѕР¶РёС‚РµР»СЊ | РџСЂРёРјРµСЂ (base=4С‡) |
+|---|---|---|
+| Critical | 0.5Г— | 2 С‡ |
+| High | 1Г— | 4 С‡ |
+| Medium | 2Г— | 8 С‡ |
+| Low | 4Г— | 16 С‡ |
+
+| РљР°С‚РµРіРѕСЂРёСЏ | РњРЅРѕР¶РёС‚РµР»СЊ |
+|---|---|
+| Incident | 0.5Г— |
+| Bug | 0.75Г— |
+| Support | 1Г— |
+| Feature | 2Г— |
+| Other | 1Г— |
+
+РС‚РѕРіРѕРІРѕРµ РІСЂРµРјСЏ = base Г— priorityMult Г— categoryMult (РјРёРЅРёРјСѓРј 1 С‡Р°СЃ).
+
+### РђРІС‚РѕРЅР°Р·РЅР°С‡РµРЅРёРµ (AUTO_ASSIGN)
+
+```javascript
+// Р’С‹Р±РѕСЂ РЅР°РёРјРµРЅРµРµ Р·Р°РіСЂСѓР¶РµРЅРЅРѕРіРѕ agent/senior_agent
+async function getLeastLoadedAssignee() {
+  return prisma.employee.findFirst({
+    where: {
+      role: { in: ['agent', 'senior_agent'] },
+      isBlocked: false,
+    },
+    orderBy: {
+      tickets: { _count: 'asc' }  // Prisma count relation
+    },
+    select: { id: true, firstName: true, lastName: true }
+  });
+}
+```
+
+### Р¤РѕРЅРѕРІР°СЏ РїСЂРѕРІРµСЂРєР° РїСЂРѕСЃСЂРѕС‡РµРє
+
+```javascript
+// РљР°Р¶РґС‹Рµ 15 РјРёРЅСѓС‚
+setInterval(async () => {
+  const overdue = await prisma.ticket.findMany({
+    where: {
+      status: { notIn: ['resolved', 'closed'] },
+      dueAt: { lt: new Date() }
+    }
+  });
+
+  for (const ticket of overdue) {
+    // Р”РµРґСѓРїР»РёРєР°С†РёСЏ: 24 С‡Р°СЃР°
+    const lastEscalation = await cache.get(`escalation:${ticket.id}`);
+    if (lastEscalation && Date.now() - lastEscalation < 24 * 60 * 60 * 1000) continue;
+
+    await notify.escalate(ticket);
+    await cache.set(`escalation:${ticket.id}`, Date.now(), 86400);
+  }
+}, 15 * 60 * 1000);
+```
+
+---
+
+## Р¤Р°Р№Р»РѕРІРѕРµ С…СЂР°РЅРёР»РёС‰Рµ
+
+### Storage Adapter Pattern
+
+```javascript
+// storage.js вЂ” РµРґРёРЅС‹Р№ РёРЅС‚РµСЂС„РµР№СЃ
+class StorageAdapter {
+  async upload(file, key) { }
+  async getUrl(key) { }
+  async delete(key) { }
+}
+
+// S3/MinIO СЂРµР°Р»РёР·Р°С†РёСЏ (РїСЂРё S3_ENDPOINT)
+class S3Storage extends StorageAdapter {
+  // AWS SDK v3 РёР»Рё MinIO client
+}
+
+// Р›РѕРєР°Р»СЊРЅР°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ (fallback)
+class LocalStorage extends StorageAdapter {
+  // uploads/ РґРёСЂРµРєС‚РѕСЂРёСЏ
+}
+
+// Р¤Р°Р±СЂРёРєР°
+function createStorage() {
+  return process.env.S3_ENDPOINT 
+    ? new S3Storage() 
+    : new LocalStorage();
+}
+```
+
+### Р’Р°Р»РёРґР°С†РёСЏ Р·Р°РіСЂСѓР·РєРё
+
+```javascript
+// Multer РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ
+const upload = multer({
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/', 'application/pdf', 'text/'];
+    if (allowed.some(type => file.mimetype.startsWith(type))) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type'));
+    }
+  }
+});
+
+// Magic bytes РїСЂРѕРІРµСЂРєР° (file-type)
+const fileType = await fileTypeFromBuffer(buffer);
+if (!fileType || !allowedMimeTypes.includes(fileType.mime)) {
+  throw new Error('File type mismatch');
+}
+
+// ClamAV СЃРєР°РЅРёСЂРѕРІР°РЅРёРµ (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)
+if (process.env.CLAMAV_ENABLED === 'true') {
+  const clamscan = await new NodeClam().init();
+  const { isInfected } = await clamscan.scanBuffer(buffer);
+  if (isInfected) throw new Error('Virus detected');
+}
+```
+
+---
+
+## РЈРІРµРґРѕРјР»РµРЅРёСЏ
+
+### Р•РґРёРЅС‹Р№ СЃРµСЂРІРёСЃ notify.js
+
+```javascript
+// notify.js
+async function notify({ type, recipients, title, message, ticketId }) {
+  // In-app
+  await createInAppNotification(recipients, title, message);
+
+  // Email (async, РЅРµ Р±Р»РѕРєРёСЂСѓРµС‚)
+  if (settings.emailEnabled) {
+    sendEmail(recipients, title, message).catch(err => logger.error(err));
+  }
+
+  // Telegram (async)
+  if (settings.telegramEnabled) {
+    sendTelegram(recipients, message).catch(err => logger.error(err));
+  }
+
+  // Web Push (async)
+  if (settings.pushEnabled) {
+    sendPush(recipients, title, message).catch(err => logger.error(err));
+  }
+}
+```
+
+### РђРІС‚РѕС‚СЂРёРіРіРµСЂС‹
+
+| РЎРѕР±С‹С‚РёРµ | РЈРІРµРґРѕРјР»СЏРµРјС‹Рµ | РљР°РЅР°Р»С‹ |
+|---|---|---|
+| РўРёРєРµС‚ СЃРѕР·РґР°РЅ | senior_agent+, РЅР°Р·РЅР°С‡РµРЅРЅС‹Р№ | in-app, email |
+| РЎС‚Р°С‚СѓСЃ РёР·РјРµРЅС‘РЅ | СѓС‡Р°СЃС‚РЅРёРєРё С‚РёРєРµС‚Р° | in-app |
+| РџСЂРёРѕСЂРёС‚РµС‚ РїРѕРІС‹С€РµРЅ | assignee, senior_agent+ | in-app, email, telegram |
+| РќР°Р·РЅР°С‡РµРЅРёРµ | РЅРѕРІС‹Р№ assignee | in-app, email |
+| РќРѕРІРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ | СѓС‡Р°СЃС‚РЅРёРєРё С‡Р°С‚Р° (РєСЂРѕРјРµ Р°РІС‚РѕСЂР°) | in-app |
+| SLA РїСЂРѕСЃСЂРѕС‡РµРЅ | assignee, senior_agent+ | email, telegram |
+
+---
+
+### Meilisearch (fuzzy search)
+
+РћРїС†РёРѕРЅР°Р»СЊРЅС‹Р№ РїРѕРёСЃРєРѕРІС‹Р№ РґРІРёР¶РѕРє СЃ РїРѕРґРґРµСЂР¶РєРѕР№:
+- **Fuzzy search** вЂ” РѕРїРµС‡Р°С‚РєРё Рё РЅРµС‚РѕС‡РЅРѕСЃС‚Рё
+- **Typo tolerance** вЂ” РїРѕРёСЃРє СЃ РѕС€РёР±РєР°РјРё
+- **Faceted search/filtering**
+- **РњРіРЅРѕРІРµРЅРЅР°СЏ РёРЅРґРµРєСЃР°С†РёСЏ** РїСЂРё CRUD РѕРїРµСЂР°С†РёСЏС…
+
+### РќР°СЃС‚СЂРѕР№РєР°
+
+```yaml
+# docker-compose.yml (СѓР¶Рµ РґРѕР±Р°РІР»РµРЅ)
+meilisearch:
+  image: getmeili/meilisearch:v1.8
+  ports:
+    - "7700:7700"
+```
+
+```bash
+# .env
+MEILISEARCH_URL=http://localhost:7700
+MEILI_MASTER_KEY=meilisearch-master-key
+```
+
+### РђСЂС…РёС‚РµРєС‚СѓСЂР°
+
+```
+MySQL в”Ђв”Ђв–є search-sync.js в”Ђв”Ђв–є Meilisearch
+                в”‚
+                в””в”Ђв”Ђ fullSync() вЂ” РїСЂРё СЃС‚Р°СЂС‚Рµ СЃРµСЂРІРµСЂР°
+                в””в”Ђв”Ђ syncEntity() вЂ” РїСЂРё CRUD (upsert/delete)
+
+Client в”Ђв”Ђв–є GET /api/search?q= в”Ђв”Ђв–є Meilisearch (РµСЃР»Рё РґРѕСЃС‚СѓРїРµРЅ)
+                                    в”‚ fallback
+                                    в””в”Ђв”Ђв–є MySQL FULLTEXT
+                                           в”‚ fallback
+                                           в””в”Ђв”Ђв–є MySQL LIKE
+```
+
+### РРЅРґРµРєСЃС‹
+
+| РРЅРґРµРєСЃ | РџРѕР»СЏ | РџРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡ |
+|--------|------|----------------|
+| `tickets` | title, description, status, priority, category | id |
+| `employees` | name, email, department | id |
+| `wiki` | title, content, category | id |
+| `news` | title, content | id |
+| `chats` | name | id |
+| `files` | name | id |
+
+Р‘РµР· Meilisearch вЂ” РїСЂРѕР·СЂР°С‡РЅС‹Р№ fallback РЅР° FULLTEXT в†’ LIKE.
+
+---
+
+## РљСЌС€РёСЂРѕРІР°РЅРёРµ
+
+### MySQL Read Replicas (docker-compose)
+
+Р’ docker-compose РЅР°СЃС‚СЂРѕРµРЅР° СЂРµРїР»РёРєР°С†РёСЏ primary в†’ replica:
+
+- **Primary** (`mysql`): `server_id=1`, binlog РІРєР»СЋС‡С‘РЅ, РїРѕСЂС‚ `3307`
+- **Replica** (`mysql_replica`): `server_id=2`, `read_only=1`, РїРѕСЂС‚ `3308`
+- РђРІС‚РѕРјР°С‚РёС‡РµСЃРєР°СЏ РЅР°СЃС‚СЂРѕР№РєР° С‡РµСЂРµР· `mysql/init-replica.sh`
+- РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ `replicator` СЃ РїСЂР°РІР°РјРё `REPLICATION SLAVE`
+
+> **Р’Р°Р¶РЅРѕ**: Prisma Free РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ read replicas РЅР°С‚РёРІРЅРѕ.
+> Р”Р»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ СЂРµРїР»РёРєРё РІ Node.js РЅСѓР¶РµРЅ РѕС‚РґРµР»СЊРЅС‹Р№ PrismaClient
+> СЃ URL СЂРµРїР»РёРєРё Рё middleware РґР»СЏ СЂРѕСѓС‚РёРЅРіР° read-Р·Р°РїСЂРѕСЃРѕРІ.
+
+### РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРёРµ Р±СЌРєР°РїС‹ (docker-compose)
+
+РЎРµСЂРІРёСЃ `db_backup` РЅР° Р±Р°Р·Рµ `alpine`:
+- `mysqldump` РєР°Р¶РґС‹Рµ 24 С‡Р°СЃР° в†’ `/backup/servicedesk_YYYYMMDD_HHMMSS.sql`
+- РҐСЂР°РЅРµРЅРёРµ 7 РґРЅРµР№ (`-mtime +7 -delete`)
+- Volume `mysql_backup` РґР»СЏ РїРµСЂСЃРёСЃС‚РµРЅС‚РЅРѕСЃС‚Рё
+
+РўР°РєР¶Рµ РґРѕСЃС‚СѓРїРµРЅ СЂСѓС‡РЅРѕР№ Р·Р°РїСѓСЃРє:
+```bash
+docker exec sd-mysql mysqldump -u root -p servicedesk > backup.sql
+```
+
+### Cache Adapter
+
+```javascript
+// cache.js вЂ” Redis / in-memory fallback
+class Cache {
+  async get(key) { }
+  async set(key, value, ttlSeconds) { }
+  async del(key) { }
+  async delPattern(pattern) { }
+}
+
+// Redis РїСЂРё REDIS_URL, РёРЅР°С‡Рµ Map
+```
+
+### РџСЂРёРјРµРЅРµРЅРёРµ
+
+| Endpoint | TTL | РРЅРІР°Р»РёРґР°С†РёСЏ |
+|---|---|---|
+| `GET /api/tickets` | 120s | POST/PUT/DELETE /api/tickets |
+| `GET /api/employees` | 300s | POST/PUT/DELETE /api/employees |
+| `GET /api/wiki` | 600s | POST/PUT/DELETE /api/wiki |
+
+```javascript
+// РџСЂРёРјРµСЂ СЃ РєСЌС€РµРј
+router.get('/api/tickets', async (req, res) => {
+  const cacheKey = `tickets:${JSON.stringify(req.query)}`;
+  const cached = await cache.get(cacheKey);
+  if (cached) return res.json({ success: true, data: cached });
+
+  const tickets = await ticketsService.list(req.query);
+  await cache.set(cacheKey, tickets, 120);
+  res.json({ success: true, data: tickets });
+});
+
+// РРЅРІР°Р»РёРґР°С†РёСЏ РїСЂРё РјСѓС‚Р°С†РёРё
+router.post('/api/tickets', async (req, res) => {
+  const ticket = await ticketsService.create(req.body);
+  await cache.delPattern('tickets:*');
+  res.json({ success: true, data: ticket });
+});
+```
+
+---
+
+## РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ
+
+### РЎС‚СЂСѓРєС‚СѓСЂР° С‚РµСЃС‚РѕРІ
+
+```
+client/__tests__/
+в”њв”Ђв”Ђ auth.test.tsx              # Р›РѕРіРёРЅ, СЂРµРіРёСЃС‚СЂР°С†РёСЏ, РІР°Р»РёРґР°С†РёСЏ
+в”њв”Ђв”Ђ tickets.test.tsx           # РЎРїРёСЃРѕРє, СЃРѕР·РґР°РЅРёРµ, С„РёР»СЊС‚СЂС‹
+в”њв”Ђв”Ђ dashboard.test.tsx         # Р’РёРґР¶РµС‚С‹, РіСЂР°С„РёРєРё
+в”њв”Ђв”Ђ chats.test.tsx             # РЎРѕРѕР±С‰РµРЅРёСЏ, СЂРµР°РєС†РёРё
+в”њв”Ђв”Ђ wiki.test.tsx              # РЎС‚Р°С‚СЊРё, РїРѕРёСЃРє
+в”њв”Ђв”Ђ news.test.tsx              # Р›РµРЅС‚Р°, С„РёР»СЊС‚СЂС‹
+в”њв”Ђв”Ђ calendar.test.tsx          # РЎРѕР±С‹С‚РёСЏ, РЅР°РІРёРіР°С†РёСЏ
+в”њв”Ђв”Ђ files.test.tsx             # Р—Р°РіСЂСѓР·РєР°, drag&drop
+в”њв”Ђв”Ђ employees.test.tsx         # РЎРїРёСЃРѕРє, РїРѕРёСЃРє
+в”њв”Ђв”Ђ polls.test.tsx             # Р“РѕР»РѕСЃРѕРІР°РЅРёРµ
+в”њв”Ђв”Ђ search.test.tsx            # Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ РїРѕРёСЃРє
+в”њв”Ђв”Ђ notifications.test.tsx     # РЈРІРµРґРѕРјР»РµРЅРёСЏ
+в”њв”Ђв”Ђ i18n.test.tsx              # РџРµСЂРµРєР»СЋС‡РµРЅРёРµ СЏР·С‹РєР°
+в””в”Ђв”Ђ setup.ts                   # MSW handlers
+
+server/__tests__/
+в”њв”Ђв”Ђ api.test.js                # Integration: auth, RBAC, search, push
+в”њв”Ђв”Ђ chats.service.test.js      # Service layer
+в”њв”Ђв”Ђ employees.service.test.js
+в”њв”Ђв”Ђ news.service.test.js
+в””в”Ђв”Ђ calendar.service.test.js
+```
+
+### РџРѕРєСЂС‹С‚РёРµ (v8)
+
+```json
+{
+  "statements": 20,
+  "branches": 15,
+  "functions": 15,
+  "lines": 25
+}
+```
+
+> **РџСЂРёРјРµС‡Р°РЅРёРµ**: РџРѕСЂРѕРіРё СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹ РЅРёР·РєРёРјРё РёР·-Р·Р° РѕС‚СЃСѓС‚СЃС‚РІРёСЏ С‚РµСЃС‚РѕРІ РЅР° UI-РєРѕРјРїРѕРЅРµРЅС‚С‹. Р­С‚Р°Рї I РІС‹РїРѕР»РЅРµРЅ: 154 РєР»РёРµРЅС‚СЃРєРёС… + 116 СЃРµСЂРІРµСЂРЅС‹С… С‚РµСЃС‚РѕРІ.
+
+---
+
+## Р›РѕРіРёСЂРѕРІР°РЅРёРµ Рё РјРѕРЅРёС‚РѕСЂРёРЅРі
+
+### Winston РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ
+
+```javascript
+// logger.js
+const logger = winston.createLogger({
+  levels: { error: 0, warn: 1, info: 2, debug: 3 },
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ 
+      filename: 'logs/error.log', 
+      level: 'error',
+      maxsize: 10 * 1024 * 1024,  // 10MB
+      maxFiles: 5
+    }),
+    new winston.transports.File({ 
+      filename: 'logs/combined.log',
+      maxsize: 10 * 1024 * 1024,
+      maxFiles: 5
+    })
+  ]
+});
+```
+
+### Sentry
+
+```javascript
+// Frontend
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [Sentry.browserTracingIntegration()],
+  tracesSampleRate: 0.1,
+});
+
+// Backend
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [Sentry.httpIntegration()],
+  tracesSampleRate: 0.1,
+});
+```
+
+### Request ID
+
+РљР°Р¶РґС‹Р№ Р·Р°РїСЂРѕСЃ РїРѕР»СѓС‡Р°РµС‚ UUID (`X-Request-Id`), РєРѕС‚РѕСЂС‹Р№ РїСЂРѕР±СЂР°СЃС‹РІР°РµС‚СЃСЏ С‡РµСЂРµР·:
+- HTTP Р·Р°РіРѕР»РѕРІРєРё
+- Р›РѕРіРё Winston
+- Sentry РєРѕРЅС‚РµРєСЃС‚
+
+---
+
+## РРЅС„СЂР°СЃС‚СЂСѓРєС‚СѓСЂР°
+
+### Docker Compose (Production)
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: sd-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: servicedesk
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./server/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./server
+    container_name: sd-api
+    environment:
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build: .
+    container_name: sd-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  mysql_data:
+  uploads_data:
+```
+
+### Kubernetes
+
+```yaml
+# namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: service-desk
+
+# configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-desk-config
+  namespace: service-desk
+data:
+  NODE_ENV: "production"
+  API_PORT: "4000"
+
+# secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: service-desk-secrets
+  namespace: service-desk
+type: Opaque
+stringData:
+  JWT_SECRET: "..."
+  DATABASE_URL: "..."
+
+# api-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: service-desk
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+      - name: api
+        image: service-desk-api:latest
+        ports:
+        - containerPort: 4000
+        envFrom:
+        - configMapRef:
+            name: service-desk-config
+        - secretRef:
+            name: service-desk-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: service-desk-ingress
+  namespace: service-desk
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: service-desk.company.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: api
+            port:
+              number: 4000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+```
+
+---
+
+## API Response Format
+
+### РЈСЃРїРµС€РЅС‹Р№ РѕС‚РІРµС‚
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "title": "...",
+    "status": "open"
+  }
+}
+```
+
+### РџР°РіРёРЅРёСЂРѕРІР°РЅРЅС‹Р№ РѕС‚РІРµС‚
+
+```json
+{
+  "success": true,
+  "data": {
+    "data": [...],
+    "total": 150,
+    "page": 1,
+    "totalPages": 15
+  }
+}
+```
+
+### РћС€РёР±РєР°
+
+```json
+{
+  "success": false,
+  "message": "Ticket not found"
+}
+```
+
+### РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": [
+    { "field": "title", "message": "Required" },
+    { "field": "priority", "message": "Invalid enum value" }
+  ]
+}
+```
+
+---
+
+## РР·РІРµСЃС‚РЅС‹Р№ С‚РµС…РЅРёС‡РµСЃРєРёР№ РґРѕР»Рі
+
+### Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ СЂРµРєРѕРјРµРЅРґР°С†РёРё (РїРѕ Р°СѓРґРёС‚Сѓ Kimi)
+
+РџРѕ СЂРµР·СѓР»СЊС‚Р°С‚Р°Рј РІРЅРµС€РЅРµРіРѕ Р°СѓРґРёС‚Р° (РѕС†РµРЅРєР° 7.7/10 в†’ 8.5/10) РІС‹РїРѕР»РЅРµРЅС‹:
+
+| Р РµРєРѕРјРµРЅРґР°С†РёСЏ | РЎС‚Р°С‚СѓСЃ |
+|---|---|
+| РџРѕРІС‹С€РµРЅРёРµ РїРѕРєСЂС‹С‚РёСЏ С‚РµСЃС‚РѕРІ (47в†’154 client, 93в†’116 server, 13в†’22 E2E) | вњ… |
+| TanStack Query (Р·Р°РјРµРЅР° Context API) | вњ… |
+| Meilisearch (fuzzy search РІРјРµСЃС‚Рѕ MySQL FULLTEXT) | вњ… |
+| Skeleton loaders РґР»СЏ РІСЃРµС… СЃРїРёСЃРєРѕРІ | вњ… |
+| Prometheus/Grafana РјРµС‚СЂРёРєРё | вњ… |
+| Р РѕР»СЊ requester (РІРёРґРёС‚ С‚РѕР»СЊРєРѕ СЃРІРѕРё С‚РёРєРµС‚С‹) | вњ… |
+
+### РћСЃС‚Р°РІС€РёР№СЃСЏ С‚РµС…РЅРёС‡РµСЃРєРёР№ РґРѕР»Рі
+
+| Р­С‚Р°Рї | Р—Р°РґР°С‡Р° | РџСЂРёРѕСЂРёС‚РµС‚ | РЎС‚Р°С‚СѓСЃ |
+|---|---|---|---|---|
+| E | SLA policy-РјР°С‚СЂРёС†Р° РїРѕ РєР°С‚РµРіРѕСЂРёСЏРј (bug/feature/support/incident) | Medium | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| F | Р РѕР»СЊ requester (РІРёРґРёС‚ С‚РѕР»СЊРєРѕ СЃРІРѕРё С‚РёРєРµС‚С‹) | Medium | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| G | TanStack Query + optimistic updates | Medium | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| H | Skeleton loaders РґР»СЏ РІСЃРµС… СЃРїРёСЃРєРѕРІ | Low | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| I | РџРѕРєСЂС‹С‚РёРµ С‚РµСЃС‚РѕРІ 50%+ | High | вњ… (116 СЃРµСЂРІРµСЂРЅС‹С… / 154 РєР»РёРµРЅС‚СЃРєРёС… / 22 E2E) |
+| I | E2E: СЌСЃРєР°Р»Р°С†РёСЏ SLA, Р°РІС‚РѕРЅР°Р·РЅР°С‡РµРЅРёРµ, СЌРєСЃРїРѕСЂС‚ | Medium | вњ… (РїРѕРєСЂС‹С‚Рѕ unit-С‚РµСЃС‚Р°РјРё) |
+| J | Volume РґР»СЏ MySQL-Р±СЌРєР°РїРѕРІ РІ docker-compose | Low | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| J | Healthcheck РІСЃРµС… СЃРµСЂРІРёСЃРѕРІ | Low | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| J | Prometheus/Grafana РјРµС‚СЂРёРєРё | Low | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| K | API versioning (/api/v1/) | Low | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| K | BullMQ РІРјРµСЃС‚Рѕ setInterval (С„РѕРЅРѕРІС‹Рµ Р·Р°РґР°С‡Рё) | Medium | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| L | РСЃРїСЂР°РІР»РµРЅРёРµ РєР»РёРµРЅС‚СЃРєРёС… С‚РµСЃС‚РѕРІ (jsdom localStorage) | High | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| L | roleUtils.test.js вЂ” 7 С‚РµСЃС‚РѕРІ РЅР° РёРµСЂР°СЂС…РёСЋ СЂРѕР»РµР№ | Medium | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+| L | API С‚РµСЃС‚С‹: /auth/me, /system-info, /tickets POST, /wiki POST, /calendar POST, /news POST, messages | Medium | вњ… Р’С‹РїРѕР»РЅРµРЅРѕ |
+
+---
+
+*Р”РѕРєСѓРјРµРЅС‚Р°С†РёСЏ Р°РєС‚СѓР°Р»СЊРЅР° РЅР° 2026-07-10. Р’РµСЂСЃРёСЏ РїСЂРѕРµРєС‚Р°: 1.0.0*
+
+
 === package.json ===
 {
   "name": "tickets-service-desk",
@@ -1297,27 +2593,71 @@ import { useAuth } from '@/context/AuthContext'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 
-
 const navItems = [
-  { to: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
-  { to: '/search', icon: Search, labelKey: 'nav.search', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+  {
+    to: '/',
+    icon: LayoutDashboard,
+    labelKey: 'nav.dashboard',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'],
+  },
+  {
+    to: '/search',
+    icon: Search,
+    labelKey: 'nav.search',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'],
+  },
 
-  { to: '/chats', icon: MessageCircle, labelKey: 'nav.chats', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
-  { to: '/tickets', icon: Ticket, labelKey: 'nav.tickets', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+  {
+    to: '/chats',
+    icon: MessageCircle,
+    labelKey: 'nav.chats',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent'],
+  },
+  {
+    to: '/tickets',
+    icon: Ticket,
+    labelKey: 'nav.tickets',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'],
+  },
   { to: '/kanban', icon: Columns3, labelKey: 'nav.kanban', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
-  { to: '/employees', icon: Users, labelKey: 'nav.employees', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
-  { to: '/calendar', icon: Calendar, labelKey: 'nav.calendar', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  {
+    to: '/employees',
+    icon: Users,
+    labelKey: 'nav.employees',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent'],
+  },
+  {
+    to: '/calendar',
+    icon: Calendar,
+    labelKey: 'nav.calendar',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent'],
+  },
   { to: '/polls', icon: BarChart3, labelKey: 'nav.polls', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
   { to: '/wiki', icon: BookOpen, labelKey: 'nav.wiki', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
   { to: '/news', icon: Newspaper, labelKey: 'nav.news', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
-  { to: '/calculator', icon: Calculator, labelKey: 'nav.calculator', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+  {
+    to: '/calculator',
+    icon: Calculator,
+    labelKey: 'nav.calculator',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'],
+  },
   { to: '/files', icon: FileText, labelKey: 'nav.files', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
-  { to: '/tickets/new', icon: PlusCircle, labelKey: 'tickets.new', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+  {
+    to: '/tickets/new',
+    icon: PlusCircle,
+    labelKey: 'tickets.new',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'],
+  },
 ]
 
 const bottomItems = [
   { to: '/admin', icon: Shield, labelKey: 'nav.admin', roles: ['super_admin', 'admin'] },
-  { to: '/profile', icon: User, labelKey: 'nav.profile', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+  {
+    to: '/profile',
+    icon: User,
+    labelKey: 'nav.profile',
+    roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'],
+  },
 ]
 
 export function Sidebar() {
@@ -1402,7 +2742,13 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <LanguageSwitcher />
         {user && (
           <div className="px-3 py-2 mt-2 text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-bold">
-            {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? t('admin.title') : user.role === 'senior_agent' ? 'Senior Agent' : t('auth.role')}
+            {user.role === 'super_admin'
+              ? 'Super Admin'
+              : user.role === 'admin'
+                ? t('admin.title')
+                : user.role === 'senior_agent'
+                  ? 'Senior Agent'
+                  : t('auth.role')}
           </div>
         )}
       </div>
@@ -1964,27 +3310,27 @@ export function useTickets() {
 
 
 === src/pages/Kanban.tsx ===
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Columns3, MessageSquare, User } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useTickets } from "@/context/ticket-context"
-import type { Ticket, TicketStatus } from "@/types"
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Columns3, MessageSquare, User } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useTickets } from '@/context/ticket-context'
+import type { Ticket, TicketStatus } from '@/types'
 
 const COLUMNS: { key: TicketStatus; label: string; color: string }[] = [
-  { key: "open", label: "РћС‚РєСЂС‹С‚С‹Рµ", color: "border-t-blue-500" },
-  { key: "in_progress", label: "Р’ СЂР°Р±РѕС‚Рµ", color: "border-t-amber-500" },
-  { key: "resolved", label: "Р РµС€С‘РЅРЅС‹Рµ", color: "border-t-emerald-500" },
-  { key: "closed", label: "Р—Р°РєСЂС‹С‚С‹Рµ", color: "border-t-slate-500" },
+  { key: 'open', label: 'РћС‚РєСЂС‹С‚С‹Рµ', color: 'border-t-blue-500' },
+  { key: 'in_progress', label: 'Р’ СЂР°Р±РѕС‚Рµ', color: 'border-t-amber-500' },
+  { key: 'resolved', label: 'Р РµС€С‘РЅРЅС‹Рµ', color: 'border-t-emerald-500' },
+  { key: 'closed', label: 'Р—Р°РєСЂС‹С‚С‹Рµ', color: 'border-t-slate-500' },
 ]
 
 const PRIORITY_COLORS: Record<string, string> = {
-  critical: "bg-red-500/10 text-red-500 border-red-500/20",
-  high: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-  medium: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  low: "bg-slate-500/10 text-slate-500 border-slate-500/20",
+  critical: 'bg-red-500/10 text-red-500 border-red-500/20',
+  high: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+  medium: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  low: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
 }
 
 export default function KanbanPage() {
@@ -1992,25 +3338,25 @@ export default function KanbanPage() {
   const navigate = useNavigate()
   const [dragId, setDragId] = useState<number | null>(null)
 
-  const grouped = COLUMNS.map(col => ({
+  const grouped = COLUMNS.map((col) => ({
     ...col,
-    tickets: tickets.filter(t => t.status === col.key),
+    tickets: tickets.filter((t) => t.status === col.key),
   }))
 
   const handleDragStart = (e: React.DragEvent, ticketId: number) => {
     setDragId(ticketId)
-    e.dataTransfer.effectAllowed = "move"
-    e.dataTransfer.setData("text/plain", String(ticketId))
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', String(ticketId))
   }
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
-    e.dataTransfer.dropEffect = "move"
+    e.dataTransfer.dropEffect = 'move'
   }
 
   const handleDrop = (e: React.DragEvent, status: TicketStatus) => {
     e.preventDefault()
-    const id = Number(e.dataTransfer.getData("text/plain"))
+    const id = Number(e.dataTransfer.getData('text/plain'))
     if (id) updateTicketStatus(id, status)
     setDragId(null)
   }
@@ -2028,20 +3374,22 @@ export default function KanbanPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        {grouped.map(col => (
+        {grouped.map((col) => (
           <div
             key={col.key}
             onDragOver={handleDragOver}
-            onDrop={e => handleDrop(e, col.key)}
+            onDrop={(e) => handleDrop(e, col.key)}
             className={cn(
-              "rounded-xl border bg-card/50 min-h-[300px] flex flex-col",
+              'rounded-xl border bg-card/50 min-h-[300px] flex flex-col',
               col.color,
-              dragId && "border-dashed",
+              dragId && 'border-dashed',
             )}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b">
               <h3 className="font-bold text-sm">{col.label}</h3>
-              <Badge variant="secondary" className="text-[10px]">{col.tickets.length}</Badge>
+              <Badge variant="secondary" className="text-[10px]">
+                {col.tickets.length}
+              </Badge>
             </div>
             <div className="flex-1 p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-18rem)]">
               {col.tickets.length === 0 && (
@@ -2049,21 +3397,32 @@ export default function KanbanPage() {
                   <p className="text-xs">РќРµС‚ С‚РёРєРµС‚РѕРІ</p>
                 </div>
               )}
-              {col.tickets.map(ticket => (
+              {col.tickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   draggable
-                  onDragStart={e => handleDragStart(e, ticket.id)}
+                  onDragStart={(e) => handleDragStart(e, ticket.id)}
                   onClick={() => navigate(`/tickets/${ticket.id}`)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/tickets/${ticket.id}`); } }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      navigate(`/tickets/${ticket.id}`)
+                    }
+                  }}
                   role="button"
                   tabIndex={0}
                   className="rounded-lg border bg-card p-3 cursor-grab active:cursor-grabbing hover:border-primary/50 transition-all space-y-2 shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <h4 className="text-xs font-bold leading-snug line-clamp-2">{ticket.title}</h4>
-                    <Badge className={cn("text-[9px] border shrink-0", PRIORITY_COLORS[ticket.priority])}>
-                      {ticket.priority === "critical" ? "РљСЂРёС‚." : ticket.priority === "high" ? "Р’С‹СЃ." : ticket.priority === "medium" ? "РЎСЂРµРґ." : "РќРёР·Рє."}
+                    <Badge className={cn('text-[9px] border shrink-0', PRIORITY_COLORS[ticket.priority])}>
+                      {ticket.priority === 'critical'
+                        ? 'РљСЂРёС‚.'
+                        : ticket.priority === 'high'
+                          ? 'Р’С‹СЃ.'
+                          : ticket.priority === 'medium'
+                            ? 'РЎСЂРµРґ.'
+                            : 'РќРёР·Рє.'}
                     </Badge>
                   </div>
                   <p className="text-[10px] text-muted-foreground line-clamp-2">{ticket.description}</p>
@@ -2076,7 +3435,7 @@ export default function KanbanPage() {
                       {ticket.assignedTo && (
                         <span className="flex items-center gap-1">
                           <User className="w-3 h-3" />
-                          {ticket.assignedTo.name.split(" ")[0]}
+                          {ticket.assignedTo.name.split(' ')[0]}
                         </span>
                       )}
                     </div>
@@ -4362,5 +5721,394 @@ router.delete('/:id', requireRole('admin', 'senior_agent'), async (req, res) => 
 })
 
 export default router
+
+
+=== k8s/README.md ===
+# Deploy to Kubernetes
+# 1. Build images (or use registry)
+#    docker build -t servicedesk-api:latest ./server
+#    docker build -t servicedesk-frontend:latest .
+#
+# 2. Create namespace and seed ConfigMap
+#    kubectl create configmap mysql-seed -n servicedesk --from-file=server/seed.sql
+#
+# 3. Apply manifests
+#    kubectl apply -f k8s/namespace.yaml
+#    kubectl apply -f k8s/api-config.yaml
+#    kubectl apply -f k8s/mysql.yaml
+#    kubectl apply -f k8s/redis.yaml
+#    kubectl apply -f k8s/api.yaml
+#    kubectl apply -f k8s/frontend.yaml
+#
+# 4. Wait for rollout
+#    kubectl wait --for=condition=available --timeout=300s deployment/api -n servicedesk
+#    kubectl wait --for=condition=available --timeout=300s deployment/frontend -n servicedesk
+#
+# 5. Verify
+#    kubectl get pods -n servicedesk
+#    kubectl get svc -n servicedesk
+
+
+=== k8s/namespace.yaml ===
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: servicedesk
+
+
+=== k8s/api.yaml ===
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: servicedesk
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: servicedesk-api:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: api-config
+                  key: PORT
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: api-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: api-config
+                  key: DB_PORT
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: api-config
+                  key: DB_USER
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: api-config
+                  key: DB_NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-secret
+                  key: DB_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: api-secret
+                  key: JWT_SECRET
+            - name: CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: api-config
+                  key: CORS_ORIGIN
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: api-secret
+                  key: REDIS_URL
+          ports:
+            - containerPort: 4000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: servicedesk
+spec:
+  ports:
+    - port: 4000
+      targetPort: 4000
+  selector:
+    app: api
+
+
+=== k8s/frontend.yaml ===
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: servicedesk
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: servicedesk-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: servicedesk
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: frontend
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: servicedesk-ingress
+  namespace: servicedesk
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: tickets.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  number: 4000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+
+
+=== k8s/hpa.yaml ===
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api
+  namespace: servicedesk
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend
+  namespace: servicedesk
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+=== k8s/mysql.yaml ===
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: servicedesk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.4
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-secret
+                  key: DB_PASSWORD
+            - name: MYSQL_DATABASE
+              value: servicedesk
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: seed-sql
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command: [mysqladmin, ping, -h, localhost]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: seed-sql
+          configMap:
+            name: mysql-seed
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: servicedesk
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: mysql
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: servicedesk
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+
+=== k8s/redis.yaml ===
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: servicedesk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: servicedesk
+spec:
+  ports:
+    - port: 6379
+  selector:
+    app: redis
+
+
+=== k8s/api-config.yaml ===
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: servicedesk
+data:
+  PORT: "4000"
+  DB_HOST: mysql
+  DB_PORT: "3306"
+  DB_USER: root
+  DB_NAME: servicedesk
+  CORS_ORIGIN: http://frontend:80
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-secret
+  namespace: servicedesk
+type: Opaque
+stringData:
+  DB_PASSWORD: root
+  JWT_SECRET: change-me-in-production
+  REDIS_URL: redis://redis:6379
 
 

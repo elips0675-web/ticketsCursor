@@ -127,7 +127,7 @@ npm run test:e2e
 | Skeleton loaders | Нет | ✅ Все списки |
 | Prometheus/Grafana | Нет | ✅ Настроены |
 | Роль requester | Нет | ✅ Реализована |
-| API versioning | Нет | ✅ Реализовано (/api/v1/) |
+| API versioning | Нет | ✅ unit-префикс (`/api/`) |
 | BullMQ вместо setInterval | setInterval | ✅ Реализовано |
 
 #### Итоговый вывод
@@ -176,7 +176,7 @@ ticketscursor/
 │   ├── components/            # UI компоненты (shadcn/ui)
 │   ├── pages/                 # Страницы приложения
 │   ├── hooks/                 # Кастомные хуки
-│   ├── contexts/              # React Context (auth, tickets, etc.)
+│   ├── context/               # React Context (auth, tickets, etc.)
 │   ├── __tests__/             # Unit тесты (Vitest + MSW)
 │   └── i18n/                  # Русский / Английский
 │

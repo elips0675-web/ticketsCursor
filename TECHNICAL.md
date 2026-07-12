@@ -1041,7 +1041,7 @@ spec:
 | J | Volume для MySQL-бэкапов в docker-compose | Low | ✅ Выполнено |
 | J | Healthcheck всех сервисов | Low | ✅ Выполнено |
 | J | Prometheus/Grafana метрики | Low | ✅ Выполнено |
-| K | API versioning (/api/v1/) | Low | ✅ Выполнено |
+| K | API versioning — unit-префикс (/api/) | Low | ✅ Выполнено |
 | K | BullMQ вместо setInterval (фоновые задачи) | Medium | ✅ Выполнено |
 | L | Исправление клиентских тестов (jsdom localStorage) | High | ✅ Выполнено |
 | L | roleUtils.test.js — 7 тестов на иерархию ролей | Medium | ✅ Выполнено |

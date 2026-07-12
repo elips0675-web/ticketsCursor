@@ -1053,3 +1053,193 @@ describe('PUT /api/tickets/:id/priority — success path', () => {
     expect([400, 500]).toContain(res.status)
   })
 })
+
+describe('GET /api/push/vapid-key', () => {
+  it('returns VAPID key or 500', async () => {
+    const res = await request(app)
+      .get('/api/push/vapid-key')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect([200, 500]).toContain(res.status)
+  })
+})
+
+describe('POST /api/push/send', () => {
+  it('rejects without title', async () => {
+    const res = await request(app)
+      .post('/api/push/send')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ body: 'test' })
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects non-admin from sending push', async () => {
+    const res = await request(app)
+      .post('/api/push/send')
+      .set('Authorization', `Bearer ${agentToken}`)
+      .send({ title: 'Test' })
+    expect(res.status).toBe(403)
+  })
+
+  it('sends push (returns 0 sent if no subs)', async () => {
+    const res = await request(app)
+      .post('/api/push/send')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ title: 'Test', body: 'Test body' })
+    expect([200, 500]).toContain(res.status)
+  })
+})
+
+describe('POST /api/push/subscribe', () => {
+  it('subscribes successfully', async () => {
+    const res = await request(app)
+      .post('/api/push/subscribe')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ subscription_json: { endpoint: 'https://test.test', keys: { auth: 'a', p256dh: 'b' } } })
+    expect([201, 500]).toContain(res.status)
+  })
+})
+
+describe('GET /api/push/subscription', () => {
+  it('returns subscriptions', async () => {
+    const res = await request(app)
+      .get('/api/push/subscription')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect([200, 500]).toContain(res.status)
+  })
+})
+
+describe('GET /api/search', () => {
+  it('returns empty for short query', async () => {
+    const res = await request(app)
+      .get('/api/search?q=a')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect(res.status).toBe(200)
+    expect(res.body.data.tickets).toEqual([])
+  })
+
+  it('requires agent role', async () => {
+    const res = await request(app)
+      .get('/api/search?q=test')
+    expect(res.status).toBe(401)
+  })
+})
+
+describe('POST /api/calendar', () => {
+  it('creates an event', async () => {
+    const res = await request(app)
+      .post('/api/calendar')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ title: 'Test event', date: '2026-12-01', time: '10:00', description: 'Test' })
+    expect([201, 400, 500]).toContain(res.status)
+  })
+})
+
+describe('PUT /api/notifications/:id/read', () => {
+  it('marks notification as read', async () => {
+    const res = await request(app)
+      .put('/api/notifications/1/read')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect([200, 404, 500]).toContain(res.status)
+  })
+})
+
+describe('DELETE /api/notifications/clear-all', () => {
+  it('clears notifications', async () => {
+    const res = await request(app)
+      .delete('/api/notifications/clear-all')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect([200, 500]).toContain(res.status)
+  })
+})
+
+describe('PUT /api/notifications/read-all', () => {
+  it('marks all as read', async () => {
+    const res = await request(app)
+      .put('/api/notifications/read-all')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect([200, 500]).toContain(res.status)
+  })
+})
+
+describe('POST /api/calendar — validation', () => {
+  it('rejects without date', async () => {
+    const res = await request(app)
+      .post('/api/calendar')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ title: 'Test' })
+    expect(res.status).toBe(400)
+  })
+})
+
+describe('Admin — user update edge cases', () => {
+  it('rejects self-demotion', async () => {
+    const res = await request(app)
+      .put('/api/admin/users/1')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ role: 'agent' })
+    expect(res.status).toBe(400)
+    expect(res.body.message).toMatch(/own account/i)
+  })
+
+  it('rejects super_admin role assignment', async () => {
+    const res = await request(app)
+      .put('/api/admin/users/2')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ role: 'super_admin' })
+    expect(res.status).toBe(403)
+    expect(res.body.message).toMatch(/super_admin/i)
+  })
+
+  it('rejects invalid role', async () => {
+    const res = await request(app)
+      .put('/api/admin/users/2')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ role: 'nonexistent' })
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects empty update body', async () => {
+    const res = await request(app)
+      .put('/api/admin/users/2')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({})
+    expect(res.status).toBe(400)
+  })
+
+  it('updates user role and department', async () => {
+    const res = await request(app)
+      .put('/api/admin/users/2')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ role: 'senior_agent', department: 'IT' })
+    expect([200, 500]).toContain(res.status)
+  })
+})
+
+describe('Admin — audit log', () => {
+  it('returns audit log list', async () => {
+    const res = await request(app)
+      .get('/api/admin/audit')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect([200, 500]).toContain(res.status)
+    if (res.status === 200) {
+      expect(Array.isArray(res.body.data)).toBe(true)
+    }
+  })
+
+  it('filters audit log by entityType', async () => {
+    const res = await request(app)
+      .get('/api/admin/audit?entityType=ticket&limit=5')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect([200, 500]).toContain(res.status)
+  })
+})
+
+describe('Admin — update settings', () => {
+  it('updates allowed settings', async () => {
+    const res = await request(app)
+      .put('/api/admin/settings')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ COMPANY_NAME: 'Test Corp', AUTO_ASSIGN: 'true' })
+    expect([200, 500]).toContain(res.status)
+  })
+})

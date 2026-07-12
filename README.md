@@ -121,7 +121,7 @@ npm run test:e2e
 | Зона риска | Было (на момент аудита) | Стало (после доработок) |
 |---|---|---|
 | Покрытие тестами | 47 client / 93 server / 13 E2E | 154 client / 116 server / 22 E2E |
-| Процент покрытия | 20-25% | 51% client / 55% server |
+| Процент покрытия | 20-25% | 51% client / 55% server (135 server tests) |
 | TanStack Query | Только Context API | ✅ Внедрён QueryClientProvider |
 | Meilisearch | MySQL FULLTEXT | ✅ Meilisearch + fallback цепочка |
 | Skeleton loaders | Нет | ✅ Все списки |
@@ -141,13 +141,14 @@ npm run test:e2e
 | Показатель | Значение | Статус |
 |---|---|---|
 | Клиентские тесты | 154 теста, 40 файлов | ✅ Пройдены |
-| Серверные тесты | 116 тестов, 6 файлов (5 сервисных + api) | ✅ Пройдены |
+| Серверные тесты | 135 тестов, 8 файлов (6 сервисных + api + middleware) | ✅ Пройдены |
 | E2E тесты | 22 теста, 5 файлов | ✅ Пройдены |
 | Покрытие кода (клиент) | 51% (порог: 51%) | ✅ Стабильно |
 | Покрытие кода (сервер) | 55% (порог: 55%) | ✅ Стабильно |
-| React Query | useQuery/useMutation, optimistic updates | ✅ |
+| React Query | useQuery/useMutation, optimistic updates, staleTime 5min | ✅ |
+| Request timing metrics | Prometheus-формат, гистограммы (50–5000ms) | ✅ |
 | Моделей Prisma | 17 | ✅ |
-| API endpoints | 50+ (Swagger) | ✅ |
+| API endpoints | 50+ (Swagger + /api/metrics) | ✅ |
 | Docker образы | Multi-stage, non-root | ✅ |
 | CI/CD pipeline | Lint → Type-check → Test → Build | ✅ |
 

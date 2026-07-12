@@ -128,6 +128,31 @@ describe('notifyTicketMessage', () => {
   })
 })
 
+describe('sendEmail — error handling', () => {
+  it('handles sendTicketNotification rejection gracefully', async () => {
+    sendTicketNotification.mockRejectedValueOnce(new Error('SMTP error'))
+    await notifyTicketCreated(1, 'User')
+    expect(createNotification).toHaveBeenCalled()
+  })
+
+  it('handles createNotification rejection gracefully', async () => {
+    createNotification.mockRejectedValueOnce(new Error('DB error'))
+    await notifyTicketCreated(1, 'User')
+    expect(sendTicketNotification).toHaveBeenCalled()
+  })
+})
+
+describe('notifyTicketCreated — missing email', () => {
+  it('skips email when creator has no email', async () => {
+    prisma.tickets.findUnique.mockResolvedValue({
+      ...mockTicket,
+      created_by_employee: { id: 10, name: 'Creator', email: null },
+    })
+    await notifyTicketCreated(1, 'User')
+    expect(sendTicketNotification).not.toHaveBeenCalled()
+  })
+})
+
 describe('notifySlaBreached', () => {
   it('notifies all targets when not recently notified', async () => {
     await notifySlaBreached(1)

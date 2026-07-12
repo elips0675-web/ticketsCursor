@@ -3,7 +3,7 @@
 - **Роль**: Senior Frontend / Fullstack Developer (Корпоративные системы)
 - **Опыт**: 3+ года — Helpdesk, CRM, ERP, Service Desk
 - **Понимает**: SLA, тикетинг, workflow заявок, RBAC, SSO/LDAP
-- **Стек**: React 18, TypeScript, Vite, Tailwind, shadcn/ui, Express, MySQL, JWT, Recharts
+- **Стек**: React 19, TypeScript 5, Vite 8, Tailwind CSS 4, shadcn/ui, Express, Prisma, MySQL, JWT, Recharts
 - **Фокус**: UX для корпоративных пользователей, безопасность (helmet, rate-limit), модульная архитектура
 - **Умеет**: дашборды с аналитикой, таблицы с фильтрацией/поиском, интеграция чатов/календарей/файлов, чистый типизированный код
 - **Ищет**: задачи в корпоративном ПО — Service Desk, CRM, ERP, BPM, внутренние порталы
@@ -39,7 +39,7 @@
 | **При коммите** | Husky → lint-staged | `eslint --fix` + `prettier --write` на изменённых файлах |
 | **В CI (GitHub Actions)** | `tsc --noEmit` | TypeScript strict type-check |
 | | `eslint . --max-warnings 100` | Синтаксис, неисп. переменные, импорты |
-| | `vitest run` | Юнит-тесты (154 клиентских + 135 серверных) |
+| | `vitest run` | Юнит-тесты (154 клиентских + 138 серверных) |
 | | `vite build` | Сборка production |
 | **Ручной запуск** | `npm run lint` | ESLint (warnings: `no-explicit-any`, `no-unused-vars`) |
 | | `npm run type-check` | `tsc --noEmit` |

@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -27,8 +28,7 @@ const PER_PAGE = 6
 export default function NewsPage() {
   const { t } = useTranslation()
   const { canManage } = useAuth()
-  const [news, setNews] = useState<NewsPost[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [showImportant, setShowImportant] = useState(false)
   const [open, setOpen] = useState(false)
@@ -36,7 +36,6 @@ export default function NewsPage() {
   const [newContent, setNewContent] = useState('')
   const [newImportant, setNewImportant] = useState(false)
   const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const [uploadingImg, setUploadingImg] = useState(false)
 
@@ -49,31 +48,36 @@ export default function NewsPage() {
     try {
       const { url } = await api.post('/wiki/upload-image', form)
       setNewContent((prev) => prev + `\n\n![${file.name}](${url})\n`)
-    } catch { /* toast handled by api client */ }
+    } catch {
+      /* toast handled by api client */
+    }
     setUploadingImg(false)
     if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
-  useEffect(() => {
-    const params = new URLSearchParams({ page: String(page), limit: String(PER_PAGE) })
-    if (showImportant) params.set('important', 'true')
-    if (search.trim()) params.set('q', search.trim())
-    api.get(`/news?${params}`)
-      .then(({ data, total, totalPages: tp }) => {
-        setNews((data || []).map(mapNews))
-        setTotalPages(tp || Math.ceil((total || 0) / PER_PAGE))
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [page, search, showImportant])
+  const newsQuery = useQuery({
+    queryKey: ['news', page, search, showImportant],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(page), limit: String(PER_PAGE) })
+      if (showImportant) params.set('important', 'true')
+      if (search.trim()) params.set('q', search.trim())
+      const res = await api.get(`/news?${params}`)
+      return {
+        data: (res.data || []).map(mapNews),
+        totalPages: res.totalPages || Math.ceil((res.total || 0) / PER_PAGE),
+      }
+    },
+  })
 
-  const paged = news
+  const news = newsQuery.data?.data ?? []
+  const totalPages = newsQuery.data?.totalPages ?? 1
+  const loading = newsQuery.isLoading
+
   const resetPage = () => setPage(1)
 
   const exportCSV = () => {
-    const data = news
     const headers = ['ID', 'Заголовок', 'Содержание', 'Важная', 'Автор', 'Дата']
-    const rows = data.map((n) => [
+    const rows = news.map((n) => [
       n.id,
       `"${n.title.replace(/"/g, '""')}"`,
       `"${n.content.replace(/"/g, '""').substring(0, 200)}"`,
@@ -91,17 +95,19 @@ export default function NewsPage() {
     URL.revokeObjectURL(url)
   }
 
-  const handleCreate = async () => {
-    if (!newTitle.trim() || !newContent.trim()) return
-    try {
-      const post = mapNews(await api.post('/news', { title: newTitle, content: newContent, important: newImportant }))
-      setNews((prev) => [post, ...prev])
-    } catch { /* toast handled by api client */ }
-    setOpen(false)
-    setNewTitle('')
-    setNewContent('')
-    setNewImportant(false)
-  }
+  const createMutation = useMutation({
+    mutationFn: () => {
+      if (!newTitle.trim() || !newContent.trim()) return Promise.reject(new Error('Invalid form'))
+      return api.post('/news', { title: newTitle, content: newContent, important: newImportant })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['news'] })
+      setOpen(false)
+      setNewTitle('')
+      setNewContent('')
+      setNewImportant(false)
+    },
+  })
 
   return (
     <div className="space-y-6">
@@ -182,7 +188,11 @@ export default function NewsPage() {
                     />
                     <span>{t('news.importantLabel')}</span>
                   </label>
-                  <Button onClick={handleCreate} className="w-full">
+                  <Button
+                    onClick={() => createMutation.mutate()}
+                    className="w-full"
+                    disabled={createMutation.isPending}
+                  >
                     {t('news.submitBtn')}
                   </Button>
                 </div>
@@ -231,7 +241,7 @@ export default function NewsPage() {
               <p className="font-bold text-sm">{t('news.empty')}</p>
             </div>
           )}
-          {paged.map((n) => {
+          {news.map((n) => {
             const imgMatch = n.content.match(/!\[.*?\]\((.*?)\)/)
             const imgUrl = imgMatch?.[1]
             const cleanContent = n.content.replace(/!\[.*?\]\(.*?\)/g, '').trim()

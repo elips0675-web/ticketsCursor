@@ -1,10 +1,12 @@
 import { Router } from 'express'
+import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
 import { listEmployees, getStats } from '../services/employees.service.js'
 
 const router = Router()
 router.use(authenticateToken)
+router.use(auditLogMiddleware)
 router.use(requireRole('agent'))
 
 router.get('/', async (req, res) => {

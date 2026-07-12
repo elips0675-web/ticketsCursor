@@ -11,7 +11,27 @@ import logger from './logger.js'
 import { requestId } from './middleware/requestId.js'
 
 if (process.env.SENTRY_DSN) {
-  Sentry.init({ dsn: process.env.SENTRY_DSN, tracesSampleRate: parseFloat(process.env.SENTRY_SAMPLE_RATE || '0.1') })
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    tracesSampleRate: parseFloat(process.env.SENTRY_SAMPLE_RATE || '0.1'),
+    beforeSend(event) {
+      if (event.exception) {
+        event.exception.values?.forEach(v => {
+          if (v.stacktrace) {
+            v.stacktrace.frames?.forEach(f => { f.vars = undefined })
+          }
+        })
+      }
+      if (event.request) {
+        const headers = event.request.headers || {}
+        if (headers['Authorization']) headers['Authorization'] = '[filtered]'
+        if (headers['authorization']) headers['authorization'] = '[filtered]'
+        if (headers['Cookie']) headers['Cookie'] = '[filtered]'
+        if (headers['cookie']) headers['cookie'] = '[filtered]'
+      }
+      return event
+    },
+  })
 }
 import ticketsRouter from './routes/tickets.js'
 import employeesRouter from './routes/employees.js'
@@ -85,18 +105,18 @@ function mount(prefix, router, ...mw) {
 }
 
 mount('/auth', authRouter, authLimiter)
-mount('/tickets', ticketsRouter, apiLimiter, cacheMiddleware(120), auditLogMiddleware)
-mount('/employees', employeesRouter, apiLimiter, cacheMiddleware(300), auditLogMiddleware)
-mount('/calendar', calendarRouter, apiLimiter, auditLogMiddleware)
-mount('/polls', pollsRouter, apiLimiter, auditLogMiddleware)
-mount('/files', filesRouter, apiLimiter, auditLogMiddleware)
-mount('/chats', chatsRouter, apiLimiter, auditLogMiddleware)
-mount('/wiki', wikiRouter, apiLimiter, auditLogMiddleware)
-mount('/news', newsRouter, apiLimiter, auditLogMiddleware)
-mount('/notifications', notificationsRouter, apiLimiter, auditLogMiddleware)
-mount('/push', pushRouter, apiLimiter, auditLogMiddleware)
-mount('/search', searchRouter, apiLimiter, auditLogMiddleware)
-mount('/admin', adminRouter, adminLimiter, auditLogMiddleware)
+mount('/tickets', ticketsRouter, apiLimiter, cacheMiddleware(120))
+mount('/employees', employeesRouter, apiLimiter, cacheMiddleware(300))
+mount('/calendar', calendarRouter, apiLimiter)
+mount('/polls', pollsRouter, apiLimiter)
+mount('/files', filesRouter, apiLimiter)
+mount('/chats', chatsRouter, apiLimiter)
+mount('/wiki', wikiRouter, apiLimiter)
+mount('/news', newsRouter, apiLimiter)
+mount('/notifications', notificationsRouter, apiLimiter)
+mount('/push', pushRouter, apiLimiter)
+mount('/search', searchRouter, apiLimiter)
+mount('/admin', adminRouter, adminLimiter)
 
 app.use([`/api/docs`, `${V1}/docs`], swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }' }))
 

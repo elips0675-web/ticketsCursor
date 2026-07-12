@@ -1,11 +1,13 @@
 import { Router } from 'express'
 import prisma from '../prisma.js'
+import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken } from '../middleware.js'
 import { getIO } from '../socket.js'
 import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken)
+router.use(auditLogMiddleware)
 
 export async function createNotification({ userId, type, title, body, link }) {
   if (!userId) return

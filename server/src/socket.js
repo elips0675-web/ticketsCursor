@@ -3,9 +3,14 @@ import { createAdapter } from '@socket.io/redis-adapter'
 import jwt from 'jsonwebtoken'
 import prisma from './prisma.js'
 import { JWT_SECRET } from './middleware.js'
+import { hasRole } from './utils/roleUtils.js'
+import { createNotification } from './routes/notifications.js'
 import logger from './logger.js'
 
 let io
+
+// Connection rate limiter: 10 handshake attempts/min per IP
+const connAttempts = new Map()
 
 // In-memory rate limiter: 5 msg/sec per socket, exponential backoff on violation
 const rateLimitMap = new Map()
@@ -23,7 +28,7 @@ function wsRateLimit(socket) {
   }
   // Refill tokens
   const elapsed = now - entry.lastRefill
-  entry.tokens = Math.min(WS_LIMIT, entry.tokens + elapsed * (WS_LIMIT / WS_INTERVAL))
+  entry.tokens = Math.floor(Math.min(WS_LIMIT, entry.tokens + elapsed * (WS_LIMIT / WS_INTERVAL)))
   entry.lastRefill = now
   // Apply backoff if in penalty
   if (entry.backoff > 0) {
@@ -59,6 +64,14 @@ export async function setupSocket(server) {
   }
 
   io.use((socket, next) => {
+    const ip = socket.handshake.address
+    const now = Date.now()
+    const attempts = connAttempts.get(ip) || []
+    const recent = attempts.filter(t => now - t < 60000)
+    if (recent.length >= 10) return next(new Error('Too many connections'))
+    recent.push(now)
+    connAttempts.set(ip, recent)
+
     const token = socket.handshake.auth?.token
     if (!token) return next(new Error('No token'))
     try {
@@ -110,7 +123,6 @@ export async function setupSocket(server) {
           distinct: ['sender_id'],
           select: { sender_id: true },
         })
-        const { createNotification } = await import('./routes/notifications.js')
         for (const p of participants) {
           await createNotification({
             userId: p.sender_id,
@@ -133,7 +145,7 @@ export async function setupSocket(server) {
       try {
         const msg = await prisma.chat_messages.findUnique({ where: { id: msgId } })
         if (!msg) return
-        const isAdmin = socket.userRole === 'admin' || socket.userRole === 'senior_agent'
+        const isAdmin = hasRole(socket.userRole, 'senior_agent')
         if (!isAdmin && msg.sender_id !== socket.userId) return
         await prisma.chat_messages.delete({ where: { id: msgId } })
         io.to(`chat:${chatId}`).emit('message:removed', msgId)

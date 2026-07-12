@@ -6,6 +6,8 @@ const MEILI_URL = process.env.MEILISEARCH_URL || 'http://localhost:7700'
 const MEILI_KEY = process.env.MEILI_MASTER_KEY || 'meilisearch-master-key'
 
 let client = null
+let _syncing = false
+const _pendingSyncs = []
 
 function getClient() {
   if (!client && MEILI_URL) {
@@ -16,6 +18,21 @@ function getClient() {
     }
   }
   return client
+}
+
+async function flushPending() {
+  const batch = _pendingSyncs.splice(0)
+  for (const { entity, action, data } of batch) {
+    try {
+      if (action === 'upsert') {
+        await client.index(entity).addDocuments([data])
+      } else if (action === 'delete') {
+        await client.index(entity).deleteDocument(data.id)
+      }
+    } catch (err) {
+      logger.warn(`Meilisearch flush ${entity}/${action} failed:`, err.message)
+    }
+  }
 }
 
 const INDEXES = {
@@ -54,6 +71,11 @@ async function setupIndexes() {
 async function fullSync() {
   const c = getClient()
   if (!c) return
+  if (_syncing) {
+    logger.warn('Meilisearch fullSync already in progress, skipping')
+    return
+  }
+  _syncing = true
   try {
     const tickets = await prisma.tickets.findMany({ select: { id: true, title: true, description: true, status: true, priority: true, category: true } })
     if (tickets.length) await c.index('tickets').addDocuments(tickets.map(t => ({ ...t, description: t.description || '' })))
@@ -76,12 +98,22 @@ async function fullSync() {
     logger.info(`Meilisearch full sync complete: ${tickets.length} tickets, ${employees.length} employees, ${wiki.length} wiki, ${news.length} news, ${chats.length} chats, ${files.length} files`)
   } catch (err) {
     logger.error('Meilisearch full sync failed:', err.message)
+  } finally {
+    _syncing = false
+    if (_pendingSyncs.length > 0) {
+      logger.info(`Flushing ${_pendingSyncs.length} pending syncs after fullSync`)
+      await flushPending()
+    }
   }
 }
 
 async function syncEntity(entity, action, data) {
   const c = getClient()
   if (!c || !INDEXES[entity]) return
+  if (_syncing) {
+    _pendingSyncs.push({ entity, action, data })
+    return
+  }
   try {
     if (action === 'upsert') {
       await c.index(entity).addDocuments([data])

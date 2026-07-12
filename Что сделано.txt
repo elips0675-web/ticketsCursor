@@ -1,674 +1,204 @@
-Что сделано — Service Desk (Корпоративная система тикетов)
-=========================================================
+Что сделано — Service Desk
+============================
 
-Стек: React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui + Express + MySQL + Socket.io
+Стек: React 19 + TypeScript + Vite 8 + Tailwind v4 + shadcn/ui + Express + Prisma + MySQL 8 + Socket.IO + Redis
 
 ────────────────────────────────────────────────────────────────────────────
 
 МОДУЛИ
 
   ✅ Аутентификация и RBAC
-    • JWT-логин / регистрация / dev-login + refresh-токены (15мин access + 7дней refresh httpOnly cookie)
-    • Пять ролей: super_admin, admin, senior_agent, agent, requester (иерархия в middleware)
-    • requireRole() middleware на бэкенде (Zod-валидация)
-    • ProtectedRoute + скрытие UI элементов по роли
-    • Восстановление пароля (nodemailer)
-    • LDAP/AD аутентификация (ldapjs, auto-provisioning сотрудников)
+    • JWT access (15min) + refresh httpOnly cookie (7d), rate-limit 10/min
+    • Пять ролей: super_admin > admin > senior_agent > agent > requester
+    • requireRole() middleware, ProtectedRoute, скрытие UI по роли
+    • LDAP (ldapjs, auto-provisioning), forgot/reset password (nodemailer)
+    • Logout endpoint — инвалидация refresh token в БД
 
   ✅ Тикеты
-    • CRUD, статусы (open → in_progress → resolved → closed)
-    • Приоритеты (low / medium / high / critical)
-    • Назначение на сотрудника
-    • Базовый SLA: due_at при создании, first_response_at при первом in_progress, resolved_at при resolved/closed
-    • Базовое автоназначение (AUTO_ASSIGN): выбор наименее загруженного agent/senior_agent
-    • SLA-мониторинг: GET /api/tickets/sla/overdue (admin/senior_agent)
-    • Фоновая проверка просрочек SLA каждые 15 минут + эскалация (in-app/email/telegram, дедупликация 24ч)
-    • Чат внутри тикета + внутренние заметки
-    • Вложения (multer → uploads/tickets/)
-    • WebSocket-эмиты изменений в реальном времени
-    • CSV (UTF-8 BOM) и PDF (jsPDF + html2canvas) экспорт
+    • CRUD, статусы с валидацией переходов (VALID_TRANSITIONS), приоритеты
+    • SLA: due_at, first_response_at, resolved_at; пересчёт при смене приоритета
+    • Автоназначение (AUTO_ASSIGN — наименее загруженный)
+    • Agent видит свои + неназначенные; requester — только свои
+    • Чат внутри тикета + внутренние заметки, вложения
+    • WebSocket эмиты, фоновая проверка SLA (15 мин), экспорт CSV/PDF
+    • Фильтры, пагинация, сортировка
 
   ✅ Дашборд
-    • Статистика: всего, активные, критические, решённые
-    • График по статусам (Recharts BarChart)
-    • Виджет сотрудников (онлайн/офлайн)
-    • Последние обновления тикетов
-    • Клик по карточкам → переход с фильтром
+    • Статистика, график по статусам (Recharts), виджет сотрудников
+    • Последние обновления, клик по карточкам → переход с фильтром
 
   ✅ Чаты (WebSocket)
-    • Общие и личные чаты
-    • Отправка/удаление сообщений в реальном времени
-    • Поиск по чатам и внутри чата
-    • Реакции (эмодзи)
-    • Непрочитанные сообщения (бейдж)
+    • Общие и личные чаты, real-time сообщения, пагинация (50/запрос)
+    • typing indicator, онлайн-статус, реакции
+    • WebSocket rate-limit (5/сек, exponential backoff)
+    • "Нельзя написать себе", макс 2000 символов
 
-  ✅ Wiki
-    • Статьи, категории, поиск
-    • Загрузка изображений (multer → uploads/wiki/)
-    • Создание через диалог
-    • CSV экспорт (UTF-8 BOM)
+  ✅ Wiki / Новости / Календарь / Опросы
+    • CRUD, RBAC (senior_agent+ для создания), пагинация
+    • Загрузка изображений в wiki, CSV экспорт
+    • Ближайшие события (виджет), прогресс-бары опросов
 
-  ✅ Новости
-    • Лента новостей с фильтром «Важные»
-    • Создание новостей (senior_agent+)
-    • CSV экспорт (UTF-8 BOM) с лимитом 10 000 записей
-
-  ✅ Календарь
-    • Сетка с навигацией по месяцам
-    • Создание / удаление событий
-    • Ближайшие события (виджет)
-    • CSV экспорт (UTF-8 BOM)
-
-  ✅ Опросы
-    • Список, создание, голосование
-    • Прогресс-бары результатов
-
-  ✅ Файлы
-    • Папки, drag & drop, загрузка (multer → uploads/files/)
-    • Фильтр по типу, поиск, вид сетка/список
-    • Открытие файлов по клику
-    • Клавиатурная a11y: tabIndex + onKeyDown в grid/list view, aria-label на dropzone
-
-  ✅ Сотрудники
-    • Список с онлайн-статусом
-    • Поиск, фильтр по роли/отделу
-    • Карточки / таблица (переключение через Radix Tabs)
-    • CSV экспорт (UTF-8 BOM)
+  ✅ Файловое хранилище
+    • Drag & drop, папки, multer + magic bytes (file-type) + ClamAV
+    • DELETE с проверкой роли (senior_agent+)
+    • S3/MinIO адаптер (storage.js), fallback локальный диск
 
   ✅ Глобальный поиск
-    • FULLTEXT (MATCH … AGAINST) поиск по 6 таблицам: тикеты, сотрудники, wiki, новости, чаты, файлы
-    • Fallback на LIKE при ошибке FULLTEXT
-    • Ctrl+K / боковое меню
-    • Группировка результатов по разделам
+    • Meilisearch → MySQL FULLTEXT → LIKE fallback
+    • 6 таблиц, парам. запросы (без SQL injection), Ctrl+K
+
+  ✅ Сотрудники
+    • Список (карточки/таблица), онлайн-статус, фильтры, CSV экспорт
 
   ✅ Админ-панель
     • Дашборд, управление пользователями (роли, блокировка)
-    • Push-уведомления (подписка / отправка)
-    • Настройки интеграций (email, телеграм)
-    • Аудит действий
+    • Self-demotion запрещён, super_admin недоступен для выбора
+    • Настройки интеграций, аудит действий, push-уведомления
 
-  ✅ WebSocket (Socket.io)
-    • JWT-аутентификация на handshake
-    • Комнаты chat:{id}, эмиты message:new / message:removed
-    • Эмиты ticket:created / ticket:updated / ticket:message
-    ● Redis adapter при REDIS_URL (иначе in-memory)
-    • Rate-limit: 5 msg/sec, exponential backoff (×2, max 60s)
+  ✅ Уведомления
+    • In-app (Socket.IO + БД) + Email (nodemailer) + Telegram
+    • Автотриггеры: создание/статус/приоритет/назначение/сообщение/SLA
+    • Очистка >90 дней (фоновая задача, каждые 6ч)
 
 ────────────────────────────────────────────────────────────────────────────
 
 ИНТЕГРАЦИИ
 
-  ✅ Уведомления (автотриггеры)
-    • notify.js — единый сервис для in-app + email + Telegram
-    • Автотриггер на: создание, статус, приоритет, назначение, новое сообщение
-    • Уведомления участникам чата тикета (кроме отправителя)
-
-  ✅ PWA
-    • injectManifest, кастомный service worker
-    • Push-уведомления (web-push)
-    • Install prompt (beforeinstallprompt)
-
-  ✅ Email (nodemailer)
-    • Транспорт, настраиваемый через админку
-    • Уведомления по тикетам
-
-  ✅ Telegram (node-telegram-bot-api)
-    • Бот, настраиваемый токен/канал через админку
-
-  ✅ LDAP / AD
-    • ldapjs: bind + search, настройка через админку
-    • POST /api/auth/ldap-login
-    • Авто-создание сотрудника (auto-provisioning) при первом входе
-
-  ✅ i18n (i18next)
-    • Русский / Английский
-    • LanguageDetector + переключатель
+  ✅ PWA — injectManifest, push-уведомления (web-push), beforeinstallprompt
+  ✅ Email — nodemailer, настройка через админку, retry с exponential backoff
+  ✅ Telegram — node-telegram-bot-api, настраиваемый канал
+  ✅ LDAP/AD — ldapjs, bind+search, auto-provisioning
+  ✅ i18n — русский/английский, LanguageDetector
+  ✅ Swagger 3.0 — GET /api/docs (swagger-ui-express)
 
 ────────────────────────────────────────────────────────────────────────────
 
-ДОКУМЕНТАЦИЯ И ИНФРАСТРУКТУРА
+ИНФРАСТРУКТУРА
 
-  ✅ Swagger / OpenAPI 3.0
-    • GET /api/docs — swagger-ui-express с полной спецификацией
+  ✅ Docker — mysql 8.4 + api (node:20-alpine) + frontend (nginx) + redis + meili
+  ✅ Kubernetes — 8 манифестов (namespace, ConfigMap, Secrets, MySQL+PVC, Redis, API×2, Frontend×2, Ingress, HPA)
+  ✅ GitHub Actions — lint → typecheck → test → build
+  ✅ Husky + lint-staged — pre-commit проверки
+  ✅ Graceful shutdown — SIGTERM/SIGINT (HTTP + Socket.IO + Prisma)
+  ✅ Prometheus + Grafana — метрики, provisioning
+  ✅ Бэкапы — mysqldump ежедневно, хранение 7 дней
+  ✅ Vercel — SPA routing (vercel.json)
+  ✅ Tauri — конфиг + Rust
 
-  ✅ Prisma ORM
-    • Prisma 5.22.0 (схема: 17 моделей, MySQL)
-    • Все knex.raw() заменены на prisma.$queryRaw / prisma.<model>.findMany / create / update / delete
-    • 13 роутов + 4 модуля (audit, notify, socket, ldap) — на Prisma
-    • Миграции через Knex (для FULLTEXT + refresh_tokens), Prisma для схемы данных
-
-  ✅ Логирование (Winston)
-    • Уровни error/warn/info/debug
-    • Транспорты: console + error.log + combined.log (ротация 10MB, 5 файлов)
-    • requestId middleware (UUID + X-Request-Id)
-
-  ✅ CI/CD (GitHub Actions)
-    • Линтинг, typecheck, сборка, серверные тесты
-
-  ✅ Docker
-    • mysql:8.4 + api (node:20-alpine) + frontend (nginx:1.27-alpine)
-    • healthcheck, seed.sql инициализация
-
-  ✅ Cache (Redis / in-memory)
-    • cache.js — Redis при REDIS_URL, иначе in-memory Map
-    • Применён к GET /api/tickets (TTL 120s), /api/employees (TTL 300s)
-    • Инвалидация при POST/PUT/DELETE
-
-  ✅ Автоочистка уведомлений
-    • server/src/index.js: setInterval каждые 6ч, удаляет > 90 дней
-
-  ✅ Kubernetes
-    • namespace, ConfigMap / Secrets
-    • MySQL + PVC, Redis
-    • API (2 реплики), Frontend (2 реплики)
-    • Ingress (nginx)
-
-  ✅ Vercel
-    • SPA routing (vercel.json)
-
-  ✅ Tauri (десктоп)
-    • Конфигурация, Rust-заглушка
-
-  ✅ E2E (Playwright)
-    • playwright.config.ts, тест логина
-    • npm run test:e2e
+  ✅ Prisma ORM — 17 моделей, read replicas, directUrl для миграций
+  ✅ Redis — кэш (tickets 120s, employees 300s), Socket.IO adapter, BullMQ
+  ✅ Логирование — Winston (console + файлы, ротация 10MB), requestId
+  ✅ Аудит — audit_log + middleware на ключевых роутах
+  ✅ Sentry — опционально (SENTRY_DSN)
 
 ────────────────────────────────────────────────────────────────────────────
 
-ТЕСТИРОВАНИЕ
+ТЕСТЫ
 
-   • Клиентские тесты: 70 (23 файла, vitest + jsdom + MSW) — ✅ все пройдены
-  • Серверные тесты: 93 (5 файлов, vitest + supertest, 4 сервисных) — ✅ все пройдены
-  • E2E (Playwright): 5 файлов (login, tickets, chats, admin, sla-autoassign-export) — 22 теста
-  • Coverage: v8, пороги 20%/15%/15%/25% (statements/branches/functions/lines)
-  • Сборка (vite build + PWA): ✅ успешно
-
-────────────────────────────────────────────────────────────────────────────
-
-ЗАПУСК
-
-  Требования: Node.js 18+, MySQL (Laragon / Docker)
-
-  Быстрый старт (локально):
-    cp server\.env.example server\.env
-    cd server && npm run dev
-    cd .. && npm run dev
-    → http://localhost:5173 (фронтенд)
-    → http://localhost:4000/api (API)
-    → http://localhost:4000/api/docs (Swagger)
-
-  Docker (prod):
-    docker compose up -d --build
-    → http://localhost
-
-  E2E тесты:
-    npx playwright install chromium
-    npm run test:e2e
-
-  DevOps логин: POST /api/auth/dev-login (без пароля, пользователь id=1)
+  • Клиентские: 154/154 (40 файлов, vitest + jsdom)
+  • Серверные: 116/116 (6 файлов, vitest + supertest)
+  • E2E: Playwright (логин, тикеты, чаты, админка, SLA)
+  • Coverage: 51% Stmts / 55% Lines
+  • Type-check + build: успешно
 
 ────────────────────────────────────────────────────────────────────────────
 
-АУДИТ ПРОЕКТА (2026-07) — ИТОГОВАЯ ОЦЕНКА: 8.7/10
+    АУДИТ ПОЛНЫЙ (2026-07-11, ~200 проверок)
 
-  Проверка по типовому чек-листу корпоративного Service Desk + внешнее ревью.
-  Проект близок к production-ready уровню и полностью пригоден для демонстрации навыков (портфолио),
-  но остаётся технический долг по SLA/workflow тикетов, унификации API-ответов, архитектуре слоёв и тестовому покрытию.
+      Раздел 1 — Аутентификация и RBAC:
+        ✅ login/register/refresh/forgot/reset — Zod-валидация, rate-limit
+        ✅ logout endpoint — ДОБАВЛЕН (POST /api/auth/logout, инвалидация refresh token)
+        ✅ Frontend logout — fetch к /api/auth/logout перед очисткой localStorage
+        ✅ LDAP — bind+search+auto-provisioning, fallback на обычный логин
+        ✅ RBAC — 5 ролей, иерархия, requireRole на бэкенде
+        ✅ ProtectedRoute — редирект на /login без токена, на / при недостатке прав
 
-  Безопасность:
-    ✅ bcrypt (10 раундов), параметризованные SQL-запросы
-    ✅ rate-limit: auth 10/60s, api 100/60s, admin 30/60s
-    ✅ helmet (заголовки), CORS (белый список origins)
-    ✅ Zod на всех роутах (auth, tickets, wiki, polls, news, admin, calendar, chats, employees, files, search, push, notifications)
-    ✅ /uploads — JWT-аутентификация (header Bearer / ?token=)
-    ✅ /dev-login — отключён в production (404)
-    ✅ /api/system-info — защищён authenticateToken
-    ✅ Error Boundary на клиенте
-    ✅ auth.js — все ответы в формате { message }
-    ✅ Multer: limits.fileSize (files 50MB, wiki 10MB, tickets 20MB) + fileFilter по MIME-типам + file-type magic bytes
+      Раздел 2 — Тикеты:
+        ✅ Валидация статусов — ДОБАВЛЕНА (VALID_TRANSITIONS, невалидный переход → 400)
+        ✅ Agent-фильтр — ДОБАВЛЕН (agent видит свои + неназначенные тикеты)
+        ✅ SLA пересчёт — ИСПРАВЛЕН (due_at пересчитывается при изменении приоритета)
+        ✅ listTickets — пагинация, фильтры по роли
+        ✅ Автоназначение (AUTO_ASSIGN) — наименее загруженный agent/senior_agent
+        ✅ SLA — first_response_at, resolved_at, due_at, фоновая проверка 15 мин
+        ✅ Экспорт CSV/PDF — через фронтенд (jsPDF + html2canvas)
+        ✅ WebSocket — эмиты ticket:created/updated/message/message-removed
 
-  Тестирование:
-    ✅ 47 клиентских (14 файлов, vitest + MSW) + 93 серверных тестов (5 файлов)
-    ✅ 4 сервисных теста: chats, employees, news, calendar
-    ✅ E2E: login, tickets, chats, admin, sla-autoassign-export (Playwright) — 22 теста
-    ✅ Coverage (v8) c порогами
-    ✅ CI гоняет клиентские тесты, поднимает MySQL 8.4 + seed.sql
+      Раздел 3 — Чаты:
+        ✅ Пагинация сообщений — ДОБАВЛЕНА (page/limit, total, totalPages)
+        ✅ Валидация длины — ДОБАВЛЕНА (макс 2000 символов, REST + WebSocket)
+        ✅ WebSocket rate-limit — 5 сообщ/сек, exponential backoff (2×, макс 60s)
+        ✅ Typing indicator — через chat:typing event
+        ✅ Онлайн-статус — Prisma update online/last_active, user:status эмит
+        ✅ Удаление сообщений — проверка владельца или admin/senior_agent
+        ✅ Личный чат — защита "нельзя написать себе" (400)
 
-  Логирование:
-    ✅ Winston (error/warn/info/debug, console + error.log + combined.log, ротация 10MB)
+      Раздел 4 — Файловое хранилище:
+        ✅ Magic bytes — validateUpload через file-type + ALLOWED extensions
+        ✅ ClamAV — опционально (CLAMAV_ENABLED)
+        ✅ Multer — diskStorage + ALLOWED_MIMES + fileSize limit
+        ✅ DELETE /:id — ДОБАВЛЕНА проверка роли (requireRole('admin', 'senior_agent'))
+        ✅ Storage adapter — S3/MinIO (при S3_ENDPOINT) или локальный диск
 
-  Обработка ошибок:
-    ✅ Глобальный error handler на сервере
-    ✅ Error Boundary на клиенте (src/components/ErrorBoundary.tsx)
-    ✅ API-интерцептор (api.ts) — централизованный fetch на всех страницах с обработкой 401/403/500 + toast
+      Раздел 5 — Поиск:
+        ✅ Meilisearch → MySQL FULLTEXT → LIKE fallback
+        ✅ Параметризованные $queryRaw — защита от SQL injection
+        ✅ 6 таблиц: tickets, employees, wiki, news, chats, files
+        ✅ Короткий запрос (<2 символов) → пустой ответ
 
-  UI / a11y / i18n:
-    ✅ Нижняя мобильная навигация, тёмная тема, i18n-файлы полные
-    ✅ i18n на всех страницах (хардкод заменён на t())
-    ✅ htmlFor/id на всех формах
-    ✅ Error messages с role="alert"
-    ✅ aria-label на icon-only кнопках
-    ✅ keyboard + role="button" + tabIndex на кликабельных карточках (grid + list view)
-    ✅ Tabs на Radix (Employees)
-    ✅ Dropzone с клавиатурной a11y (tabIndex, onKeyDown, aria-label, aria-live)
+      Раздел 6 — Уведомления:
+        ✅ GET / — фильтр по user_id, take: 50
+        ✅ PUT /:id/read — проверка владельца
+        ✅ PUT /read-all, DELETE /clear-all
+        ✅ createNotification — Socket.IO эмит + запись в БД
+        ✅ Фоновая очистка >90 дней (каждые 6ч, BullMQ/setInterval)
 
-  Функциональные дыры:
-    ✅ RBAC: super_admin / admin / senior_agent / agent / requester (requireRole + ProtectedRoute)
-    ✅ WebSocket: Socket.io с комнатами, эмиты ticket/chat/message
-    ✅ Уведомления: notify.js (in-app + email + Telegram) на все события
-    ✅ Аудит: audit_log + auditLogMiddleware на ключевых роутах
-    ✅ Email, Telegram, WebPush, PDF/CSV на тикетах
-    ✅ LDAP/AD: ldapjs, bind + search, авто-создание сотрудника при первом входе
-    ✅ Экспорт CSV на всех страницах (тикеты PDF/CSV, Wiki/Calendar/Employees/News — CSV)
+      Раздел 7 — Сотрудники:
+        ✅ GET / — список, GET /stats
+        ✅ requireRole('agent')
+        ✅ Онлайн-статус через WebSocket
 
-  Производительность:
-    ✅ Redis для Socket.io (опционально, fallback in-memory)
-    ✅ Redis-кэш для GET /api/tickets (TTL 120s) и /api/employees (TTL 300s), инвалидация на мутациях
-    ✅ WebSocket rate-limit: 5 msg/sec, exponential backoff (×2, max 60s)
-    ✅ Серверная пагинация: tickets, news, wiki, files, polls
-    ✅ CREATE INDEX (16 шт) в seed.sql
-    ✅ N+1 в polls.js исправлен (IN() вместо цикла)
-    ✅ News.tsx на серверной пагинации
+      Раздел 8 — Wiki/Новости/Календарь/Опросы:
+        ✅ CRUD, RBAC (senior_agent+ для создания)
+        ✅ Пагинация, фильтры
+        ✅ Загрузка изображений в wiki (multer + validateUpload)
 
-  Инфраструктура:
-    ✅ Docker, K8s, Vercel, Tauri, CI/CD, Swagger, Playwright
-    ✅ Server Dockerfile: multi-stage, non-root USER node, .dockerignore
-    ✅ docker-compose: JWT_SECRET обязателен, NODE_ENV=production
+      Раздел 9 — Админ-панель:
+        ✅ Settings (GET/PUT) — ALLOWED_SETTINGS whitelist
+        ✅ Users (GET/PUT) — CRITICAL FIX: super_admin исключён из выбора ролей
+        ✅ Self-demotion — ЗАПРЕЩЕНА (Cannot modify your own account)
+        ✅ Audit log — фильтры по entityType, entityId
 
-────────────────────────────────────────────────────────────────────────────
+      Раздел 10 — PWA/Desktop/i18n/a11y:
+        ✅ VitePWA (injectManifest), beforeinstallprompt
+        ✅ Tauri — конфиг + Rust
+        ✅ i18n (ru/en), LanguageDetector
+        ✅ Тёмная тема (CSS vars + localStorage)
+        ✅ ErrorBoundary на всех страницах
 
-   ✅ Requester role: middleware фильтрация тикетов по created_by, requireRole('agent') на 8 модулях
-   ✅ Skeleton loaders: Tickets, News, Wiki, Files, Chats, Polls, Employees
-   ✅ SLA stats: GET /api/tickets/sla/stats, админ-карточка с compliance rate
+      Раздел 11 — Производительность:
+        ✅ TanStack Query + staleTime
+        ✅ Redis cache (tickets 120s, employees 300s)
+        ✅ Skeleton loaders, пагинация
+        ✅ Виртуализация (@tanstack/react-virtual)
 
-   ПРОВЕРКА КРИТИЧНЫХ ПУНКТОВ (по ревью)
+      Раздел 12 — Безопасность:
+        ✅ Helmet, CORS, rate-limit (auth 10/min, api 100/min, admin 30/min)
+        ✅ JWT — подпись проверяется, alg: none rejected
+        ✅ Параметризованные запросы — SQL injection защита
+        ✅ File upload — MIME + magic bytes + ClamAV
 
-  Из того же списка — проверка всех пунктов по коду:
-
-  Безопасность:
-    ✅ dev-login: отключён в production (404)
-    ✅ Валидация: Zod на всех роутах (15 схем, validate/validateQuery)
-    ✅ Helmet: включён, CORS: белый список origins
-    ✅ rate-limit: auth 10/60s, api 100/60s, admin 30/60s
-    ✅ Multer: limits.fileSize (files 50MB, wiki 10MB, tickets 20MB)
-    ✅ Multer: fileFilter по MIME-типам (запрет .exe/.js/.html)
-
-  Функциональность:
-    ✅ RBAC: super_admin / admin / senior_agent / agent / requester, requireRole(), ProtectedRoute
-    ✅ WebSocket: Socket.io, комнаты, эмиты ticket/chat
-    ✅ Уведомления: notify.js на создание/статус/назначение/сообщение
-    ✅ Аудит: audit_log + middleware
-    ✅ Docker + docker-compose: mysql + api + frontend
-    ✅ Миграции БД: knex
-    ✅ Prisma: все 13 роутов + socket/audit/settings на Prisma
-    ✅ CI/CD: GitHub Actions
-    ✅ Тесты: 47 клиентских (14 файлов, MSW) + 93 серверных (5 файлов: 4 сервисных + api.test.js) + E2E (4 файла)
-    ✅ Покрытие: v8 с порогами
-    ✅ LDAP/AD: ldapjs, auto-provisioning, админка
-
-  ✅ Логирование: Winston (error/warn/info/debug, console + error.log + combined.log)
-  ✅ Multer: fileFilter по MIME-типам + file-type (magic bytes)
-  ✅ dev-login: отключён вне production (404)
-
-  ────────────────────────────────────────────────────────────────────────────
-
-   ПЛАН ДОРАБОТКИ ПО ЭТАПАМ
-
-   ✅ Этап 1-23 выполнены. Проект стабилен.
-   ✅ Этап 24 (Code Review Fixes): Исправлены все 12 критических проблем tickets-модуля по code review:
-
-     ✅ 24.1 Формат API-ответов — убраны spread-операторы (...ticket, ...msg, ...mapped)
-     ✅ 24.2 Уведомления — все notify* с await + try/catch
-     ✅ 24.3 Сервисный слой — updatePriority/updateAssign вынесены в tickets.service.js
-     ✅ 24.4 Права чтения — GET /:id проверяет canView (senior_agent+ или свои тикеты)
-     ✅ 24.5 hasRole() утилита — иерархическая проверка ролей, super_admin включён во все проверки
-     ✅ 24.6 getLeastLoadedAssignee — переписан на чистый Prisma (без raw SQL)
-     ✅ 24.7 Пагинация сообщений — listTickets без сообщений (только _count), getTicketById с take/skip
-     ✅ 24.8 getResolvedAt — сброс в null при reopened
-     ✅ 24.9 createTicket — fallback настроек при ошибке getSettings()
-     ✅ 24.10 crypto.randomUUID() — вместо Math.random() для имён файлов
-     ✅ 24.11 Логирование — logger.error во всех catch, logger.warn для сокета
-     ✅ 24.12 Проверка тикета — POST /:id/messages проверяет существование тикета
-
-     Создан новый эндпоинт GET /:id/messages для пагинированной подгрузки истории.
-     Создана утилита server/src/utils/roleUtils.js.
-     Обновлён фронтенд: TicketDetail.tsx, ticket-context.tsx, Tickets.tsx, Kanban.tsx, types/index.ts.
-
-   ПЛАН ДОРАБОТКИ ДО PRODUCTION (приоритет)
-
-   🔴 ✅ Этап A — Убрать DEMO-fallback при ошибках API
-     ✅ ticket-context — пустые массивы вместо DEMO_TICKETS/DEMO_EMPLOYEES
-     ✅ demo-data.ts — удалён (модуль больше не нужен)
-
-   🔴 ✅ Этап B — Graceful shutdown (SIGTERM)
-     ✅ server/src/index.js — shutdown(signal) с закрытием HTTP + Socket.IO + Prisma
-     ✅ Обработка SIGTERM/SIGINT
-
-   🔴 ✅ Этап C — Унификация API-ответов во всех роутах
-     ✅ chats, files, polls, wiki, news, employees, calendar, search, auth, ldap, push
-     ✅ Единый формат: { success, data } / { success: false, message }
-
-     Детально:
-     ✅ auth.js — login/register/refresh/dev-login → { success: true, data: { token, employee } }
-     ✅ employees.js — list (map снейк→кэмел), stats
-     ✅ news.js, polls.js, wiki.js — пагинированные ответы { success: true, data: { data, total, page, totalPages } }
-     ✅ search.js — fulltext + LIKE fallback
-     ✅ files.js — folders, create folder, upload, delete
-     ✅ chats.js — list, detail, send message, mark read, personal chat
-     ✅ calendar.js — list, create, update, delete
-     ✅ push.js — vapid-key, subscription, subscribe/unsubscribe, send
-     ✅ ldap.js — LDAP-логин
-
-     Фронтенд — все raw fetch() поправлены на извлечение .data:
-     ✅ ticket-context.tsx (employees), Profile.tsx (employees), Admin.tsx (stats)
-     ✅ Chats.tsx, Login.tsx (login/ldap/dev-login), Register.tsx, use-push.ts
-
-   🔴 ✅ Этап D — Сервисный слой для всех модулей
-     ✅ chats.service.js — getChats, getChatById, createMessage, getChatParticipants, markRead, findOrCreatePersonalChat
-     ✅ files.service.js — getFolders, createFolder, createFile, deleteFile
-     ✅ polls.service.js — listPolls, createPoll, votePoll, deletePoll
-     ✅ wiki.service.js — listArticles, getArticleById, createArticle
-     ✅ news.service.js — listNews, createNews
-     ✅ employees.service.js — listEmployees, getStats
-     ✅ calendar.service.js — listEvents, createEvent, updateEvent, deleteEvent
-     ✅ Роуты переписаны: импорт сервисов, роуты тонкие (auth/validation/response)
-
-   ✅ Этап E — SLA policy-матрица
-     ✅ Деадлайны по категориям (bug/feature/support/incident) + приоритетам
-     ✅ Отчётность по SLA в админ-дашборде (GET /api/tickets/sla/stats)
-
-   ✅ Этап F — Роль requester
-     ✅ role: 'requester' — видит только свои тикеты, не видит админку
-     ✅ ProtectedRoute + middleware проверка на всех роутах
-
-   ✅ Этап G — React Query + optimistic updates
-      ✅ Установка @tanstack/react-query v5.101.0
-      ✅ Замена fetch в ticket-context на useQuery/useMutation
-      ✅ Optimistic updates для createTicket, addMessage, updateStatus/priority/assign
-
-   ✅ Этап H — Skeleton loaders
-     ✅ Tickets, News, Wiki, Files, Employees, Chats, Polls — skeleton-компоненты
-     ✅ src/components/skeletons.tsx (SkeletonCard, SkeletonCardGrid, SkeletonTableRow, SkeletonChatRow)
-
-   🔴 🔄 Этап I — Покрытие тестов 50%+
-     ✅ Серверные тесты: 17 → 93 (5 файлов: 4 сервисных + api.test.js)
-     ✅ 4 сервисных теста: chats, employees, news, calendar
-     ✅ API тесты расширены: auth, RBAC, поиск, уведомления, push, валидация
-      ✅ Клиентские тесты: 47 → 70 (23 файла)
-      ✅ E2E: эскалация SLA, автоназначение, экспорт (e2e/sla-autoassign-export.spec.ts — 9 тестов)
-
-   ✅ Этап J — CI/CD + инфраструктура
-      ✅ mysql_backup volume для бэкапов в docker-compose
-      ✅ Healthcheck для api (wget /api/health) и frontend (wget /)
-      ✅ Prometheus (prom/prometheus) + Grafana (grafana/grafana) с provisioning
-
-   ✅ Этап L — Доведение тестов до актуального состояния
-      ✅ Исправлены клиентские тесты: добавлен jsdom URL (http://localhost) и мок localStorage в setup.ts
-      ✅ Все 71 клиентский тест (21 файл) проходят — были полностью сломаны (localStorage is not a function)
-      ✅ Добавлен roleUtils.test.js — 7 тестов на иерархию ролей (hasRole, граничные случаи)
-      ✅ Добавлены API-тесты: /auth/me, /auth/logout, /system-info, POST /tickets, /wiki, /calendar, /news, /tickets/:id/messages
-      ✅ Серверные тесты: 116 (6 файлов), все проходят
-      ✅ Обновлены пороги покрытия под актуальные значения
-      ✅ npm run build — успешно
-
-   ✅ Этап M — Prisma read replicas + виртуализация списков
-      ✅ Prisma read replicas: server/src/prisma.js — replicas: [{ url }] + datasourceUrl
-      ✅ schema.prisma — directUrl для миграций (always primary)
-      ✅ docker-compose.yml — REPLICA_DATABASE_URL (mysql_replica:3306) + DIRECT_DATABASE_URL
-      ✅ Установлен @tanstack/react-virtual
-      ✅ TicketDetail.tsx — виртуализация списка сообщений (useVirtualizer, overscan 5)
-      ✅ ChatDetail.tsx — виртуализация списка сообщений (render только видимых)
-      ✅ Fallback на обычный рендер в тестовом окружении (jsdom без layout)
-
-   ✅ Этап N — Code review fixes (Kimi AI)
-      ✅ README — версии синхронизированы: React 19, Vite 8, Tailwind v4, coverage 51%
-      ✅ cache.js — Redis SCAN вместо KEYS (не блокирует Redis на больших базах)
-      ✅ seed.sql — добавлен индекс idx_employees_role_active для getLeastLoadedAssignee
-      ✅ k8s/hpa.yaml — HPA для api (2→8 реплик, CPU 70%) и frontend (2→6 реплик)
-      ✅ src/lib/use-push.ts — .catch() на serviceWorker.ready (unhandled rejection)
-
-   ✅ Тесты: клиент 154/154 (40 файлов), сервер 116/116 (6 файлов), type-check + build
+      Раздел 13 — Инфраструктура/DevOps:
+        ✅ Docker Compose (mysql 8.4 + api + frontend + redis + meili)
+        ✅ Kubernetes (8 манифестов, HPA, ConfigMap, Secrets)
+        ✅ GitHub Actions (lint → typecheck → test → build)
+        ✅ Husky + lint-staged
+        ✅ Graceful shutdown (SIGTERM/SIGINT)
+        ✅ Prometheus + Grafana (provisioning)
+        ✅ Backup (mysqldump, ежедневно, 7 дней хранения)
 
 ────────────────────────────────────────────────────────────────────────────
 
 РЕПОЗИТОРИЙ
 
   https://github.com/elips0675-web/ticketsCursor
-
-────────────────────────────────────────────────────────────────────────────
-
-PRODUCTION PROMPT
-
-Промпт: Production-Ready Helpdesk System
-
-Контекст
-Есть существующий проект Service Desk (Helpdesk) — корпоративная система учёта заявок с чатами, календарём, опросами, файловым хранилищем и профилем пользователя.
-Текущий стек:
-Frontend: React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui + Recharts
-Backend: Express + MySQL + JWT (helmet, rate-limit)
-Среда: Node.js 18+, MySQL (через Laragon)
-Текущие модули: Дашборд, Тикеты, Сотрудники, Календарь, Опросы, Файлы, Чаты, Профиль, Авторизация
-Известные проблемы: нет ORM, нет WebSocket/real-time, нет RBAC, нет Docker, нет тестов, dev-логин без пароля (бэкдор), файлы хранятся локально, нет валидации входных данных, нет refresh-токенов
-
-Задача
-Превратить проект в production-ready систему. Работать поэтапно, каждый этап — отдельный коммит/PR.
-
-Этап 1. Инфраструктура и безопасность (критично)
-Backend:
-  1. Заменить ручные SQL-запросы на Prisma ORM с полной типобезопасностью
-  2. Настроить миграции базы данных через Prisma Migrate
-  3. Добавить Zod для валидации всех входных данных на API
-  4. Реализовать JWT с refresh-токенами (access — 15 мин, refresh — 7 дней, хранить в httpOnly cookie)
-  5. Удалить dev-login эндпоинт из продакшена (оставить только под флагом NODE_ENV=development)
-  6. Добавить RBAC (роли: super_admin, admin, manager, agent, user) с middleware-проверкой на каждом защищённом роуте
-  7. Настроить CORS строго под домены приложения
-  8. Добавить winston для логирования (в файл + консоль, ротация логов)
-Инфраструктура:
-  9. Создать docker-compose.yml с сервисами: app (Node), db (MySQL 8), redis (для сессий/кэша)
-  10. Добавить .env.example со всеми обязательными переменными
-  11. Настроить healthcheck эндпоинт (/health) для мониторинга
-
-Этап 2. Real-time и файлы (критично)
-Чаты:
-  12. Интегрировать Socket.IO для real-time сообщений
-  13. Сообщения должны доставляться мгновенно, статус «прочитано» обновляться в реальном времени
-  14. История чатов подгружается пагинацией (по 50 сообщений)
-Файловое хранилище:
-  15. Перенести хранение файлов с локального диска на AWS S3 (или MinIO для self-hosted)
-  16. Генерировать presigned URL для загрузки/скачивания
-  17. Ограничить размер файла (макс 50 МБ), валидировать MIME-тип
-  18. Добавить антивирусную проверку (ClamAV или аналог) для загружаемых файлов
-
-Этап 3. Тестирование и надёжность
-  19. Написать unit-тесты для сервисного слоя (Vitest)
-  20. Написать API-тесты для всех эндпоинтов (Supertest + Vitest)
-  21. Написать e2e-тесты для критических пользовательских сценариев (Playwright): создание тикета, назначение, чат, закрытие
-  22. Настроить GitHub Actions CI/CD: lint → type-check → test → build → deploy
-  23. Добавить husky + lint-staged для pre-commit хуков
-
-Этап 4. Мониторинг и уведомления
-  24. Интегрировать Sentry для отслеживания ошибок на фронте и бэке
-  25. Добавить email-уведомления (Resend / AWS SES): новый тикет, назначение, комментарий, дедлайн
-  26. Добавить in-app уведомления (bell-иконка с бейджем, список уведомлений)
-  27. Настроить rate limiting по IP + по пользователю (агрессивнее для auth-эндпоинтов)
-
-Этап 5. Оптимизация и масштабирование
-  28. Добавить Redis для кэширования частых запросов (список сотрудников, дашборд)
-  29. Реализовать пагинацию на всех списках (тикеты, сообщения, файлы, сотрудники)
-  30. Добавить поиск по тикетам через полнотекстовый индекс MySQL или Elasticsearch
-  31. Оптимизировать запросы Prisma (N+1 проблема)
-  32. Добавить экспорт тикетов в CSV/PDF
-
-Требования к коду
-- TypeScript strict mode — без any
-- Чистая архитектура: controllers → services → repositories. Не писать бизнес-логику в контроллерах
-- Единый формат ответа API: { success: boolean, data?: T, error?: { code: string, message: string } }
-- Централизованная обработка ошибок — middleware, не try-catch в каждом контроллере
-- Документация API — Swagger/OpenAPI через swagger-ui-express
-
-Критерии готовности
-[ ] Все тесты проходят (coverage > 70%)
-[ ] docker-compose up поднимает полностью рабочее приложение
-[ ] Нет any в TypeScript
-[ ] Все API-эндпоинты задокументированы в Swagger
-[ ] RBAC работает: пользователь без прав получает 403
-[ ] Чаты работают в real-time без обновления страницы
-[ ] Файлы загружаются в S3/MinIO, не на локальный диск
-[ ] Sentry ловит ошибки
-[ ] CI/CD pipeline зелёный
-
-────────────────────────────────────────────────────────────────────────────
-
-PRODUCTION PROMPT ДОРАБОТАТЬ
-
-Реализовано (текущий статус):
-
-  ✅ Роль super_admin — middleware с иерархией (super_admin > admin > senior_agent > agent)
-  ✅ Zod на бэкенде — заменён express-validator на Zod (все 15 схем)
-  ✅ Refresh-токены JWT — access 15мин + refresh 7дней (httpOnly cookie, /api/auth/refresh)
-  ✅ Полнотекстовый поиск — FULLTEXT INDEX + MATCH AGAINST с fallback на LIKE
-  ✅ Sentry — SDK на фронт (@sentry/react) и бэк (@sentry/node), опционально через SENTRY_DSN
-  ✅ S3/MinIO — storage.js адаптер (S3 при S3_ENDPOINT, иначе локальный диск)
-  ✅ ClamAV — интеграция в validateUpload (опционально, CLAMAV_ENABLED=true)
-  ✅ Prisma ORM — knex.raw заменён на Prisma во всех 13 роутах + 4 модулях
-  ✅ Исправление сайдбара — super_admin добавлен во все roles массивы navItems
-  ✅ Исправление лейаута — {children} заменён на <Outlet /> в AppLayout и AdminLayout (React Router v6)
-
-Не реализовано (требует внешних сервисов или дальнейшей доработки):
-
-   — (пусто — все пункты выполнены)
-
-────────────────────────────────────────────────────────────────────────────
-
-АУДИТ PRODUCTION PROMPT (2026-07)
-
-   Оценка промпта как roadmap:
-     Полнота покрытия:       8/10
-     Чёткость требований:    9/10
-     Практическая применимость: 8/10
-     Архитектурная зрелость: 7/10
-     Масштабируемость:       6/10
-
-   Что учтено в проекте:
-
-     ✅ Backend: Prisma, Zod, JWT+refresh, RBAC, CORS, Winston, миграции
-     ✅ Real-time: Socket.IO, комнаты, эмиты ticket/chat/message
-     ✅ Файлы: multer + fileFilter + ClamAV, storage.js адаптер (S3/локально)
-     ✅ Тесты: 47 клиентских + 17 серверных + E2E (Playwright)
-     ✅ CI/CD: GitHub Actions, husky + lint-staged
-     ✅ Мониторинг: Sentry (front+back), Winston, rate-limit
-     ✅ Кэш: Redis (TTL 120s tickets, 300s employees), in-memory fallback
-     ✅ Пагинация: tickets, news, wiki, files, polls
-     ✅ Поиск: FULLTEXT INDEX + MATCH AGAINST + fallback LIKE
-     ✅ Экспорт: CSV (UTF-8 BOM) + PDF (jsPDF)
-     ✅ Аудит: audit_log + auditLogMiddleware на ключевых роутах
-     ✅ Docker: compose (mysql 8.4 + api + frontend), Dockerfile multi-stage
-     ✅ Socket.IO Redis adapter: @socket.io/redis-adapter + ioredis
-     ✅ Graceful shutdown: SIGTERM обработка (server/src/index.js)
-     ✅ Audit: таблица audit_log, middleware на ключевых роутах
-
-   Рекомендации на следующую итерацию:
-
-      ✅ TanStack Query (React Query) + optimistic updates — выполнено (Этап G)
-      ✅ Retry-логика для email — выполнена (exponential backoff в notify.js)
-      ✅ Skeleton loaders — выполнены (Этап H)
-      ✅ React Error Boundaries на уровне модулей — выполнены (App.tsx, все 23 страницы)
-      ✅ Prometheus/Grafana метрики — выполнены (Этап J)
-      ✅ Multi-stage Dockerfile — улучшен (Prisma generate, wget healthcheck)
-
-      ✅ Fuzzy search — Meilisearch (docker-compose, search-sync.js, fallback FULLTEXT→LIKE)
-      ✅ MySQL read replicas — docker-compose (primary + replica + init-replica.sh)
-      ✅ Автоматические бэкапы — db_backup сервис (mysqldump раз в 24ч, хранение 7 дней, volume mysql_backup)
-
-   ✅ АУДИТ ПОЛНЫЙ (2026-07-11, ~200 проверок)
-
-     Раздел 1 — Аутентификация и RBAC:
-       ✅ login/register/refresh/forgot/reset — Zod-валидация, rate-limit
-       ✅ logout endpoint — ДОБАВЛЕН (POST /api/auth/logout, инвалидация refresh token)
-       ✅ Frontend logout — fetch к /api/auth/logout перед очисткой localStorage
-       ✅ LDAP — bind+search+auto-provisioning, fallback на обычный логин
-       ✅ RBAC — 5 ролей, иерархия, requireRole на бэкенде
-       ✅ ProtectedRoute — редирект на /login без токена, на / при недостатке прав
-
-     Раздел 2 — Тикеты:
-       ✅ Валидация статусов — ДОБАВЛЕНА (VALID_TRANSITIONS, невалидный переход → 400)
-       ✅ Agent-фильтр — ДОБАВЛЕН (agent видит свои + неназначенные тикеты)
-       ✅ SLA пересчёт — ИСПРАВЛЕН (due_at пересчитывается при изменении приоритета)
-       ✅ listTickets — пагинация, фильтры по роли
-       ✅ Автоназначение (AUTO_ASSIGN) — наименее загруженный agent/senior_agent
-       ✅ SLA — first_response_at, resolved_at, due_at, фоновая проверка 15 мин
-       ✅ Экспорт CSV/PDF — через фронтенд (jsPDF + html2canvas)
-       ✅ WebSocket — эмиты ticket:created/updated/message/message-removed
-
-     Раздел 3 — Чаты:
-       ✅ Пагинация сообщений — ДОБАВЛЕНА (page/limit, total, totalPages)
-       ✅ Валидация длины — ДОБАВЛЕНА (макс 2000 символов, REST + WebSocket)
-       ✅ WebSocket rate-limit — 5 сообщ/сек, exponential backoff (2×, макс 60s)
-       ✅ Typing indicator — через chat:typing event
-       ✅ Онлайн-статус — Prisma update online/last_active, user:status эмит
-       ✅ Удаление сообщений — проверка владельца или admin/senior_agent
-       ✅ Личный чат — защита "нельзя написать себе" (400)
-
-     Раздел 4 — Файловое хранилище:
-       ✅ Magic bytes — validateUpload через file-type + ALLOWED extensions
-       ✅ ClamAV — опционально (CLAMAV_ENABLED)
-       ✅ Multer — diskStorage + ALLOWED_MIMES + fileSize limit
-       ✅ DELETE /:id — ДОБАВЛЕНА проверка роли (requireRole('admin', 'senior_agent'))
-       ✅ Storage adapter — S3/MinIO (при S3_ENDPOINT) или локальный диск
-
-     Раздел 5 — Поиск:
-       ✅ Meilisearch → MySQL FULLTEXT → LIKE fallback
-       ✅ Параметризованные $queryRaw — защита от SQL injection
-       ✅ 6 таблиц: tickets, employees, wiki, news, chats, files
-       ✅ Короткий запрос (<2 символов) → пустой ответ
-
-     Раздел 6 — Уведомления:
-       ✅ GET / — фильтр по user_id, take: 50
-       ✅ PUT /:id/read — проверка владельца
-       ✅ PUT /read-all, DELETE /clear-all
-       ✅ createNotification — Socket.IO эмит + запись в БД
-       ✅ Фоновая очистка >90 дней (каждые 6ч, BullMQ/setInterval)
-
-     Раздел 7 — Сотрудники:
-       ✅ GET / — список, GET /stats
-       ✅ requireRole('agent')
-       ✅ Онлайн-статус через WebSocket
-
-     Раздел 8 — Wiki/Новости/Календарь/Опросы:
-       ✅ CRUD, RBAC (senior_agent+ для создания)
-       ✅ Пагинация, фильтры
-       ✅ Загрузка изображений в wiki (multer + validateUpload)
-
-     Раздел 9 — Админ-панель:
-       ✅ Settings (GET/PUT) — ALLOWED_SETTINGS whitelist
-       ✅ Users (GET/PUT) — CRITICAL FIX: super_admin исключён из выбора ролей
-       ✅ Self-demotion — ЗАПРЕЩЕНА (Cannot modify your own account)
-       ✅ Audit log — фильтры по entityType, entityId
-
-     Раздел 10 — PWA/Desktop/i18n/a11y:
-       ✅ VitePWA (injectManifest), beforeinstallprompt
-       ✅ Tauri — конфиг + Rust
-       ✅ i18n (ru/en), LanguageDetector
-       ✅ Тёмная тема (CSS vars + localStorage)
-       ✅ ErrorBoundary на всех страницах
-
-     Раздел 11 — Производительность:
-       ✅ TanStack Query + staleTime
-       ✅ Redis cache (tickets 120s, employees 300s)
-       ✅ Skeleton loaders, пагинация
-       ✅ Виртуализация (@tanstack/react-virtual)
-
-     Раздел 12 — Безопасность:
-       ✅ Helmet, CORS, rate-limit (auth 10/min, api 100/min, admin 30/min)
-       ✅ JWT — подпись проверяется, alg: none rejected
-       ✅ Параметризованные запросы — SQL injection защита
-       ✅ File upload — MIME + magic bytes + ClamAV
-
-     Раздел 13 — Инфраструктура/DevOps:
-       ✅ Docker Compose (mysql 8.4 + api + frontend + redis + meili)
-       ✅ Kubernetes (8 манифестов, HPA, ConfigMap, Secrets)
-       ✅ GitHub Actions (lint → typecheck → test → build)
-       ✅ Husky + lint-staged
-       ✅ Graceful shutdown (SIGTERM/SIGINT)
-       ✅ Prometheus + Grafana (provisioning)
-       ✅ Backup (mysqldump, ежедневно, 7 дней хранения)
+  Последний коммит: 4f091fc — feat: полный аудит 13 разделов, security-фиксы, обновление документации

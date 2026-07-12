@@ -2,6 +2,7 @@ import eslint from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import reactHooks from 'eslint-plugin-react-hooks'
 import prettier from 'eslint-config-prettier'
+import globals from 'globals'
 
 export default tseslint.config(
   {
@@ -9,9 +10,9 @@ export default tseslint.config(
       'dist/',
       'node_modules/',
       '*.config.*',
-      'server/',
       'public/sw.js',
       'check-console.mjs',
+      'fix-i18n.mjs',
     ],
   },
   eslint.configs.recommended,
@@ -23,6 +24,16 @@ export default tseslint.config(
       'react-hooks/set-state-in-effect': 'warn',
       'react-hooks/purity': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    files: ['server/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
   },

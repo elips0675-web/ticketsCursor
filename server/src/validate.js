@@ -1,3 +1,4 @@
+import { ZodError } from 'zod'
 import {
   loginSchema, registerSchema, createTicketSchema,
   updateStatusSchema, updatePrioritySchema, assignTicketSchema,

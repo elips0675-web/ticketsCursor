@@ -4,11 +4,9 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Mail, ArrowLeft, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { API_URL } from '@/lib/api'
 
 export default function ForgotPassword() {
-  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)

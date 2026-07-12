@@ -1,18 +1,36 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useMemo, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Search, Grid3X3, List, FileText, Image, FileCode, File, Folder, Upload, X } from 'lucide-react'
-import type { FileItem, FileFolder } from '@/types'
+import { Search, Grid3X3, List, FileText, Image, FileCode, File, Folder, Upload, Loader2 } from 'lucide-react'
+import type { FileFolder } from '@/types'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { api, API_URL } from '@/lib/api'
 import { SkeletonCardGrid } from '@/components/skeletons'
 
+function mapFolder(raw: any): FileFolder {
+  return {
+    id: raw.id,
+    name: raw.name,
+    files: (raw.files || []).map((file: any) => ({
+      id: file.id,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      folderId: file.folderId,
+      path: file.path,
+      createdAt: file.createdAt,
+    })),
+  }
+}
+
 export default function FilesPage() {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const CATEGORIES = [
     { key: 'all', label: t('files.catAll'), icon: Folder },
     { key: 'img', label: t('files.catImages'), icon: Image },
@@ -20,69 +38,48 @@ export default function FilesPage() {
     { key: 'doc', label: t('files.catDocs'), icon: FileText },
     { key: 'code', label: t('files.catCode'), icon: FileCode },
   ]
-  const [folders, setFolders] = useState<FileFolder[]>([])
-  const [loading, setLoading] = useState(true)
   const [activeFolder, setActiveFolder] = useState<number | null>(null)
   const [category, setCategory] = useState('all')
   const [search, setSearch] = useState('')
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [dragging, setDragging] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dragCounter = useRef(0)
 
-  const fetchFolders = useCallback(() => {
-    api.get('/files/folders')
-      .then((data) => {
-        const mapped = (data || []).map((f: any) => ({
-          id: f.id,
-          name: f.name,
-          files: (f.files || []).map((file: any) => ({
-            id: file.id,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            folderId: file.folderId,
-            path: file.path,
-            createdAt: file.createdAt,
-          })),
-        }))
-        setFolders(mapped)
-        if (mapped.length > 0 && activeFolder === null) setActiveFolder(mapped[0].id)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [activeFolder])
+  const foldersQuery = useQuery({
+    queryKey: ['file-folders'],
+    queryFn: () => api.get('/files/folders').then((data) => (data || []).map(mapFolder)),
+  })
 
-  useEffect(() => {
-    fetchFolders()
-  }, [fetchFolders])
+  const folders = foldersQuery.data ?? []
+  const loading = foldersQuery.isLoading
 
-  const uploadFile = async (file: File) => {
-    setUploading(true)
-    try {
+  // set active folder to first when data loads
+  if (folders.length > 0 && activeFolder === null) {
+    setActiveFolder(folders[0].id)
+  }
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
       const fd = new FormData()
       fd.append('file', file)
       if (activeFolder) fd.append('folderId', String(activeFolder))
       await api.post('/files/upload', fd)
-      toast.success(t('files.uploadSuccess', { name: file.name }))
-      fetchFolders()
-    } catch {
-      toast.error(t('files.uploadError'))
-    }
-    setUploading(false)
-  }
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault()
-      dragCounter.current = 0
-      setDragging(false)
-      const files = Array.from(e.dataTransfer.files)
-      files.forEach(uploadFile)
     },
-    [activeFolder],
-  )
+    onSuccess: (_data, file) => {
+      toast.success(t('files.uploadSuccess', { name: file.name }))
+      queryClient.invalidateQueries({ queryKey: ['file-folders'] })
+    },
+    onError: () => toast.error(t('files.uploadError')),
+  })
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    dragCounter.current = 0
+    setDragging(false)
+    const files = Array.from(e.dataTransfer.files)
+    files.forEach((f) => uploadMutation.mutate(f))
+  }
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -101,7 +98,7 @@ export default function FilesPage() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    files.forEach(uploadFile)
+    files.forEach((f) => uploadMutation.mutate(f))
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -132,7 +129,11 @@ export default function FilesPage() {
       </div>
 
       {dragging && (
-        <div className="fixed inset-0 z-50 bg-primary/10 flex items-center justify-center pointer-events-none" role="status" aria-live="polite">
+        <div
+          className="fixed inset-0 z-50 bg-primary/10 flex items-center justify-center pointer-events-none"
+          role="status"
+          aria-live="polite"
+        >
           <div className="bg-background border-2 border-dashed border-primary rounded-2xl p-12 text-center">
             <Upload className="w-12 h-12 mx-auto mb-3 text-primary" />
             <p className="font-bold text-lg">Отпустите файлы для загрузки</p>
@@ -157,11 +158,13 @@ export default function FilesPage() {
           <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} />
           <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
           <p className="font-bold text-sm">{t('files.dropzone')}</p>
-          {uploading && <Loader2 className="w-4 h-4 animate-spin mx-auto mt-2 text-primary" />}
+          {uploadMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mx-auto mt-2 text-primary" />}
         </CardContent>
       </Card>
 
-      {loading ? <SkeletonCardGrid count={6} cols={2} /> : (
+      {loading ? (
+        <SkeletonCardGrid count={6} cols={2} />
+      ) : (
         <>
           <div className="flex flex-wrap gap-2">
             {folders.map((f) => (

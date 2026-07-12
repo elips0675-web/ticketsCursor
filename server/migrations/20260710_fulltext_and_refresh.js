@@ -26,7 +26,7 @@ export async function up(knex) {
     'ALTER TABLE chat_rooms ADD FULLTEXT INDEX ft_chat_rooms (name)',
     'ALTER TABLE files ADD FULLTEXT INDEX ft_files (name)',
   ]) {
-    try { await knex.raw(stmt) } catch {}
+    try { await knex.raw(stmt) } catch { /* index may already exist */ }
   }
 }
 

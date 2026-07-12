@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { Search, MessageCircle, Users, User, Clock, Hash } from 'lucide-react'
+import { Search, MessageCircle, Users, Hash } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -27,20 +28,20 @@ export default function ChatsPage() {
   const { t } = useTranslation()
   const { token } = useAuth()
   const navigate = useNavigate()
-  const [chats, setChats] = useState<ChatRoom[]>([])
-  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    fetch(`${API_URL}/chats`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => (res.ok ? res.json() : { data: [] }))
-      .then((body) => {
-        const data = body.data || body
-        setChats(data.map(mapChatRoom))
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [token])
+  const chatsQuery = useQuery({
+    queryKey: ['chats'],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/chats`, { headers: { Authorization: `Bearer ${token}` } })
+      const body = res.ok ? await res.json() : { data: [] }
+      return (body.data || body).map(mapChatRoom) as ChatRoom[]
+    },
+    enabled: !!token,
+  })
+
+  const chats = chatsQuery.data ?? []
+  const loading = chatsQuery.isLoading
 
   const groups = chats.filter((c) => c.type === 'group' || c.type === 'channel')
   const personal = chats.filter((c) => c.type === 'personal')
@@ -143,7 +144,9 @@ export default function ChatsPage() {
 
       {loading ? (
         <div className="space-y-1">
-          {Array.from({ length: 6 }).map((_, i) => <SkeletonChatRow key={i} />)}
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonChatRow key={i} />
+          ))}
         </div>
       ) : (
         <div className="space-y-1">

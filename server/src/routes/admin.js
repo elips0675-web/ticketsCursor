@@ -1,11 +1,13 @@
 import { Router } from 'express'
 import prisma from '../prisma.js'
+import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { invalidateCache as invalidateSettingsCache } from '../settings.js'
 import logger from '../logger.js'
 
 const router = Router()
 router.use(authenticateToken, requireRole('admin'))
+router.use(auditLogMiddleware)
 
 const ALLOWED_SETTINGS = [
   'TELEGRAM_BOT_TOKEN', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM', 'SMTP_SECURE',

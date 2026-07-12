@@ -3,6 +3,7 @@ import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { createWikiValidation } from '../validate.js'
 import logger from '../logger.js'
@@ -32,6 +33,7 @@ const upload = multer({
 
 const router = Router()
 router.use(authenticateToken)
+router.use(auditLogMiddleware)
 router.use(requireRole('agent'))
 
 router.get('/', async (req, res) => {

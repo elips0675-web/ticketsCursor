@@ -1,6 +1,0 @@
-[mysqld]
-server_id=1
-log_bin=mysql-bin
-binlog_do_db=servicedesk
-expire_logs_days=7
-max_binlog_size=100M

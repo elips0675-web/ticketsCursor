@@ -24,6 +24,10 @@ function safeSend(fn) {
   fn().catch(err => logger.error(`Notification send failed: ${err.message}`))
 }
 
+function safeNotify(promise) {
+  promise.catch(err => logger.error(`Notify failed: ${err.message}`))
+}
+
 async function getTicketWithUsers(ticketId) {
   const ticket = await prisma.tickets.findUnique({
     where: { id: ticketId },
@@ -60,11 +64,11 @@ export async function notifyTicketCreated(ticketId, actorName) {
   if (!t) return
 
   const tag = `#${ticketId}: ${t.title}`
-  createNotification({
+  safeNotify(createNotification({
     userId: t.creatorId, type: 'ticket_created',
     title: 'Тикет создан', body: t.title,
     link: `/tickets/${ticketId}`,
-  })
+  }))
   sendTelegramNotification(`🆕 Новый тикет ${tag}\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\nКатегория: ${t.category}`)
   if (t.creatorEmail) {
     safeSend(() => retryWithBackoff(() => sendTicketNotification({
@@ -86,12 +90,12 @@ export async function notifyStatusChanged(ticketId, oldStatus, newStatus, actorN
   const targets = [t.creatorId]
   if (t.assigneeId && !targets.includes(t.assigneeId)) targets.push(t.assigneeId)
   for (const userId of targets) {
-    createNotification({
+    safeNotify(createNotification({
       userId, type: 'ticket_status',
       title: `Статус изменён: ${newLabel}`,
       body: t.title,
       link: `/tickets/${ticketId}`,
-    })
+    }))
   }
   sendTelegramNotification(`📋 Статус тикета ${tag}\n${oldLabel} → ${newLabel}\nИзменил: ${actorName}`)
 
@@ -121,11 +125,11 @@ export async function notifyTicketAssigned(ticketId, assigneeId, assignedByName)
 
   if (!assigneeId || assigneeId === t.creatorId) return
 
-  createNotification({
+  safeNotify(createNotification({
     userId: assigneeId, type: 'ticket_assigned',
     title: 'Назначен тикет', body: t.title,
     link: `/tickets/${ticketId}`,
-  })
+  }))
   sendTelegramNotification(`👤 Тикет #${ticketId} назначен на пользователя\n"${t.title}"\nНазначил: ${assignedByName}`)
 
   if (t.assigneeEmail) {
@@ -146,12 +150,12 @@ export async function notifyTicketMessage(ticketId, senderId, senderName, text) 
 
   for (const userId of targets) {
     if (userId === senderId) continue
-    createNotification({
+    safeNotify(createNotification({
       userId, type: 'ticket_message',
       title: senderName || 'Пользователь',
       body: text,
       link: `/tickets/${ticketId}`,
-    })
+    }))
   }
 
   sendTelegramNotification(`💬 Новое сообщение в тикете #${ticketId}: ${t.title}\n${senderName}: ${text.slice(0, 200)}`)

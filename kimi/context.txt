@@ -1,0 +1,4366 @@
+﻿=== AGENTS.md ===
+## Рћ СЂР°Р·СЂР°Р±РѕС‚С‡РёРєРµ
+
+- **Р РѕР»СЊ**: Senior Frontend / Fullstack Developer (РљРѕСЂРїРѕСЂР°С‚РёРІРЅС‹Рµ СЃРёСЃС‚РµРјС‹)
+- **РћРїС‹С‚**: 3+ РіРѕРґР° вЂ” Helpdesk, CRM, ERP, Service Desk
+- **РџРѕРЅРёРјР°РµС‚**: SLA, С‚РёРєРµС‚РёРЅРі, workflow Р·Р°СЏРІРѕРє, RBAC, SSO/LDAP
+- **РЎС‚РµРє**: React 18, TypeScript, Vite, Tailwind, shadcn/ui, Express, MySQL, JWT, Recharts
+- **Р¤РѕРєСѓСЃ**: UX РґР»СЏ РєРѕСЂРїРѕСЂР°С‚РёРІРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№, Р±РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ (helmet, rate-limit), РјРѕРґСѓР»СЊРЅР°СЏ Р°СЂС…РёС‚РµРєС‚СѓСЂР°
+- **РЈРјРµРµС‚**: РґР°С€Р±РѕСЂРґС‹ СЃ Р°РЅР°Р»РёС‚РёРєРѕР№, С‚Р°Р±Р»РёС†С‹ СЃ С„РёР»СЊС‚СЂР°С†РёРµР№/РїРѕРёСЃРєРѕРј, РёРЅС‚РµРіСЂР°С†РёСЏ С‡Р°С‚РѕРІ/РєР°Р»РµРЅРґР°СЂРµР№/С„Р°Р№Р»РѕРІ, С‡РёСЃС‚С‹Р№ С‚РёРїРёР·РёСЂРѕРІР°РЅРЅС‹Р№ РєРѕРґ
+- **РС‰РµС‚**: Р·Р°РґР°С‡Рё РІ РєРѕСЂРїРѕСЂР°С‚РёРІРЅРѕРј РџРћ вЂ” Service Desk, CRM, ERP, BPM, РІРЅСѓС‚СЂРµРЅРЅРёРµ РїРѕСЂС‚Р°Р»С‹
+
+## РџСЂР°РІРёР»Р° СЂР°Р±РѕС‚С‹
+
+1. РљРѕРґ РЅР° СЂСѓСЃСЃРєРѕРј (UI), РєРѕРјРјРµРЅС‚Р°СЂРёРё РїРѕ РјРёРЅРёРјСѓРјСѓ
+2. РџРµСЂРµРґ РёР·РјРµРЅРµРЅРёСЏРјРё С‡РёС‚Р°С‚СЊ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РєРѕРґ, РїРѕРІС‚РѕСЂСЏС‚СЊ СЃС‚РёР»СЊ
+3. РќРµ Р»РѕРјР°С‚СЊ СЂР°Р±РѕС‚Р°СЋС‰РµРµ вЂ” СЃРЅР°С‡Р°Р»Р° РїРѕРЅСЏС‚СЊ, РїРѕС‚РѕРј РјРµРЅСЏС‚СЊ
+4. Р’СЃРµ РёР·РјРµРЅРµРЅРёСЏ С‡РµСЂРµР· `git add -A && git commit && git push`
+5. РџРѕСЃР»Рµ Р·Р°РґР°С‡ Р·Р°РїСѓСЃРєР°С‚СЊ `npm test` Рё `npm run build`
+6. РџСЂРµРґР»Р°РіР°С‚СЊ РїСЂРѕСЃС‚С‹Рµ СЂРµС€РµРЅРёСЏ, РЅРµ СѓСЃР»РѕР¶РЅСЏС‚СЊ
+7. Р•СЃР»Рё С‡С‚Рѕ-С‚Рѕ РЅРµРїРѕРЅСЏС‚РЅРѕ вЂ” СЃРїСЂРѕСЃРёС‚СЊ, РЅРµ РіР°РґР°С‚СЊ
+8. РџРѕСЃР»Рµ Р·Р°РІРµСЂС€РµРЅРёСЏ СЌС‚Р°РїР° вЂ” СѓР±СЂР°С‚СЊ РµРіРѕ РёР· РџР›РђРќ Р”РћР РђР‘РћРўРљР РџРћ Р­РўРђРџРђРњ РІ Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ.txt Рё РѕР±РЅРѕРІРёС‚СЊ СЃС‚Р°С‚СѓСЃС‹ РІ РђРЈР”РРў РџР РћР•РљРўРђ
+9. **РџРѕСЃР»Рµ РєР°Р¶РґРѕРіРѕ РёР·РјРµРЅРµРЅРёСЏ РєРѕРґР°** вЂ” Р·Р°РїСѓСЃРєР°С‚СЊ Playwright СЃРєСЂРёРїС‚ `check-console.mjs`, РїСЂРѕРІРµСЂСЏС‚СЊ `errors: []` Рё `hasRussianText: true`; РїСЂРё РЅР°Р»РёС‡РёРё РѕС€РёР±РѕРє вЂ” РёСЃРїСЂР°РІРёС‚СЊ РґРѕ РѕС‚РІРµС‚Р° РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ
+
+## РљРѕРЅС‚СЂРѕР»СЊ РєР°С‡РµСЃС‚РІР° РєРѕРґР°
+
+РџСЂРё РіРµРЅРµСЂР°С†РёРё Рё РёР·РјРµРЅРµРЅРёРё РєРѕРґР° РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ:
+
+- **РўРёРїРёР·Р°С†РёСЏ**: СЃС‚СЂРѕРіРёР№ TypeScript (`strict: true`), РёР·Р±РµРіР°С‚СЊ `any`, СЏРІРЅС‹Рµ С‚РёРїС‹ РґР»СЏ РїСЂРѕРїСЃРѕРІ Рё СЃРѕСЃС‚РѕСЏРЅРёР№
+- **РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє**: try/catch РІРѕ РІСЃРµС… Р°СЃРёРЅС…СЂРѕРЅРЅС‹С… РѕРїРµСЂР°С†РёСЏС…, РїСЂРѕРІРµСЂРєР° РЅР° null/undefined, ErrorBoundary РЅР° РєР»СЋС‡РµРІС‹С… РєРѕРјРїРѕРЅРµРЅС‚Р°С…
+- **РРјРїРѕСЂС‚С‹**: РїСЂРѕРІРµСЂСЏС‚СЊ С‡С‚Рѕ РїСѓС‚Рё СЃСѓС‰РµСЃС‚РІСѓСЋС‚, РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р°Р»РёР°СЃ `@/` РґР»СЏ src, РЅРµ РѕСЃС‚Р°РІР»СЏС‚СЊ РјС‘СЂС‚РІС‹С… РёРјРїРѕСЂС‚РѕРІ
+- **РђСЃРёРЅС…СЂРѕРЅРЅРѕСЃС‚СЊ**: РІСЃРµ Р°СЃРёРЅС…СЂРѕРЅРЅС‹Рµ С„СѓРЅРєС†РёРё РґРѕР»Р¶РЅС‹ РёРјРµС‚СЊ await РёР»Рё .catch(), РЅРёРєР°РєРёС… Р·Р°Р±С‹С‚С‹С… РїСЂРѕРјРёСЃРѕРІ
+- **API**: РїРѕСЃР»Рµ РёР·РјРµРЅРµРЅРёР№ РЅР° Р±СЌРєРµРЅРґРµ вЂ” СЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°С‚СЊ С‚РёРїС‹ РЅР° С„СЂРѕРЅС‚РµРЅРґРµ
+- **РўРµСЃС‚С‹**: РїСЂРµРґР»Р°РіР°С‚СЊ С‚РµСЃС‚С‹ РґР»СЏ РЅРѕРІРѕР№ С„СѓРЅРєС†РёРѕРЅР°Р»СЊРЅРѕСЃС‚Рё
+- **Р›РёРЅС‚РµСЂ**: РїРµСЂРµРґ РєРѕРјРјРёС‚РѕРј РїСЂРѕРІРµСЂСЏС‚СЊ `npm run lint` Рё `npm run type-check`
+
+## РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ РєРѕРЅС‚СЂРѕР»СЊ РѕС€РёР±РѕРє
+
+| Р­С‚Р°Рї | РРЅСЃС‚СЂСѓРјРµРЅС‚ | Р§С‚Рѕ РїСЂРѕРІРµСЂСЏРµС‚ |
+|------|-----------|---------------|
+| **РџСЂРё РєРѕРјРјРёС‚Рµ** | Husky в†’ lint-staged | `eslint --fix` + `prettier --write` РЅР° РёР·РјРµРЅС‘РЅРЅС‹С… С„Р°Р№Р»Р°С… |
+| **Р’ CI (GitHub Actions)** | `tsc --noEmit` | TypeScript strict type-check |
+| | `eslint . --max-warnings 100` | РЎРёРЅС‚Р°РєСЃРёСЃ, РЅРµРёСЃРї. РїРµСЂРµРјРµРЅРЅС‹Рµ, РёРјРїРѕСЂС‚С‹ |
+| | `vitest run` | Р®РЅРёС‚-С‚РµСЃС‚С‹ (154 РєР»РёРµРЅС‚СЃРєРёС… + 116 СЃРµСЂРІРµСЂРЅС‹С…) |
+| | `vite build` | РЎР±РѕСЂРєР° production |
+| **Р СѓС‡РЅРѕР№ Р·Р°РїСѓСЃРє** | `npm run lint` | ESLint (warnings: `no-explicit-any`, `no-unused-vars`) |
+| | `npm run type-check` | `tsc --noEmit` |
+| | `npm test` | Vitest (РєР»РёРµРЅС‚) |
+| | `cd server && npm test` | Vitest (СЃРµСЂРІРµСЂ) |
+| **РџРѕСЃР»Рµ РєР°Р¶РґРѕРіРѕ РёР·РјРµРЅРµРЅРёСЏ** | `node check-console.mjs` | Playwright РїСЂРѕРІРµСЂСЏРµС‚ 6 СЃС‚СЂР°РЅРёС† (`/`, `/wiki`, `/chats`, `/tickets`, `/employees`, `/search`) РЅР°: `errors: []`, `hasRussianText: true` |
+| **Pre-commit hook** | `.husky/pre-commit` | `npx lint-staged` вЂ” Р°РІС‚РѕС„РёРєСЃ Рё С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ |
+
+## РЎРґРµР»Р°РЅРѕ
+
+### Р­С‚Р°Рї 1 вЂ” Р‘Р°Р·РѕРІР°СЏ РЅР°СЃС‚СЂРѕР№РєР°
+- РљР»РѕРЅРёСЂРѕРІР°РЅ СЂРµРїРѕР·РёС‚РѕСЂРёР№, СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё
+- РСЃРїСЂР°РІР»РµРЅС‹ С‚РёРїС‹ FK РІ РјРёРіСЂР°С†РёСЏС… (`unsigned()`)
+- РСЃРїСЂР°РІР»РµРЅС‹ seed-РґР°РЅРЅС‹Рµ (invalid `status: 'critical'` в†’ `'open'`)
+
+### Р­С‚Р°Рї 2 вЂ” РњРѕР±РёР»СЊРЅР°СЏ РЅР°РІРёРіР°С†РёСЏ
+- РЎРѕР·РґР°РЅР° РЅРёР¶РЅСЏСЏ РїР°РЅРµР»СЊ РЅР°РІРёРіР°С†РёРё (Dashboard, Tickets, Chats, Employees + Р•С‰С‘)
+- Sheet РїРµСЂРµСЂР°Р±РѕС‚Р°РЅ РІ РµРґРёРЅС‹Р№ РєРѕРЅС‚СЂРѕР»РёСЂСѓРµРјС‹Р№ СЌРєР·РµРјРїР»СЏСЂ (Р±С‹Р»Рѕ РґРІР° РЅРµР·Р°РІРёСЃРёРјС‹С… Radix Dialog)
+- РР· Sidebar РІС‹РЅРµСЃРµРЅ `SidebarContent` РґР»СЏ РїРµСЂРµРёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РІ РјРѕР±РёР»СЊРЅРѕРј РјРµРЅСЋ
+- РСЃРїСЂР°РІР»РµРЅС‹ С†РІРµС‚Р° РјРѕР±РёР»СЊРЅРѕРіРѕ РјРµРЅСЋ (`bg-sidebar text-sidebar-foreground`)
+- Р”РѕР±Р°РІР»РµРЅ `onNavigate` РґР»СЏ Р·Р°РєСЂС‹С‚РёСЏ РјРµРЅСЋ РїСЂРё РїРµСЂРµС…РѕРґРµ
+- Р”РѕР±Р°РІР»РµРЅ PWA-install prompt (`beforeinstallprompt`)
+- РџРµСЂРµРєР»СЋС‡РµРЅР° СЃС‚СЂР°С‚РµРіРёСЏ PWA РЅР° `injectManifest`
+
+### Р­С‚Р°Рї 3 вЂ” Push-СѓРІРµРґРѕРјР»РµРЅРёСЏ
+- `web-push` РЅР° Р±СЌРєРµРЅРґРµ + VAPID keys
+- `POST /api/push/send` (admin/senior_agent)
+- РҐСѓРє `use-push` (РїРѕРґРїРёСЃРєР°/РѕС‚РїРёСЃРєР°)
+- РљР°СЃС‚РѕРјРЅС‹Р№ service worker (`public/sw.js`)
+- Р СѓС‡РЅР°СЏ СЂРµРіРёСЃС‚СЂР°С†РёСЏ SW РІ `main.tsx`
+
+### Р­С‚Р°Рї 4 вЂ” РђРґРјРёРЅРєР° + RBAC
+- `requireRole()` middleware РЅР°: POST /register (admin), DELETE /calendar/:id (senior_agent+), PUT /tickets/:id/status (senior_agent+), PUT /tickets/:id/priority (senior_agent+)
+- `GET /api/admin/users`, `PUT /api/admin/users/:id`
+- AdminLayout вЂ” РѕС‚РґРµР»СЊРЅС‹Р№ Р»РµР№Р°СѓС‚ СЃРѕ СЃРІРѕРёРј СЃР°Р№РґР±Р°СЂРѕРј (Dashboard, Users, Push)
+- РЎС‚СЂР°РЅРёС†С‹: Admin.tsx (РґР°С€Р±РѕСЂРґ), AdminUsers.tsx (СЃРїРёСЃРѕРє, СЂРѕР»Рё, Р±Р»РѕРєРёСЂРѕРІРєР°), AdminPush.tsx (РїРѕРґРїРёСЃРєР° + РѕС‚РїСЂР°РІРєР°)
+- `/admin` РІС‹РЅРµСЃРµРЅ РёР· РѕСЃРЅРѕРІРЅРѕРіРѕ Р»РµР№Р°СѓС‚Р°
+
+### Р­С‚Р°Рї 5 вЂ” РџР»РёС‚РѕС‡РЅР°СЏ РІС‘СЂСЃС‚РєР°
+- **Polls.tsx** в†’ РїР»РёС‚РєР° (1в†’2в†’3 РєРѕР»РѕРЅРєРё), РІР°СЂРёР°РЅС‚С‹ РІСЃРµРіРґР° РІРёРґРЅС‹, expand/collapse СѓР±СЂР°РЅ
+- **Tickets.tsx** в†’ РїР»РёС‚РєР° (1в†’2в†’3 РєРѕР»РѕРЅРєРё) + РїР°РіРёРЅР°С†РёСЏ В«РџРѕРєР°Р·Р°С‚СЊ РµС‰С‘В» (РїРѕ 9)
+- **News.tsx** в†’ РїР»РёС‚РєР° (1в†’2в†’3 РєРѕР»РѕРЅРєРё) + РїР°РіРёРЅР°С†РёСЏ В«РџРѕРєР°Р·Р°С‚СЊ РµС‰С‘В» (РїРѕ 6)
+- **Search.tsx** в†’ СЂРµР·СѓР»СЊС‚Р°С‚С‹ РІРЅСѓС‚СЂРё РєР°Р¶РґРѕР№ СЃРµРєС†РёРё РїР»РёС‚РєРѕР№ (grid 1в†’2 РєРѕР»РѕРЅРєРё), СѓР±СЂР°РЅ `max-w-3xl`
+
+### Р­С‚Р°Рї 6 вЂ” RBAC С„СЂРѕРЅС‚РµРЅРґ
+- **TicketDetail**: СЃРєСЂС‹С‚Рѕ СѓРїСЂР°РІР»РµРЅРёРµ (СЃС‚Р°С‚СѓСЃ/РїСЂРёРѕСЂРёС‚РµС‚/РЅР°Р·РЅР°С‡РµРЅРёРµ) РґР»СЏ `agent`
+- **Polls**: РєРЅРѕРїРєР° В«РЎРѕР·РґР°С‚СЊ РѕРїСЂРѕСЃВ» С‚РѕР»СЊРєРѕ РґР»СЏ `canManage`
+- **Calendar**: РєРЅРѕРїРєР° СѓРґР°Р»РµРЅРёСЏ СЃРѕР±С‹С‚РёСЏ С‚РѕР»СЊРєРѕ РґР»СЏ `canManage`
+- **ProtectedRoute**: РЅРѕРІС‹Р№ РєРѕРјРїРѕРЅРµРЅС‚, СЂРµРґРёСЂРµРєС‚ РЅР° `/login` Р±РµР· С‚РѕРєРµРЅР°, РЅР° `/` РїСЂРё РЅРµРґРѕСЃС‚Р°С‚РєРµ РїСЂР°РІ
+- **Register + /admin/***: Р·Р°С‰РёС‰РµРЅС‹ С‡РµСЂРµР· `ProtectedRoute adminOnly`
+- **РўРµСЃС‚С‹ СЂР°СЃС€РёСЂРµРЅС‹**: 9в†’17 С‚РµСЃС‚РѕРІ (RBAC, register validation)
+
+### Р­С‚Р°Рї 7 вЂ” WebSocket / real-time
+- **SocketContext.tsx**: РёСЃРїСЂР°РІР»РµРЅР° РїРµСЂРµРґР°С‡Р° instance (Р±С‹Р» stale ref), РґРѕР±Р°РІР»РµРЅ `connected`
+- **socket.js**: `getIO()` СЌРєСЃРїРѕСЂС‚ РґР»СЏ РґРѕСЃС‚СѓРїР° РёР· REST-СЂРѕСѓС‚РѕРІ
+- **tickets.js**: СЌРјРёС‚С‹ `ticket:created`, `ticket:updated` (status/priority/assign), `ticket:message`, `ticket:message-removed`
+- **Toaster (sonner)**: РґРѕР±Р°РІР»РµРЅ РІ `App.tsx` РґР»СЏ toast-СѓРІРµРґРѕРјР»РµРЅРёР№
+- **Tickets.tsx**: СЃР»СѓС€Р°РµС‚ `ticket:created` / `ticket:updated` в†’ toast
+- **TicketDetail.tsx**: СЃР»СѓС€Р°РµС‚ `ticket:message` РґР»СЏ Р°РєС‚РёРІРЅРѕРіРѕ С‚РёРєРµС‚Р° в†’ toast
+- Р’СЃРµ СЌРјРёС‚С‹ Р±РµР·РѕРїР°СЃРЅС‹ (`getIO()?.emit` вЂ” РЅРµ РїР°РґР°РµС‚ Р±РµР· WebSocket)
+
+### Р­С‚Р°Рї 8 вЂ” РџРѕРґРєР»СЋС‡РµРЅРёРµ СЃС‚СЂР°РЅРёС† Рє API
+- **Polls.tsx** вЂ” РїРѕРґРєР»СЋС‡С‘РЅ Рє API (GET/POST /api/polls, POST /api/polls/:id/vote)
+- **News.tsx** вЂ” РїРѕРґРєР»СЋС‡С‘РЅ Рє API (GET/POST /api/news)
+- **Wiki.tsx** вЂ” РїРѕРґРєР»СЋС‡С‘РЅ Рє API (GET/POST /api/wiki)
+- **Calendar.tsx** вЂ” РїРѕРґРєР»СЋС‡С‘РЅ Рє API (GET/POST/DELETE /api/calendar)
+- **Files.tsx** вЂ” РїРѕРґРєР»СЋС‡С‘РЅ Рє API (GET /api/files/folders)
+- **Chats.tsx** вЂ” РїРѕРґРєР»СЋС‡С‘РЅ Рє API (GET /api/chats)
+- **Profile.tsx** вЂ” РґР°РЅРЅС‹Рµ РёР· AuthContext + /api/employees
+- **Admin.tsx / AdminUsers.tsx / AdminPush.tsx** вЂ” СѓР¶Рµ Р±С‹Р»Рё РЅР° API
+- РЈР±СЂР°РЅС‹ DEMO-РґР°РЅРЅС‹Рµ РёР· 7 СЃС‚СЂР°РЅРёС†
+
+### Р­С‚Р°Рї 9 вЂ” РўС‘РјРЅР°СЏ С‚РµРјР°
+- **ThemeContext** вЂ” РїСЂРѕРІР°Р№РґРµСЂ СЃ РїРµСЂРµРєР»СЋС‡РµРЅРёРµРј light/dark, СЃРѕС…СЂР°РЅРµРЅРёРµ РІ localStorage
+- **ThemeToggle** вЂ” РєРЅРѕРїРєР° РІ СЃР°Р№РґР±Р°СЂРµ (РґРµСЃРєС‚РѕРї + РјРѕР±РёР»СЊРЅРѕРµ РјРµРЅСЋ)
+- CSS-РїРµСЂРµРјРµРЅРЅС‹Рµ `.dark` СѓР¶Рµ Р±С‹Р»Рё РІ index.css
+
+### Р­С‚Р°Рї 10 вЂ” Р¤РёРЅР°Р»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° РїСЂРѕРµРєС‚Р°
+- РЈСЃС‚Р°РЅРѕРІР»РµРЅ РЅРµРґРѕСЃС‚Р°СЋС‰РёР№ РїР°РєРµС‚ `multer` РЅР° СЃРµСЂРІРµСЂРµ (Р»РѕРјР°Р»Рѕ С‚РµСЃС‚С‹)
+- Р—Р°РїСѓС‰РµРЅР° РїРѕР»РЅР°СЏ СЃР±РѕСЂРєР° (`npm run build`) вЂ” СѓСЃРїРµС€РЅРѕ
+- Р—Р°РїСѓС‰РµРЅС‹ РєР»РёРµРЅС‚СЃРєРёРµ С‚РµСЃС‚С‹ (14/14) вЂ” РІСЃРµ РїСЂРѕР№РґРµРЅС‹
+- Р—Р°РїСѓС‰РµРЅС‹ СЃРµСЂРІРµСЂРЅС‹Рµ С‚РµСЃС‚С‹ (17/17) вЂ” РІСЃРµ РїСЂРѕР№РґРµРЅС‹
+- РћР±РЅРѕРІР»С‘РЅ AGENTS.md СЃ РїСЂРѕС„РёР»РµРј СЂР°Р·СЂР°Р±РѕС‚С‡РёРєР° Рё РїСЂР°РІРёР»Р°РјРё
+
+### Р­С‚Р°Рї 11 вЂ” Р”РѕСЂР°Р±РѕС‚РєР° С„Р°Р№Р»РѕРІРѕРіРѕ С…СЂР°РЅРёР»РёС‰Р°
+- **files.js**: РґРѕР±Р°РІР»РµРЅ multer СЃ РґРёСЃРєРѕРІС‹Рј С…СЂР°РЅРёР»РёС‰РµРј (Р±С‹Р»Рѕ С‚РѕР»СЊРєРѕ JSON-РјРµС‚Р°РґР°РЅРЅС‹Рµ)
+- **Files.tsx**: РїРµСЂРµС…РѕРґ РЅР° FormData, РѕС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»РѕРІ РїРѕ РєР»РёРєСѓ (С‡РµСЂРµР· `/uploads/files/...`)
+- **seed.sql**: РґРѕР±Р°РІР»РµРЅР° РєРѕР»РѕРЅРєР° `path` РІ С‚Р°Р±Р»РёС†Сѓ `files`
+- **types/index.ts**: РґРѕР±Р°РІР»РµРЅРѕ РїРѕР»Рµ `path` РІ `FileItem`
+
+## РЎРѕСЃС‚РѕСЏРЅРёРµ РїСЂРѕРµРєС‚Р°
+
+Р’СЃС‘, С‡С‚Рѕ РїР»Р°РЅРёСЂРѕРІР°Р»РѕСЃСЊ РЅР° 10 СЌС‚Р°РїРѕРІ вЂ” РІС‹РїРѕР»РЅРµРЅРѕ. РџСЂРѕРµРєС‚ РїРѕР»РЅРѕСЃС‚СЊСЋ СЂР°Р±РѕС‡РёР№:
+
+| РљРѕРјРїРѕРЅРµРЅС‚ | РЎС‚Р°С‚СѓСЃ |
+|-----------|--------|
+| РўРёРєРµС‚С‹ (CRUD, СЃС‚Р°С‚СѓСЃС‹, РїСЂРёРѕСЂРёС‚РµС‚С‹, РЅР°Р·РЅР°С‡РµРЅРёРµ) | вњ… API + UI |
+| Р”Р°С€Р±РѕСЂРґ (СЃС‚Р°С‚РёСЃС‚РёРєР°, РіСЂР°С„РёРєРё, СЃРѕС‚СЂСѓРґРЅРёРєРё) | вњ… API (СЃ fallback РЅР° demo) |
+| Р§Р°С‚С‹ (WebSocket, СЃРѕРѕР±С‰РµРЅРёСЏ, С„Р°Р№Р»С‹) | вњ… Socket.io |
+| Wiki (СЃС‚Р°С‚СЊРё, РєР°С‚РµРіРѕСЂРёРё, РїРѕРёСЃРє, РёР·РѕР±СЂР°Р¶РµРЅРёСЏ) | вњ… API + UI |
+| РќРѕРІРѕСЃС‚Рё (Р»РµРЅС‚Р°, С„РёР»СЊС‚СЂС‹, СЃРѕР·РґР°РЅРёРµ) | вњ… API + UI |
+| РљР°Р»РµРЅРґР°СЂСЊ (СЃРѕР±С‹С‚РёСЏ, CRUD) | вњ… API + UI |
+| РћРїСЂРѕСЃС‹ (РіРѕР»РѕСЃРѕРІР°РЅРёРµ, СЃРѕР·РґР°РЅРёРµ) | вњ… API + UI |
+| Р¤Р°Р№Р»С‹ (drag & drop, РїР°РїРєРё, Р·Р°РіСЂСѓР·РєР°) | вњ… multer + FormData |
+| РЎРѕС‚СЂСѓРґРЅРёРєРё (СЃРїРёСЃРѕРє, РєР°СЂС‚РѕС‡РєРё/С‚Р°Р±Р»РёС†Р°, С„РёР»СЊС‚СЂС‹) | вњ… API + UI |
+| РџРѕРёСЃРє (РіР»РѕР±Р°Р»СЊРЅС‹Р№, Ctrl+K) | вњ… API + UI |
+| РђРґРјРёРЅРєР° (РїРѕР»СЊР·РѕРІР°С‚РµР»Рё, push, РЅР°СЃС‚СЂРѕР№РєРё, Р°СѓРґРёС‚) | вњ… API + UI |
+| RBAC (admin/senior_agent/agent) | вњ… middleware + ProtectedRoute |
+| РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ (JWT, Р»РѕРіРёРЅ, СЂРµРіРёСЃС‚СЂР°С†РёСЏ) | вњ… API + UI |
+| PWA (service worker, push, install prompt) | вњ… injectManifest |
+| WebSocket (real-time СѓРІРµРґРѕРјР»РµРЅРёСЏ, С‡Р°С‚С‹) | вњ… Socket.io |
+| РўС‘РјРЅР°СЏ С‚РµРјР° (CSS vars, РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ) | вњ… (РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ СЃРєСЂС‹С‚) |
+| CI/CD (GitHub Actions) | вњ… .github/workflows/ci.yml |
+| Docker (compose, 3 РєРѕРЅС‚РµР№РЅРµСЂР°) | вњ… docker-compose.yml |
+| Vercel (SPA routing) | вњ… vercel.json |
+| Tauri (РґРµСЃРєС‚РѕРї) | вњ… config + Rust |
+| Email (nodemailer) | вњ… server/src/email.js |
+| Telegram (Р±РѕС‚) | вњ… server/src/telegram.js |
+| PDF/CSV СЌРєСЃРїРѕСЂС‚ | вњ… jsPDF + html2canvas / UTF-8 BOM |
+| i18n (RU/EN) | вњ… i18next |
+| РЈРІРµРґРѕРјР»РµРЅРёСЏ (РєРѕР»РѕРєРѕР»СЊС‡РёРє) | вњ… API + socket + UI |
+
+## Р”РµРїР»РѕР№
+
+```bash
+# Docker (prod)
+docker compose up -d --build
+
+# Р›РѕРєР°Р»СЊРЅР°СЏ СЂР°Р·СЂР°Р±РѕС‚РєР°
+# 1. Р—Р°РїСѓСЃС‚РёС‚СЊ MySQL (Laragon РёР»Рё Docker)
+# 2. cp server/.env.example server/.env
+# 3. cd server && npm run dev
+# 4. cd .. && npm run dev
+```
+
+### Р­С‚Р°Рї 12 вЂ” РћРїС†РёРѕРЅР°Р»СЊРЅС‹Рµ СѓР»СѓС‡С€РµРЅРёСЏ
+- **Swagger/OpenAPI**: `GET /api/docs` вЂ” swagger-ui-express СЃ РїРѕР»РЅРѕР№ СЃРїРµС†РёС„РёРєР°С†РёРµР№ РІСЃРµС… СЌРЅРґРїРѕРёРЅС‚РѕРІ
+- **E2E (Playwright)**: РЅР°СЃС‚СЂРѕР№РєР° `playwright.config.ts`, С‚РµСЃС‚ Р»РѕРіРёРЅР° (`e2e/login.spec.ts`), СЃРєСЂРёРїС‚С‹ `npm run test:e2e`
+- **Redis**: Socket.io Redis adapter (`@socket.io/redis-adapter` + `ioredis`), РЅР° `REDIS_URL` вЂ” Р°РґР°РїС‚РµСЂ РІРєР»СЋС‡С‘РЅ, Р±РµР· Redis вЂ” fallback РЅР° in-memory
+- **Kubernetes**: РїРѕР»РЅС‹Рµ РјР°РЅРёС„РµСЃС‚С‹ РІ `k8s/` (namespace, ConfigMap, Secrets, MySQL + PVC, Redis, API (2 СЂРµРїР»РёРєРё), Frontend (2 СЂРµРїР»РёРєРё), Ingress)
+
+### Р­С‚Р°Рї 13 вЂ” Prisma read replicas
+- **server/src/prisma.js**: `replicas: [{ url }]` + `datasourceUrl`, `REPLICA_DATABASE_URL` env
+- **schema.prisma**: `directUrl` РґР»СЏ РјРёРіСЂР°С†РёР№
+- **docker-compose.yml**: `DATABASE_URL`, `DIRECT_DATABASE_URL`, `REPLICA_DATABASE_URL` РІ api-РєРѕРЅС‚РµР№РЅРµСЂ
+
+### Р­С‚Р°Рї 14 вЂ” Р’РёСЂС‚СѓР°Р»РёР·Р°С†РёСЏ СЃРїРёСЃРєРѕРІ (@tanstack/react-virtual)
+- **TicketDetail.tsx**: `useVirtualizer` РґР»СЏ СЃРѕРѕР±С‰РµРЅРёР№, fallback РІ jsdom
+- **ChatDetail.tsx**: `useVirtualizer` РґР»СЏ СЃРѕРѕР±С‰РµРЅРёР№ + РІС‹РЅРµСЃРµРЅ `renderMsg()`
+- РџСЂРё >100 СЃРѕРѕР±С‰РµРЅРёР№ СЂРµРЅРґРµСЂСЏС‚СЃСЏ С‚РѕР»СЊРєРѕ РІРёРґРёРјС‹Рµ + 5 overscan
+
+### Р­С‚Р°Рї 15 вЂ” Code review fixes (Kimi AI)
+- **README**: РІРµСЂСЃРёРё React 19, Vite 8, Tailwind v4, coverage 51%; РјРµС‚СЂРёРєРё С‚РµСЃС‚РѕРІ РѕР±РЅРѕРІР»РµРЅС‹
+- **cache.js**: Redis `SCAN` РІРјРµСЃС‚Рѕ `KEYS` вЂ” РЅРµ Р±Р»РѕРєРёСЂСѓРµС‚ Redis
+- **seed.sql**: `idx_employees_role_active` РґР»СЏ `getLeastLoadedAssignee`
+- **k8s/hpa.yaml**: HPA api 2в†’8, frontend 2в†’6, CPU 70% / Memory 80%
+- **use-push.ts**: `.catch()` РЅР° unhandled rejection
+
+### Р­С‚Р°Рї 17 вЂ” Code review fixes (РџСЂР°РІРєР° kimi.txt + РџСЂР°РІРєР° kimi1.txt, 7+8 РїСЂРѕР±Р»РµРј)
+- **ESLint**: СѓР±СЂР°РЅ `'server/'` РёР· РёРіРЅРѕСЂР°, РґРѕР±Р°РІР»РµРЅ Node.js-РєРѕРЅС„РёРі С‡РµСЂРµР· `globals.node`
+- **main.tsx**: СѓР±СЂР°РЅ РґСѓР±Р»РёСЂСѓСЋС‰РёР№СЃСЏ `QueryClientProvider` (РѕСЃС‚Р°Р»СЃСЏ С‚РѕР»СЊРєРѕ РІ App.tsx)
+- **App.tsx**: `/register` РѕР±С‘СЂРЅСѓС‚ РІ `<ProtectedRoute adminOnly>`
+- **auditLogMiddleware**: РїРµСЂРµРЅРµСЃС‘РЅ РёР· `mount()` РІ app.js РІРЅСѓС‚СЂСЊ РєР°Р¶РґРѕРіРѕ СЂРѕСѓС‚РµСЂР° РїРѕСЃР»Рµ `authenticateToken` (12 С„Р°Р№Р»РѕРІ)
+- **notify.js**: РґРѕР±Р°РІР»РµРЅ `safeNotify()` вЂ” .catch() РЅР° РІСЃРµ РІС‹Р·РѕРІС‹ `createNotification` (4 РјРµСЃС‚Р°)
+- **socket.js**: РІС‹РЅРµСЃРµРЅ `import { createNotification }` РЅР°РІРµСЂС… (Р±С‹Р» РґРёРЅР°РјРёС‡РµСЃРєРёР№ РёРјРїРѕСЂС‚ РЅР° РєР°Р¶РґРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ)
+- **socket.js**: `message:delete` РёСЃРїРѕР»СЊР·СѓРµС‚ `hasRole()` РІРјРµСЃС‚Рѕ РїСЂСЏРјРѕР№ РїСЂРѕРІРµСЂРєРё (super_admin С‚РµРїРµСЂСЊ РїСЂРѕС…РѕРґРёС‚)
+- **socket.js**: `wsRateLimit` вЂ” РґРѕР±Р°РІР»РµРЅ `Math.floor()` РґР»СЏ С‚РѕРєРµРЅРѕРІ
+- **background.js**: `.catch(() => {})` РЅР° `sendTicketNotification` РІ `warnAdminRedisMissing`
+- **files.js**: РґРѕР±Р°РІР»РµРЅ `import prisma` (Р±С‹Р» missing import)
+- **validate.js**: РґРѕР±Р°РІР»РµРЅ `import { ZodError } from 'zod'`
+- **Kanban.tsx**: РґРѕР±Р°РІР»РµРЅС‹ `MessageSquare, User` РёР· lucide-react (Р±С‹Р»Рё missing imports)
+- **Lint**: 0 errors, 115 warnings (СЃРµСЂРІРµСЂ С‚РµРїРµСЂСЊ Р»РёРЅС‚РёС‚СЃСЏ)
+- **docker-compose.yml**: JWT_SECRET fallback (`:-dev-jwt-secret-change-in-production`)
+- **docker-compose.yml**: СѓРґР°Р»С‘РЅ mysql_replica (РјС‘СЂС‚РІС‹Р№ РєРѕРґ), СѓРґР°Р»С‘РЅ REPLICA_DATABASE_URL
+- **prisma.js**: СѓР±СЂР°РЅР° РѕРїС†РёСЏ `replicas` (Р±С‹Р»Р° РЅРµРёСЃРїРѕР»СЊР·СѓРµРјР°)
+- **mysql/**: СѓРґР°Р»РµРЅС‹ replica.cnf, primary.cnf, init-replica.sh
+- **socket.js**: РґРѕР±Р°РІР»РµРЅ connection rate limit (10 handshake/min per IP)
+- **background.js**: СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅ `stopBackgroundJobs()`, setInterval СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ РІ `cleanupTimer`/`slaTimer`
+- **index.js**: РІС‹Р·РѕРІ `stopBackgroundJobs()` РІ shutdown handler
+- **cache.js**: `SCRIPT LOAD` + `evalsha` СЃ fallback РЅР° `eval`
+- **package.json**: СѓРґР°Р»С‘РЅ `@tauri-apps/cli` (РјС‘СЂС‚РІС‹Р№ РІРµСЃ)
+- **app.js**: РґРѕР±Р°РІР»РµРЅ `beforeSend` РІ Sentry вЂ” С„РёР»СЊС‚СЂ PII (Authorization, Cookie, stack vars)
+
+### Р­С‚Р°Рї 16 вЂ” РџРѕР»РЅС‹Р№ С„СѓРЅРєС†РёРѕРЅР°Р»СЊРЅС‹Р№ Р°СѓРґРёС‚ (РџСЂРѕРјС‚ С‚РµСЃС‚.txt, ~200 РїСЂРѕРІРµСЂРѕРє)
+- вњ… Р Р°Р·РґРµР» 1: Auth + RBAC вЂ” РґРѕР±Р°РІР»РµРЅ logout endpoint (РёРЅРІР°Р»РёРґР°С†РёСЏ refresh token)
+- вњ… Р Р°Р·РґРµР» 2: РўРёРєРµС‚С‹ вЂ” VALID_TRANSITIONS (РЅРµРІР°Р»РёРґРЅС‹Р№ РїРµСЂРµС…РѕРґ в†’ 400), agent-С„РёР»СЊС‚СЂ (СЃРІРѕРё + РЅРµРЅР°Р·РЅР°С‡РµРЅРЅС‹Рµ), SLA РїРµСЂРµСЃС‡С‘С‚ РїСЂРё СЃРјРµРЅРµ РїСЂРёРѕСЂРёС‚РµС‚Р°
+- вњ… Р Р°Р·РґРµР» 3: Р§Р°С‚С‹ вЂ” РїР°РіРёРЅР°С†РёСЏ СЃРѕРѕР±С‰РµРЅРёР№ (page/limit/total), РІР°Р»РёРґР°С†РёСЏ РґР»РёРЅС‹ (max 2000)
+- вњ… Р Р°Р·РґРµР» 4: Р¤Р°Р№Р»С‹ вЂ” role check РЅР° DELETE (senior_agent+)
+- вњ… Р Р°Р·РґРµР» 9: РђРґРјРёРЅРєР° вЂ” super_admin РёСЃРєР»СЋС‡С‘РЅ РёР· РІС‹Р±РѕСЂР° СЂРѕР»РµР№, Р·Р°РїСЂРµС‚ self-demotion
+- вњ… Р Р°Р·РґРµР» 12: Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ вЂ” Р·Р°РїСЂРµС‚ promotion РґРѕ super_admin С‡РµСЂРµР· API
+
+
+=== package.json ===
+{
+  "name": "tickets-service-desk",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "test": "vitest run --config vitest.client.config.ts",
+    "test:watch": "vitest --config vitest.client.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "src/**/*.{json,css,md}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
+    "@radix-ui/react-alert-dialog": "^1.1.16",
+    "@radix-ui/react-avatar": "^1.1.12",
+    "@radix-ui/react-checkbox": "^1.3.6",
+    "@radix-ui/react-dialog": "^1.1.16",
+    "@radix-ui/react-dropdown-menu": "^2.1.17",
+    "@radix-ui/react-label": "^2.1.9",
+    "@radix-ui/react-popover": "^1.1.16",
+    "@radix-ui/react-scroll-area": "^1.2.11",
+    "@radix-ui/react-select": "^2.3.0",
+    "@radix-ui/react-separator": "^1.1.9",
+    "@radix-ui/react-slot": "^1.2.5",
+    "@radix-ui/react-tabs": "^1.1.14",
+    "@radix-ui/react-toast": "^1.2.16",
+    "@radix-ui/react-tooltip": "^1.2.9",
+    "@sentry/react": "^10.64.0",
+    "@tailwindcss/postcss": "^4.3.2",
+    "@tanstack/react-query": "^5.101.0",
+    "@tanstack/react-virtual": "^3.14.5",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^12.40.0",
+    "html2canvas": "^1.4.1",
+    "i18next": "^26.3.4",
+    "i18next-browser-languagedetector": "^8.2.1",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.577.0",
+    "react": "^19.1.0",
+    "react-day-picker": "^8.10.2",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.78.0",
+    "react-i18next": "^17.0.8",
+    "react-router-dom": "^6.30.4",
+    "recharts": "^3.8.1",
+    "socket.io-client": "^4.8.3",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss": "^4.1.4",
+    "vite-plugin-pwa": "^1.3.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
+    "@tailwindcss/postcss": "^4.1.4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react-swc": "^4.3.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.6.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.7.0",
+    "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
+    "lint-staged": "^17.0.8",
+    "msw": "^2.15.0",
+    "postcss": "^8.5.15",
+    "prettier": "^3.9.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.63.0",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.10"
+  }
+}
+
+
+=== eslint.config.js ===
+import eslint from '@eslint/js'
+import tseslint from 'typescript-eslint'
+import reactHooks from 'eslint-plugin-react-hooks'
+import prettier from 'eslint-config-prettier'
+import globals from 'globals'
+
+export default tseslint.config(
+  {
+    ignores: [
+      'dist/',
+      'node_modules/',
+      '*.config.*',
+      'public/sw.js',
+      'check-console.mjs',
+      'fix-i18n.mjs',
+    ],
+  },
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/purity': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    files: ['server/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    },
+  },
+  prettier,
+)
+
+
+=== .gitignore ===
+node_modules/
+dist/
+coverage/
+server/node_modules/
+.env
+*.log
+.DS_Store
+Thumbs.db
+playwright-report/
+test-results/
+
+# Playwright check script
+check-console.mjs
+screenshot*.png
+
+auth.json
+
+# Uploaded files (not part of source)
+server/uploads/files/
+
+=== docker-compose.yml ===
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: sd-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: servicedesk
+      MYSQL_USER: ${DB_USER:-sduser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-sdpassword}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - mysql_backup:/backup
+      - ./server/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      - ./mysql/primary.cnf:/etc/mysql/conf.d/replication.cnf
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.8
+    container_name: sd-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-meilisearch-master-key}
+      MEILI_ENV: production
+    volumes:
+      - meilisearch_data:/meili_data
+    ports:
+      - "7700:7700"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  db_backup:
+    image: alpine:3.20
+    container_name: sd-db-backup
+    restart: unless-stopped
+    command: >
+      sh -c "
+        apk add --no-cache mysql-client &&
+        while true; do
+          DATE=\$(date +%Y%m%d_%H%M%S) &&
+          mysqldump -h mysql -u root -p\${DB_ROOT_PASSWORD:-root} --single-transaction --routines --triggers servicedesk > /backup/servicedesk_\$DATE.sql &&
+          echo \"Backup saved: servicedesk_\$DATE.sql\" &&
+          find /backup -name 'servicedesk_*.sql' -mtime +7 -delete &&
+          sleep 86400
+        done
+      "
+    environment:
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - mysql_backup:/backup
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  api:
+    build: ./server
+    container_name: sd-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: 4000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-sduser}
+      DB_PASSWORD: ${DB_PASSWORD:-sdpassword}
+      DB_NAME: servicedesk
+      DATABASE_URL: mysql://${DB_USER:-sduser}:${DB_PASSWORD:-sdpassword}@mysql:3306/servicedesk
+      DIRECT_DATABASE_URL: mysql://${DB_USER:-sduser}:${DB_PASSWORD:-sdpassword}@mysql:3306/servicedesk
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      MEILISEARCH_URL: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-meilisearch-master-key}
+      NODE_ENV: production
+    volumes:
+      - uploads_data:/app/uploads
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: sd-frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: sd-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    volumes:
+      - prometheus_data:/prometheus
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: sd-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3001:3000"
+
+volumes:
+  mysql_data:
+  mysql_backup:
+  uploads_data:
+  prometheus_data:
+  grafana_data:
+  meilisearch_data:
+
+
+=== src/main.tsx ===
+import { createRoot } from 'react-dom/client'
+import App from './App'
+import ErrorBoundary from './components/ErrorBoundary'
+import './index.css'
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {})
+}
+
+createRoot(document.getElementById('root')!).render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>,
+)
+
+
+=== src/App.tsx ===
+import * as Sentry from '@sentry/react'
+import { lazy, Suspense, useState, ReactNode } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
+import { AppLayout } from '@/components/layout/app-layout'
+import { AdminLayout } from '@/components/layout/admin-layout'
+import { TicketProvider } from '@/context/ticket-context'
+import { AuthProvider } from '@/context/AuthContext'
+import { SocketProvider } from '@/context/SocketContext'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import ErrorBoundary from '@/components/ErrorBoundary'
+import ProtectedRoute from '@/components/ProtectedRoute'
+import './i18n/index'
+import Dashboard from '@/pages/Dashboard'
+import Tickets from '@/pages/Tickets'
+import TicketDetail from '@/pages/TicketDetail'
+import Employees from '@/pages/Employees'
+import NewTicket from '@/pages/NewTicket'
+import CalendarPage from '@/pages/Calendar'
+import PollsPage from '@/pages/Polls'
+import ChatsPage from '@/pages/Chats'
+import ChatDetail from '@/pages/ChatDetail'
+import ProfilePage from '@/pages/Profile'
+import NewsPage from '@/pages/News'
+import CalculatorPage from '@/pages/Calculator'
+import KanbanPage from '@/pages/Kanban'
+import NotificationsPage from '@/pages/NotificationsPage'
+import Login from '@/pages/Login'
+import ForgotPassword from '@/pages/ForgotPassword'
+import ResetPassword from '@/pages/ResetPassword'
+import Register from '@/pages/Register'
+import NotFound from '@/pages/NotFound'
+
+const Admin = lazy(() => import('@/pages/Admin'))
+const AdminUsers = lazy(() => import('@/pages/AdminUsers'))
+const AdminPush = lazy(() => import('@/pages/AdminPush'))
+const AdminSettings = lazy(() => import('@/pages/AdminSettings'))
+const AdminAudit = lazy(() => import('@/pages/AdminAudit'))
+const WikiPage = lazy(() => import('@/pages/Wiki'))
+const SearchPage = lazy(() => import('@/pages/Search'))
+const FilesPage = lazy(() => import('@/pages/Files'))
+
+function Page({ children }: { children: ReactNode }) {
+  return <ErrorBoundary>{children}</ErrorBoundary>
+}
+
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
+    tracesSampleRate: parseFloat(import.meta.env.VITE_SENTRY_SAMPLE_RATE || '0.1'),
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  })
+}
+
+const SentryRoutes =
+  typeof Sentry.withSentryReactRouterV6Routing === 'function' ? Sentry.withSentryReactRouterV6Routing(Routes) : Routes
+
+export default function App() {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+  )
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <TicketProvider>
+              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center h-screen text-muted-foreground text-sm">
+                      Р—Р°РіСЂСѓР·РєР°вЂ¦
+                    </div>
+                  }
+                >
+                  <Toaster position="top-right" richColors closeButton />
+                  <SentryRoutes>
+                    <Route
+                      path="/login"
+                      element={
+                        <Page>
+                          <Login />
+                        </Page>
+                      }
+                    />
+                    <Route
+                      path="/forgot-password"
+                      element={
+                        <Page>
+                          <ForgotPassword />
+                        </Page>
+                      }
+                    />
+                    <Route
+                      path="/reset-password"
+                      element={
+                        <Page>
+                          <ResetPassword />
+                        </Page>
+                      }
+                    />
+                    <Route
+                      path="/register"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <Page>
+                            <Register />
+                          </Page>
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <AdminLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route
+                        index
+                        element={
+                          <Page>
+                            <Admin />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="users"
+                        element={
+                          <Page>
+                            <AdminUsers />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="push"
+                        element={
+                          <Page>
+                            <AdminPush />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="settings"
+                        element={
+                          <Page>
+                            <AdminSettings />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="audit"
+                        element={
+                          <Page>
+                            <AdminAudit />
+                          </Page>
+                        }
+                      />
+                    </Route>
+
+                    <Route element={<AppLayout />}>
+                      <Route
+                        index
+                        element={
+                          <Page>
+                            <Dashboard />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="tickets"
+                        element={
+                          <Page>
+                            <Tickets />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="tickets/new"
+                        element={
+                          <Page>
+                            <NewTicket />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="tickets/:id"
+                        element={
+                          <Page>
+                            <TicketDetail />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="employees"
+                        element={
+                          <Page>
+                            <Employees />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="calendar"
+                        element={
+                          <Page>
+                            <CalendarPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="polls"
+                        element={
+                          <Page>
+                            <PollsPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="chats"
+                        element={
+                          <Page>
+                            <ChatsPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="chats/:id"
+                        element={
+                          <Page>
+                            <ChatDetail />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="profile"
+                        element={
+                          <Page>
+                            <ProfilePage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="news"
+                        element={
+                          <Page>
+                            <NewsPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="notifications"
+                        element={
+                          <Page>
+                            <NotificationsPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="calculator"
+                        element={
+                          <Page>
+                            <CalculatorPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="kanban"
+                        element={
+                          <Page>
+                            <KanbanPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="wiki"
+                        element={
+                          <Page>
+                            <WikiPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="files"
+                        element={
+                          <Page>
+                            <FilesPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="search"
+                        element={
+                          <Page>
+                            <SearchPage />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="*"
+                        element={
+                          <Page>
+                            <NotFound />
+                          </Page>
+                        }
+                      />
+                    </Route>
+                  </SentryRoutes>
+                </Suspense>
+              </BrowserRouter>
+            </TicketProvider>
+          </SocketProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  )
+}
+
+
+=== src/i18n/index.ts ===
+import i18n from "i18next"
+import { initReactI18next } from "react-i18next"
+import LanguageDetector from "i18next-browser-languagedetector"
+import en from "./locales/en.json"
+import ru from "./locales/ru.json"
+
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: { en: { translation: en }, ru: { translation: ru } },
+    fallbackLng: "ru",
+    interpolation: { escapeValue: false },
+    detection: { order: ["localStorage", "navigator"], caches: ["localStorage"] },
+  })
+
+export default i18n
+
+
+=== src/lib/api.ts ===
+import { toast } from 'sonner'
+
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+
+function getToken(): string | null {
+  return localStorage.getItem('token')
+}
+
+async function handleResponse(res: Response): Promise<any> {
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    window.location.href = '/login'
+    throw new Error('РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°')
+  }
+  const data = res.ok ? null : await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || `РћС€РёР±РєР° ${res.status}`)
+  }
+  if (res.status === 204) return null
+  const payload = await res.json().catch(() => null)
+  if (payload && typeof payload === 'object' && typeof payload.success === 'boolean') {
+    if (Object.prototype.hasOwnProperty.call(payload, 'data')) return payload.data
+    return payload
+  }
+  return payload
+}
+
+async function request(method: string, path: string, body?: any, opts?: RequestInit): Promise<any> {
+  const token = getToken()
+  const headers: Record<string, string> = { ...(opts?.headers as Record<string, string>) }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  if (body && !(body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json'
+  }
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      method,
+      headers,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+      ...opts,
+    })
+    return await handleResponse(res)
+  } catch (err: any) {
+    if (err?.message === 'РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°') throw err
+    toast.error(err?.message || 'РћС€РёР±РєР° СЃРµС‚Рё')
+    throw err
+  }
+}
+
+export const api = {
+  get: (path: string, opts?: RequestInit) => request('GET', path, undefined, opts),
+  post: (path: string, body?: any, opts?: RequestInit) => request('POST', path, body, opts),
+  put: (path: string, body?: any, opts?: RequestInit) => request('PUT', path, body, opts),
+  delete: (path: string, opts?: RequestInit) => request('DELETE', path, undefined, opts),
+}
+
+
+=== src/lib/schemas.ts ===
+import { z } from 'zod'
+
+export const loginSchema = z.object({
+  email: z.string().email('Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ email'),
+  password: z.string().min(1, 'Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ'),
+})
+
+export const registerSchema = z.object({
+  name: z.string().min(1, 'РРјСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ').max(100, 'РњР°РєСЃРёРјСѓРј 100 СЃРёРјРІРѕР»РѕРІ'),
+  email: z.string().email('Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ email'),
+  password: z
+    .string()
+    .min(8, 'РњРёРЅРёРјСѓРј 8 СЃРёРјРІРѕР»РѕРІ')
+    .regex(/[A-ZРђ-РЇ]/, 'РҐРѕС‚СЏ Р±С‹ РѕРґРЅР° Р·Р°РіР»Р°РІРЅР°СЏ Р±СѓРєРІР°')
+    .regex(/[0-9]/, 'РҐРѕС‚СЏ Р±С‹ РѕРґРЅР° С†РёС„СЂР°'),
+})
+
+export const newTicketSchema = z.object({
+  title: z.string().min(5, 'РњРёРЅРёРјСѓРј 5 СЃРёРјРІРѕР»РѕРІ').max(200, 'РњР°РєСЃРёРјСѓРј 200 СЃРёРјРІРѕР»РѕРІ'),
+  description: z.string().min(10, 'РњРёРЅРёРјСѓРј 10 СЃРёРјРІРѕР»РѕРІ'),
+  priority: z.enum(['low', 'medium', 'high', 'critical']),
+  category: z.string().min(1, 'Р’С‹Р±РµСЂРёС‚Рµ РєР°С‚РµРіРѕСЂРёСЋ'),
+})
+
+export type LoginFormData = z.infer<typeof loginSchema>
+export type RegisterFormData = z.infer<typeof registerSchema>
+export type NewTicketFormData = z.infer<typeof newTicketSchema>
+
+
+=== src/lib/utils.ts ===
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+import { format, formatDistanceToNow, formatRelative, isToday, isYesterday, differenceInDays } from 'date-fns'
+import { ru } from 'date-fns/locale'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+export function formatDate(dateStr: string): string {
+  return format(new Date(dateStr), 'd MMM yyyy', { locale: ru })
+}
+
+export function formatTime(dateStr: string): string {
+  return format(new Date(dateStr), 'HH:mm')
+}
+
+export function formatRelativeTime(dateStr: string): string {
+  const d = new Date(dateStr)
+  const diffDays = differenceInDays(new Date(), d)
+  if (diffDays < 1) {
+    if (isToday(d)) return formatDistanceToNow(d, { addSuffix: true, locale: ru })
+    if (isYesterday(d)) return 'РІС‡РµСЂР°'
+    return format(d, 'HH:mm')
+  }
+  if (diffDays < 7) return `${diffDays}Рґ`
+  return formatDate(dateStr)
+}
+
+
+=== src/lib/use-debounce.ts ===
+import { useState, useEffect } from 'react'
+
+export function useDebounce<T>(value: T, delay: number = 300): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(id)
+  }, [value, delay])
+  return debounced
+}
+
+
+=== src/lib/use-push.ts ===
+import { useEffect, useState, useCallback } from 'react'
+
+function urlBase64ToUint8Array(base64: string) {
+  const padding = '='.repeat((4 - (base64.length % 4)) % 4)
+  const data = atob(base64.replace(/-/g, '+').replace(/_/g, '/') + padding)
+  const output = new Uint8Array(data.length)
+  for (let i = 0; i < data.length; i++) output[i] = data.charCodeAt(i)
+  return output
+}
+
+export function usePush() {
+  const [subscribed, setSubscribed] = useState(false)
+  const [supported, setSupported] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setSupported('serviceWorker' in navigator && 'PushManager' in window)
+  }, [])
+
+  useEffect(() => {
+    if (!supported) return
+    navigator.serviceWorker.ready
+      .then((reg) => reg.pushManager.getSubscription().then((sub) => setSubscribed(!!sub)))
+      .catch(() => {})
+  }, [supported])
+
+  const subscribe = useCallback(async () => {
+    if (!supported) return
+    setLoading(true)
+    setError(null)
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetch('/api/push/vapid-key', { headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) throw new Error('VAPID key not configured on server')
+      const body = await res.json()
+      const { publicKey } = body.data || body
+
+      const reg = await navigator.serviceWorker.ready
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      })
+
+      const save = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ subscription_json: sub.toJSON() }),
+      })
+      if (!save.ok) throw new Error('Failed to save subscription')
+      setSubscribed(true)
+    } catch (e) {
+      setSubscribed(false)
+      setError(e instanceof Error ? e.message : 'Push subscription failed')
+    }
+    setLoading(false)
+  }, [supported])
+
+  const unsubscribe = useCallback(async () => {
+    if (!supported) return
+    setLoading(true)
+    try {
+      const reg = await navigator.serviceWorker.ready
+      const sub = await reg.pushManager.getSubscription()
+      if (sub) await sub.unsubscribe()
+
+      const token = localStorage.getItem('token')
+      await fetch('/api/push/unsubscribe', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    } catch {
+      // backend РЅРµРґРѕСЃС‚СѓРїРµРЅ вЂ” РґРµРјРѕ-СЂРµР¶РёРј
+    }
+    setSubscribed(false)
+    setLoading(false)
+  }, [supported])
+
+  return { subscribed, supported, loading, error, subscribe, unsubscribe }
+}
+
+
+=== src/components/layout/app-layout.tsx ===
+import { useEffect, useState } from "react"
+import { Outlet, useNavigate, useLocation } from "react-router-dom"
+import { LayoutDashboard, Ticket, MessageCircle, Users, Menu, MoreHorizontal, LogOut } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sidebar, SidebarContent } from "./sidebar"
+import { PwaInstallPrompt } from "@/components/pwa-install-prompt"
+import { cn } from "@/lib/utils"
+import NotificationBell from "@/components/NotificationBell"
+import LanguageSwitcher from "@/components/LanguageSwitcher"
+import { useAuth } from "@/context/AuthContext"
+
+const bottomNavItems = [
+  { to: "/", icon: LayoutDashboard, label: "Р”Р°С€Р±РѕСЂРґ" },
+  { to: "/tickets", icon: Ticket, label: "РўРёРєРµС‚С‹" },
+  { to: "/chats", icon: MessageCircle, label: "Р§Р°С‚С‹" },
+  { to: "/employees", icon: Users, label: "РЎРѕС‚СЂСѓРґРЅРёРєРё" },
+]
+
+export function AppLayout() {
+  const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault()
+        navigate("/search")
+      }
+    }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [navigate])
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-muted/30">
+      <Sidebar />
+      <div className="flex flex-col flex-1 min-w-0">
+        <MobileHeader onMenuClick={() => setMenuOpen(true)} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-20 md:pb-6 lg:pb-8">
+          <Outlet />
+        </main>
+        <MobileBottomNav onMenuClick={() => setMenuOpen(true)} />
+      </div>
+      <PwaInstallPrompt />
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent side="left" className="p-0 w-60 flex flex-col bg-sidebar text-sidebar-foreground">
+          <SidebarContent onNavigate={() => setMenuOpen(false)} />
+        </SheetContent>
+      </Sheet>
+    </div>
+  )
+}
+
+function MobileHeader({ onMenuClick }: { onMenuClick: () => void }) {
+  const { logout } = useAuth()
+  return (
+    <div className="flex items-center justify-between p-4 border-b bg-background md:pl-6">
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 rounded bg-primary flex items-center justify-center md:hidden">
+          <span className="text-white text-[10px] font-bold">SD</span>
+        </div>
+        <span className="font-bold text-sm">Service Desk</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <NotificationBell />
+        <span className="md:hidden"><LanguageSwitcher /></span>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => { logout(); window.location.href = '/login' }}
+          className="text-muted-foreground hover:text-destructive"
+          title="Р’С‹Р№С‚Рё" aria-label="Р’С‹Р№С‚Рё"
+        >
+          <LogOut className="w-5 h-5" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onMenuClick} className="md:hidden" aria-label="РњРµРЅСЋ">
+          <Menu className="w-5 h-5" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function MobileBottomNav({ onMenuClick }: { onMenuClick: () => void }) {
+  const nav = useNavigate()
+  const { logout, user } = useAuth()
+  const location = useLocation()
+  const filteredNav = bottomNavItems.filter(item => {
+    if (user?.role === 'requester') return item.to === '/' || item.to === '/tickets'
+    return true
+  })
+
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/"
+    return location.pathname.startsWith(path)
+  }
+
+  return (
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t flex items-center justify-around py-1">
+      {filteredNav.map((item) => (
+        <button
+          key={item.to}
+          onClick={() => nav(item.to)}
+          className={cn(
+            "flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-w-0 flex-1",
+            isActive(item.to)
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          <item.icon className="w-5 h-5" />
+          <span className="text-[10px] font-medium leading-tight">{item.label}</span>
+        </button>
+      ))}
+      <button
+        onClick={() => { logout(); window.location.href = '/login' }}
+        className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-w-0 flex-1 text-muted-foreground hover:text-destructive"
+      >
+        <LogOut className="w-5 h-5" />
+        <span className="text-[10px] font-medium leading-tight">Р’С‹Р№С‚Рё</span>
+      </button>
+      <button
+        onClick={onMenuClick}
+        className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-w-0 flex-1 text-muted-foreground hover:text-foreground"
+      >
+        <MoreHorizontal className="w-5 h-5" />
+        <span className="text-[10px] font-medium leading-tight">РњРµРЅСЋ</span>
+      </button>
+    </nav>
+  )
+}
+
+
+=== src/components/layout/sidebar.tsx ===
+import { NavLink } from 'react-router-dom'
+import {
+  Search,
+  Ticket,
+  LayoutDashboard,
+  Users,
+  PlusCircle,
+  Calendar,
+  BarChart3,
+  FileText,
+  MessageCircle,
+  User,
+  LogOut,
+  BookOpen,
+  Newspaper,
+  Shield,
+  Columns3,
+  Calculator,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+
+
+const navItems = [
+  { to: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+  { to: '/search', icon: Search, labelKey: 'nav.search', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+
+  { to: '/chats', icon: MessageCircle, labelKey: 'nav.chats', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/tickets', icon: Ticket, labelKey: 'nav.tickets', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+  { to: '/kanban', icon: Columns3, labelKey: 'nav.kanban', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/employees', icon: Users, labelKey: 'nav.employees', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/calendar', icon: Calendar, labelKey: 'nav.calendar', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/polls', icon: BarChart3, labelKey: 'nav.polls', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/wiki', icon: BookOpen, labelKey: 'nav.wiki', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/news', icon: Newspaper, labelKey: 'nav.news', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/calculator', icon: Calculator, labelKey: 'nav.calculator', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+  { to: '/files', icon: FileText, labelKey: 'nav.files', roles: ['super_admin', 'admin', 'senior_agent', 'agent'] },
+  { to: '/tickets/new', icon: PlusCircle, labelKey: 'tickets.new', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+]
+
+const bottomItems = [
+  { to: '/admin', icon: Shield, labelKey: 'nav.admin', roles: ['super_admin', 'admin'] },
+  { to: '/profile', icon: User, labelKey: 'nav.profile', roles: ['super_admin', 'admin', 'senior_agent', 'agent', 'requester'] },
+]
+
+export function Sidebar() {
+  return (
+    <aside className="hidden md:flex md:w-60 flex-col bg-sidebar text-sidebar-foreground h-screen shrink-0 overflow-y-auto">
+      <SidebarContent />
+    </aside>
+  )
+}
+
+export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  const { user, logout } = useAuth()
+  const { t } = useTranslation()
+  const userRole = user?.role || 'agent'
+
+  const filterByRole = (items: typeof navItems) => items.filter((i) => i.roles.includes(userRole))
+  return (
+    <>
+      <div className="p-5 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
+            <Ticket className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h1 className="font-bold text-sm leading-tight">Service Desk</h1>
+            <p className="text-[9px] text-sidebar-foreground/50 font-bold uppercase tracking-widest mt-0.5">Helpdesk</p>
+          </div>
+        </div>
+      </div>
+
+      <nav className="flex-1 p-3 space-y-1">
+        {filterByRole(navItems).map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === '/'}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors',
+                isActive
+                  ? 'bg-sidebar-accent text-sidebar-primary'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+              )
+            }
+          >
+            <item.icon className="w-4 h-4" />
+            {t(item.labelKey)}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="p-3 border-t border-sidebar-border space-y-1">
+        {filterByRole(bottomItems).map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors',
+                isActive
+                  ? 'bg-sidebar-accent text-sidebar-primary'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+              )
+            }
+          >
+            <item.icon className="w-4 h-4" />
+            {t(item.labelKey)}
+          </NavLink>
+        ))}
+        <button
+          onClick={() => {
+            logout()
+            window.location.href = '/login'
+          }}
+          className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+        >
+          <LogOut className="w-4 h-4" />
+          {t('auth.logout')}
+        </button>
+        <LanguageSwitcher />
+        {user && (
+          <div className="px-3 py-2 mt-2 text-[10px] text-sidebar-foreground/40 uppercase tracking-widest font-bold">
+            {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? t('admin.title') : user.role === 'senior_agent' ? 'Senior Agent' : t('auth.role')}
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+
+=== src/components/ErrorBoundary.tsx ===
+import { Component, ErrorInfo, ReactNode } from 'react'
+
+interface Props {
+  children: ReactNode
+}
+
+interface State {
+  hasError: boolean
+  error?: Error
+}
+
+export default class ErrorBoundary extends Component<Props, State> {
+  state: State = { hasError: false }
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('ErrorBoundary caught:', error, info.componentStack)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background p-8">
+          <div className="text-center max-w-md">
+            <h1 className="text-2xl font-bold mb-2">Р§С‚Рѕ-С‚Рѕ РїРѕС€Р»Рѕ РЅРµ С‚Р°Рє</h1>
+            <p className="text-muted-foreground mb-4">
+              РџСЂРѕРёР·РѕС€Р»Р° РЅРµРїСЂРµРґРІРёРґРµРЅРЅР°СЏ РѕС€РёР±РєР°. РџРѕРїСЂРѕР±СѓР№С‚Рµ РїРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ СЃС‚СЂР°РЅРёС†Сѓ.
+            </p>
+            <pre className="text-xs text-left bg-muted p-3 rounded mb-4 overflow-auto max-h-32">
+              {this.state.error?.message}
+            </pre>
+            <button
+              className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90"
+              onClick={() => window.location.reload()}
+            >
+              РџРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+
+=== src/components/ProtectedRoute.tsx ===
+import { Navigate } from "react-router-dom"
+import { useAuth } from "@/context/AuthContext"
+import type { ReactNode } from "react"
+
+export default function ProtectedRoute({ children, adminOnly }: { children: ReactNode; adminOnly?: boolean }) {
+  const { token, user } = useAuth()
+  if (!token) return <Navigate to="/login" replace />
+  if (adminOnly && user?.role !== "admin" && user?.role !== "super_admin") return <Navigate to="/" replace />
+  return <>{children}</>
+}
+
+
+=== src/context/AuthContext.tsx ===
+import { createContext, useContext, useState, type ReactNode } from 'react'
+import { API_URL } from '@/lib/api'
+
+function getInitialToken(): string | null {
+  const t = localStorage.getItem('token')
+  if (!t) return null
+  const parts = t.split('.')
+  if (parts.length !== 3) return t
+  try {
+    const payload = JSON.parse(atob(parts[1]))
+    if (payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      return null
+    }
+    return t
+  } catch {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    return null
+  }
+}
+
+function getInitialUser(): User | null {
+  const u = localStorage.getItem('user')
+  if (!u) return null
+  try {
+    return JSON.parse(u)
+  } catch {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    return null
+  }
+}
+
+interface User {
+  id: number
+  name: string
+  email: string
+  role: 'super_admin' | 'admin' | 'senior_agent' | 'agent' | 'requester'
+}
+
+interface AuthContextType {
+  user: User | null
+  token: string | null
+  login: (token: string, user: User) => void
+  logout: () => void
+  isAdmin: boolean
+  isSenior: boolean
+  isSuperAdmin: boolean
+  canManage: boolean
+}
+
+export const AuthContext = createContext<AuthContextType | null>(null)
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(getInitialUser)
+  const [token, setToken] = useState<string | null>(getInitialToken)
+
+  const login = (t: string, u: User) => {
+    localStorage.setItem('token', t)
+    localStorage.setItem('user', JSON.stringify(u))
+    setToken(t)
+    setUser(u)
+  }
+
+  const logout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setToken(null)
+    setUser(null)
+    fetch(`${API_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {})
+  }
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin'
+  const isSenior = user?.role === 'senior_agent' || user?.role === 'admin' || user?.role === 'super_admin'
+  const isSuperAdmin = user?.role === 'super_admin'
+  const canManage = isAdmin || isSenior
+
+  return (
+    <AuthContext.Provider value={{ user, token, login, logout, isAdmin, isSenior, isSuperAdmin, canManage }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
+}
+
+
+=== src/context/SocketContext.tsx ===
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { io, type Socket } from 'socket.io-client'
+import { useAuth } from './AuthContext'
+
+interface SocketContextType {
+  socket: Socket | null
+  connected: boolean
+  sendMessage: (chatId: number, text: string) => void
+  deleteMessage: (chatId: number, msgId: number) => void
+  joinChat: (chatId: number) => void
+  leaveChat: (chatId: number) => void
+  notifyAll: (data: { title: string; body: string; url?: string }) => void
+  sendTyping: (chatId: number) => void
+}
+
+export const SocketContext = createContext<SocketContextType | null>(null)
+
+export function SocketProvider({ children }: { children: ReactNode }) {
+  const { token } = useAuth()
+  const [socket, setSocket] = useState<Socket | null>(null)
+  const [connected, setConnected] = useState(false)
+
+  useEffect(() => {
+    if (!token) return
+    const s = io({ auth: { token } })
+    s.on('connect', () => setConnected(true))
+    s.on('disconnect', () => setConnected(false))
+    setSocket(s)
+    return () => {
+      s.close()
+      setSocket(null)
+      setConnected(false)
+    }
+  }, [token])
+
+  const sendMessage = useCallback(
+    (chatId: number, text: string) => {
+      socket?.emit('message:send', { chatId, text })
+    },
+    [socket],
+  )
+
+  const deleteMessage = useCallback(
+    (chatId: number, msgId: number) => {
+      socket?.emit('message:delete', { chatId, msgId })
+    },
+    [socket],
+  )
+
+  const joinChat = useCallback(
+    (chatId: number) => {
+      socket?.emit('join:chat', chatId)
+    },
+    [socket],
+  )
+
+  const leaveChat = useCallback(
+    (chatId: number) => {
+      socket?.emit('leave:chat', chatId)
+    },
+    [socket],
+  )
+
+  const notifyAll = useCallback(
+    (data: { title: string; body: string; url?: string }) => {
+      socket?.emit('notify:all', data)
+    },
+    [socket],
+  )
+
+  const sendTyping = useCallback(
+    (chatId: number) => {
+      socket?.emit('chat:typing', { chatId })
+    },
+    [socket],
+  )
+
+  return (
+    <SocketContext.Provider
+      value={{ socket, connected, sendMessage, deleteMessage, joinChat, leaveChat, notifyAll, sendTyping }}
+    >
+      {children}
+    </SocketContext.Provider>
+  )
+}
+
+export function useSocket() {
+  const ctx = useContext(SocketContext)
+  if (!ctx) throw new Error('useSocket must be used within SocketProvider')
+  return ctx
+}
+
+
+=== src/context/ticket-context.tsx ===
+import { createContext, useContext, useEffect, useCallback, type ReactNode } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { Ticket, TicketStats, Employee, TicketStatus, TicketPriority } from "@/types"
+import { useAuth } from "@/context/AuthContext"
+import { useSocket } from "@/context/SocketContext"
+
+const API = "http://localhost:4000/api"
+
+interface TicketContextType {
+  tickets: Ticket[]
+  employees: Employee[]
+  stats: TicketStats
+  loading: boolean
+  updateTicketStatus: (id: number, status: TicketStatus) => Promise<void>
+  updateTicketPriority: (id: number, priority: TicketPriority) => Promise<void>
+  assignTicket: (id: number, employeeId: number) => Promise<void>
+  addMessage: (ticketId: number, text: string, isInternal: boolean, attachments?: { url: string; name: string }[]) => Promise<void>
+  createTicket: (data: { title: string; description: string; priority: TicketPriority; category: string; computerName?: string; userAccount?: string }) => Promise<void>
+}
+
+const TicketContext = createContext<TicketContextType | null>(null)
+
+function mapTicket(raw: any): Ticket {
+  return {
+    id: raw.id,
+    title: raw.title,
+    description: raw.description,
+    status: raw.status,
+    priority: raw.priority,
+    category: raw.category,
+    tags: [],
+    computerName: raw.computer_name,
+    userAccount: raw.user_account,
+    createdBy: { id: raw.created_by, name: raw.created_by_name || "User", email: "", avatar: "" },
+    assignedTo: raw.assigned_to ? { id: raw.assigned_to, name: raw.assigned_name || "", email: raw.assigned_email || "", avatar: raw.assigned_avatar || "" } : undefined,
+    messages: Array.isArray(raw.messages) ? raw.messages.map((m: any) => ({
+      id: m.id,
+      ticketId: m.ticket_id,
+      senderId: m.sender_id,
+      senderName: m.sender_name,
+      senderAvatar: m.sender_avatar || "",
+      text: m.text,
+      attachments: m.attachments ? (typeof m.attachments === 'string' ? JSON.parse(m.attachments) : m.attachments) : [],
+      createdAt: m.created_at,
+      isInternal: !!m.is_internal,
+    })) : [],
+    messages_count: raw.messages_count || (Array.isArray(raw.messages) ? raw.messages.length : 0),
+    createdAt: raw.created_at,
+    updatedAt: raw.updated_at,
+  }
+}
+
+function mapEmployee(e: any): Employee {
+  return {
+    id: e.id, name: e.name, email: e.email,
+    role: e.role as Employee["role"],
+    department: e.department, avatar: e.avatar || "",
+    online: !!e.online, activeTickets: e.activeTickets || 0, resolvedToday: e.resolvedToday || 0,
+  }
+}
+
+async function authFetch(url: string, token: string | null, options?: RequestInit) {
+  const res = await fetch(url, {
+    ...options,
+    headers: { ...options?.headers, Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) throw new Error(`API error: ${res.status}`)
+  return res.json()
+}
+
+export function TicketProvider({ children }: { children: ReactNode }) {
+  const { token, user } = useAuth()
+  const queryClient = useQueryClient()
+
+  const ticketsQuery = useQuery({
+    queryKey: ['tickets'],
+    queryFn: async () => {
+      const body = await authFetch(`${API}/tickets?limit=500`, token)
+      return (body.data || []).map(mapTicket)
+    },
+    enabled: !!token,
+  })
+
+  const employeesQuery = useQuery({
+    queryKey: ['employees'],
+    queryFn: async () => {
+      const body = await authFetch(`${API}/employees`, token)
+      const raw = body.data || body
+      return raw.map(mapEmployee)
+    },
+    enabled: !!token,
+  })
+
+  const tickets = ticketsQuery.data ?? []
+  const employees = employeesQuery.data ?? []
+  const loading = ticketsQuery.isLoading || employeesQuery.isLoading
+
+  const { socket } = useSocket()
+  useEffect(() => {
+    if (!socket) return
+    const onStatus = ({ userId, online }: { userId: number; online: boolean }) => {
+      queryClient.setQueryData<Employee[]>(['employees'], prev =>
+        prev?.map(e => e.id === userId ? { ...e, online } : e)
+      )
+    }
+    socket.on('user:status', onStatus)
+    return () => { socket.off('user:status', onStatus) }
+  }, [socket, queryClient])
+
+  const stats: TicketStats = {
+    total: tickets.length,
+    open: tickets.filter(t => t.status === 'open').length,
+    inProgress: tickets.filter(t => t.status === 'in_progress').length,
+    resolved: tickets.filter(t => t.status === 'resolved').length,
+    critical: tickets.filter(t => t.priority === 'critical').length,
+    avgResolutionTime: 4.5,
+  }
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: TicketStatus }) =>
+      authFetch(`${API}/tickets/${id}/status`, token, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      }),
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['tickets'] })
+      const prev = queryClient.getQueryData<Ticket[]>(['tickets'])
+      queryClient.setQueryData<Ticket[]>(['tickets'], old =>
+        old?.map(t => t.id === id ? { ...t, status, updatedAt: new Date().toISOString() } : t)
+      )
+      return { prev }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['tickets'], ctx.prev)
+    },
+  })
+
+  const priorityMutation = useMutation({
+    mutationFn: ({ id, priority }: { id: number; priority: TicketPriority }) =>
+      authFetch(`${API}/tickets/${id}/priority`, token, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priority }),
+      }),
+    onMutate: async ({ id, priority }) => {
+      await queryClient.cancelQueries({ queryKey: ['tickets'] })
+      const prev = queryClient.getQueryData<Ticket[]>(['tickets'])
+      queryClient.setQueryData<Ticket[]>(['tickets'], old =>
+        old?.map(t => t.id === id ? { ...t, priority, updatedAt: new Date().toISOString() } : t)
+      )
+      return { prev }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['tickets'], ctx.prev)
+    },
+  })
+
+  const assignMutation = useMutation({
+    mutationFn: ({ id, employeeId }: { id: number; employeeId: number }) =>
+      authFetch(`${API}/tickets/${id}/assign`, token, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employeeId }),
+      }),
+    onMutate: async ({ id, employeeId }) => {
+      await queryClient.cancelQueries({ queryKey: ['tickets'] })
+      const prev = queryClient.getQueryData<Ticket[]>(['tickets'])
+      const emp = employees.find(e => e.id === employeeId)
+      queryClient.setQueryData<Ticket[]>(['tickets'], old =>
+        old?.map(t => t.id === id ? {
+          ...t, assignedTo: emp || t.assignedTo, updatedAt: new Date().toISOString()
+        } : t)
+      )
+      return { prev }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['tickets'], ctx.prev)
+    },
+  })
+
+  const addMessageMutation = useMutation({
+    mutationFn: async ({ ticketId, text, isInternal, attachments }: {
+      ticketId: number; text: string; isInternal: boolean;
+      attachments?: { url: string; name: string }[]
+    }) => {
+      const body = await authFetch(`${API}/tickets/${ticketId}/messages`, token, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, isInternal, attachments }),
+      })
+      return { ticketId, msg: body.data }
+    },
+    onMutate: async ({ ticketId, text, isInternal }) => {
+      await queryClient.cancelQueries({ queryKey: ['tickets'] })
+      const prev = queryClient.getQueryData<Ticket[]>(['tickets'])
+      const tempMsg = {
+        id: -Date.now(), ticketId,
+        senderId: user?.id || 0, senderName: user?.name || 'User',
+        senderAvatar: '', text, attachments: [],
+        createdAt: new Date().toISOString(), isInternal,
+      }
+      queryClient.setQueryData<Ticket[]>(['tickets'], old =>
+        old?.map(t => t.id === ticketId
+          ? { ...t, messages: [...t.messages, tempMsg], updatedAt: new Date().toISOString() }
+          : t)
+      )
+      return { prev }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['tickets'], ctx.prev)
+    },
+    onSuccess: ({ ticketId, msg }) => {
+      queryClient.setQueryData<Ticket[]>(['tickets'], old =>
+        old?.map(t => {
+          if (t.id !== ticketId) return t
+          const realMsg = {
+            id: msg.id, ticketId: msg.ticket_id,
+            senderId: msg.sender_id, senderName: msg.sender_name,
+            senderAvatar: msg.sender_avatar || "", text: msg.text,
+            attachments: msg.attachments ? (typeof msg.attachments === 'string' ? JSON.parse(msg.attachments) : msg.attachments) : [],
+            createdAt: msg.created_at, isInternal: !!msg.is_internal,
+          }
+          return { ...t, messages: t.messages.map(m => m.id < 0 ? realMsg : m), updatedAt: new Date().toISOString() }
+        })
+      )
+    },
+  })
+
+  const createTicketMutation = useMutation({
+    mutationFn: (data: { title: string; description: string; priority: TicketPriority; category: string; computerName?: string; userAccount?: string }) =>
+      authFetch(`${API}/tickets`, token, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }).then(body => body.data),
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['tickets'] })
+      const prev = queryClient.getQueryData<Ticket[]>(['tickets'])
+      const tempTicket: Ticket = {
+        id: -Date.now(), title: data.title, description: data.description,
+        status: 'open', priority: data.priority, category: data.category, tags: [],
+        computerName: data.computerName, userAccount: data.userAccount,
+        createdBy: { id: user?.id || 0, name: user?.name || '', email: '', avatar: '' },
+        assignedTo: undefined, messages: [], messages_count: 0,
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      }
+      queryClient.setQueryData<Ticket[]>(['tickets'], old =>
+        old ? [tempTicket, ...old] : [tempTicket]
+      )
+      return { prev }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['tickets'], ctx.prev)
+    },
+    onSuccess: (raw) => {
+      const created = mapTicket(raw)
+      queryClient.setQueryData<Ticket[]>(['tickets'], old =>
+        old?.map(t => t.id < 0 ? created : t)
+      )
+    },
+  })
+
+  const updateTicketStatus = useCallback((id: number, status: TicketStatus) =>
+    statusMutation.mutateAsync({ id, status }), [statusMutation])
+
+  const updateTicketPriority = useCallback((id: number, priority: TicketPriority) =>
+    priorityMutation.mutateAsync({ id, priority }), [priorityMutation])
+
+  const assignTicket = useCallback((id: number, employeeId: number) =>
+    assignMutation.mutateAsync({ id, employeeId }), [assignMutation])
+
+  const addMessage = useCallback(
+    (ticketId: number, text: string, isInternal: boolean, attachments?: { url: string; name: string }[]) =>
+      addMessageMutation.mutateAsync({ ticketId, text, isInternal, attachments }),
+    [addMessageMutation])
+
+  const createTicket = useCallback(
+    (data: { title: string; description: string; priority: TicketPriority; category: string; computerName?: string; userAccount?: string }) =>
+      createTicketMutation.mutateAsync(data),
+    [createTicketMutation])
+
+  return (
+    <TicketContext.Provider value={{ tickets, employees, stats, updateTicketStatus, updateTicketPriority, assignTicket, addMessage, createTicket, loading }}>
+      {children}
+    </TicketContext.Provider>
+  )
+}
+
+export function useTickets() {
+  const ctx = useContext(TicketContext)
+  if (!ctx) throw new Error("useTickets must be used within TicketProvider")
+  return ctx
+}
+
+
+=== src/pages/Kanban.tsx ===
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Columns3, MessageSquare, User } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { useTickets } from "@/context/ticket-context"
+import type { Ticket, TicketStatus } from "@/types"
+
+const COLUMNS: { key: TicketStatus; label: string; color: string }[] = [
+  { key: "open", label: "РћС‚РєСЂС‹С‚С‹Рµ", color: "border-t-blue-500" },
+  { key: "in_progress", label: "Р’ СЂР°Р±РѕС‚Рµ", color: "border-t-amber-500" },
+  { key: "resolved", label: "Р РµС€С‘РЅРЅС‹Рµ", color: "border-t-emerald-500" },
+  { key: "closed", label: "Р—Р°РєСЂС‹С‚С‹Рµ", color: "border-t-slate-500" },
+]
+
+const PRIORITY_COLORS: Record<string, string> = {
+  critical: "bg-red-500/10 text-red-500 border-red-500/20",
+  high: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+  medium: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  low: "bg-slate-500/10 text-slate-500 border-slate-500/20",
+}
+
+export default function KanbanPage() {
+  const { tickets, updateTicketStatus } = useTickets()
+  const navigate = useNavigate()
+  const [dragId, setDragId] = useState<number | null>(null)
+
+  const grouped = COLUMNS.map(col => ({
+    ...col,
+    tickets: tickets.filter(t => t.status === col.key),
+  }))
+
+  const handleDragStart = (e: React.DragEvent, ticketId: number) => {
+    setDragId(ticketId)
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", String(ticketId))
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+  }
+
+  const handleDrop = (e: React.DragEvent, status: TicketStatus) => {
+    e.preventDefault()
+    const id = Number(e.dataTransfer.getData("text/plain"))
+    if (id) updateTicketStatus(id, status)
+    setDragId(null)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Columns3 className="w-6 h-6 text-primary" />
+            РљР°РЅР±Р°РЅ-РґРѕСЃРєР°
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">РџРµСЂРµС‚Р°СЃРєРёРІР°Р№С‚Рµ С‚РёРєРµС‚С‹ РјРµР¶РґСѓ СЃС‚Р°С‚СѓСЃР°РјРё</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {grouped.map(col => (
+          <div
+            key={col.key}
+            onDragOver={handleDragOver}
+            onDrop={e => handleDrop(e, col.key)}
+            className={cn(
+              "rounded-xl border bg-card/50 min-h-[300px] flex flex-col",
+              col.color,
+              dragId && "border-dashed",
+            )}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <h3 className="font-bold text-sm">{col.label}</h3>
+              <Badge variant="secondary" className="text-[10px]">{col.tickets.length}</Badge>
+            </div>
+            <div className="flex-1 p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-18rem)]">
+              {col.tickets.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-xs">РќРµС‚ С‚РёРєРµС‚РѕРІ</p>
+                </div>
+              )}
+              {col.tickets.map(ticket => (
+                <div
+                  key={ticket.id}
+                  draggable
+                  onDragStart={e => handleDragStart(e, ticket.id)}
+                  onClick={() => navigate(`/tickets/${ticket.id}`)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/tickets/${ticket.id}`); } }}
+                  role="button"
+                  tabIndex={0}
+                  className="rounded-lg border bg-card p-3 cursor-grab active:cursor-grabbing hover:border-primary/50 transition-all space-y-2 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h4 className="text-xs font-bold leading-snug line-clamp-2">{ticket.title}</h4>
+                    <Badge className={cn("text-[9px] border shrink-0", PRIORITY_COLORS[ticket.priority])}>
+                      {ticket.priority === "critical" ? "РљСЂРёС‚." : ticket.priority === "high" ? "Р’С‹СЃ." : ticket.priority === "medium" ? "РЎСЂРµРґ." : "РќРёР·Рє."}
+                    </Badge>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground line-clamp-2">{ticket.description}</p>
+                  <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3" />
+                        {ticket.messages_count ?? ticket.messages.length}
+                      </span>
+                      {ticket.assignedTo && (
+                        <span className="flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          {ticket.assignedTo.name.split(" ")[0]}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+
+=== src/types/index.ts ===
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed'
+export type TicketPriority = 'low' | 'medium' | 'high' | 'critical'
+export type TicketCategory = 'bug' | 'feature' | 'support' | 'incident' | 'other'
+export type EmployeeRole = 'agent' | 'senior_agent' | 'admin' | 'super_admin'
+
+export interface Employee {
+  id: number
+  name: string
+  email: string
+  avatar: string
+  role: EmployeeRole
+  department: string
+  online: boolean
+  activeTickets: number
+  resolvedToday: number
+  phone?: string
+}
+
+export interface TicketMessage {
+  id: number
+  ticketId: number
+  senderId: number
+  senderName: string
+  senderAvatar: string
+  text: string
+  attachments: string[]
+  createdAt: string
+  isInternal: boolean
+}
+
+export interface Ticket {
+  id: number
+  title: string
+  description: string
+  status: TicketStatus
+  priority: TicketPriority
+  category: TicketCategory
+  createdBy: {
+    id: number
+    name: string
+    email: string
+    avatar: string
+  }
+  assignedTo?: Employee
+  messages: TicketMessage[]
+  messages_count?: number
+  createdAt: string
+  updatedAt: string
+  tags: string[]
+  computerName?: string
+  userAccount?: string
+}
+
+export interface TicketStats {
+  total: number
+  open: number
+  inProgress: number
+  resolved: number
+  critical: number
+  avgResolutionTime: number
+}
+
+export interface CalendarEvent {
+  id: number
+  title: string
+  date: string
+  time: string | null
+  description: string | null
+  creatorId: number
+  createdAt: string
+}
+
+export interface PollOption {
+  id: number
+  pollId: number
+  text: string
+  votesCount: number
+  voted?: boolean
+}
+
+export interface Poll {
+  id: number
+  title: string
+  description: string
+  multipleChoice: boolean
+  options: PollOption[]
+  totalVotes: number
+  myVotes: number[]
+  createdBy: number
+  createdAt: string
+  endsAt?: string
+  showResults: 'after_vote' | 'always'
+  isClosed: boolean
+}
+
+export interface FileItem {
+  id: number
+  name: string
+  size: string
+  type: string
+  folderId: number
+  path?: string
+  folder?: string
+  createdAt: string
+}
+
+export interface FileFolder {
+  id: number
+  name: string
+  files: FileItem[]
+}
+
+export type ChatType = 'group' | 'personal' | 'channel'
+
+export interface ChatRoom {
+  id: number
+  name: string
+  type: ChatType
+  avatar?: string
+  lastMessage?: string
+  lastTime?: string
+  unread: number
+  members?: number
+}
+
+export interface ChatMessage {
+  id: number
+  chatId: number
+  senderId: number
+  senderName: string
+  text: string
+  image?: string
+  createdAt: string
+  edited?: boolean
+  reactions?: Record<string, number[]>
+}
+
+export interface EmployeeProfile {
+  id: number
+  name: string
+  email: string
+  phone: string
+  role: string
+  department: string
+  title: string
+  avatar: string
+  bio: string
+  online: boolean
+}
+
+export interface WikiArticle {
+  id: number
+  title: string
+  content: string
+  category: string
+  tags: string[]
+  authorId: number
+  authorName: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface NewsPost {
+  id: number
+  title: string
+  content: string
+  important: boolean
+  authorId: number
+  authorName: string
+  createdAt: string
+}
+
+
+=== server/package.json ===
+{
+  "name": "tickets-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "migrate": "knex migrate:latest --knexfile knexfile.js",
+    "migrate:rollback": "knex migrate:rollback --knexfile knexfile.js",
+    "seed": "knex seed:run --knexfile knexfile.js",
+    "setup": "knex migrate:latest --knexfile knexfile.js && knex seed:run --knexfile knexfile.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1083.0",
+    "@aws-sdk/s3-request-presigner": "^3.1083.0",
+    "@prisma/client": "^5.22.0",
+    "@sentry/node": "^10.64.0",
+    "@socket.io/redis-adapter": "^8.3.0",
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^5.80.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^8.5.2",
+    "express-validator": "^7.3.2",
+    "file-type": "^22.0.1",
+    "helmet": "^8.2.0",
+    "ioredis": "^5.11.1",
+    "jsonwebtoken": "^9.0.2",
+    "knex": "^3.3.0",
+    "meilisearch": "^0.59.0",
+    "multer": "^2.2.0",
+    "mysql2": "^3.11.0",
+    "node-telegram-bot-api": "^1.1.2",
+    "nodemailer": "^9.0.3",
+    "passport": "^0.7.0",
+    "passport-ldapauth": "^3.0.1",
+    "prisma": "^5.22.0",
+    "socket.io": "^4.8.3",
+    "supertest": "^7.2.2",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
+    "vitest": "^4.1.9",
+    "web-push": "^3.6.7",
+    "winston": "^3.19.0",
+    "zod": "^4.4.3"
+  }
+}
+
+
+=== server/src/app.js ===
+import 'dotenv/config'
+import express from 'express'
+import { createServer } from 'http'
+import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
+import cookieParser from 'cookie-parser'
+import os from 'os'
+import * as Sentry from '@sentry/node'
+import logger from './logger.js'
+import { requestId } from './middleware/requestId.js'
+
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    tracesSampleRate: parseFloat(process.env.SENTRY_SAMPLE_RATE || '0.1'),
+    beforeSend(event) {
+      if (event.exception) {
+        event.exception.values?.forEach(v => {
+          if (v.stacktrace) {
+            v.stacktrace.frames?.forEach(f => { f.vars = undefined })
+          }
+        })
+      }
+      if (event.request) {
+        const headers = event.request.headers || {}
+        if (headers['Authorization']) headers['Authorization'] = '[filtered]'
+        if (headers['authorization']) headers['authorization'] = '[filtered]'
+        if (headers['Cookie']) headers['Cookie'] = '[filtered]'
+        if (headers['cookie']) headers['cookie'] = '[filtered]'
+      }
+      return event
+    },
+  })
+}
+import ticketsRouter from './routes/tickets.js'
+import employeesRouter from './routes/employees.js'
+import calendarRouter from './routes/calendar.js'
+import pollsRouter from './routes/polls.js'
+import filesRouter from './routes/files.js'
+import chatsRouter from './routes/chats.js'
+import wikiRouter from './routes/wiki.js'
+import newsRouter from './routes/news.js'
+import notificationsRouter from './routes/notifications.js'
+import searchRouter from './routes/search.js'
+import pushRouter from './routes/push.js'
+import authRouter from './routes/auth.js'
+import adminRouter from './routes/admin.js'
+import swaggerUi from 'swagger-ui-express'
+import swaggerSpec from './swagger.js'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import jwt from 'jsonwebtoken'
+import { JWT_SECRET, authenticateToken } from './middleware.js'
+import { cacheMiddleware } from './cache.js'
+import { auditLogMiddleware } from './audit.js'
+
+const app = express()
+const server = createServer(app)
+
+const authLimiter = rateLimit({ windowMs: 60_000, max: 10, message: { message: 'Too many auth requests' } })
+const apiLimiter = rateLimit({ windowMs: 60_000, max: 100, message: { message: 'Too many requests' } })
+const adminLimiter = rateLimit({ windowMs: 60_000, max: 30, message: { message: 'Too many admin requests' } })
+
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
+  : ['http://localhost:5173', 'http://localhost:4000']
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
+    cb(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+}))
+app.use(helmet())
+app.use(requestId)
+app.use(express.json())
+app.use(cookieParser())
+
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.requestHandler())
+  app.use(Sentry.Handlers.tracingHandler())
+}
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const uploadsDir = path.join(__dirname, '..', 'uploads')
+app.use('/uploads', (req, res, next) => {
+  const authHeader = req.headers.authorization
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : req.query.token
+  if (!token) return res.status(401).json({ message: 'Unauthorized' })
+  try {
+    jwt.verify(token, JWT_SECRET)
+    if (req.query.token) delete req.query.token
+    express.static(uploadsDir)(req, res, next)
+  } catch {
+    res.status(403).json({ message: 'Invalid token' })
+  }
+})
+
+const V1 = '/api/v1'
+
+function mount(prefix, router, ...mw) {
+  app.use(`/api${prefix}`, ...mw, router)
+  app.use(`${V1}${prefix}`, ...mw, router)
+}
+
+mount('/auth', authRouter, authLimiter)
+mount('/tickets', ticketsRouter, apiLimiter, cacheMiddleware(120))
+mount('/employees', employeesRouter, apiLimiter, cacheMiddleware(300))
+mount('/calendar', calendarRouter, apiLimiter)
+mount('/polls', pollsRouter, apiLimiter)
+mount('/files', filesRouter, apiLimiter)
+mount('/chats', chatsRouter, apiLimiter)
+mount('/wiki', wikiRouter, apiLimiter)
+mount('/news', newsRouter, apiLimiter)
+mount('/notifications', notificationsRouter, apiLimiter)
+mount('/push', pushRouter, apiLimiter)
+mount('/search', searchRouter, apiLimiter)
+mount('/admin', adminRouter, adminLimiter)
+
+app.use([`/api/docs`, `${V1}/docs`], swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }' }))
+
+app.get('/', (req, res) => {
+  res.json({ app: 'Service Desk API', version: '1.0.0' })
+})
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+app.get('/api/metrics', (req, res) => {
+  const mem = process.memoryUsage()
+  const uptime = process.uptime()
+  res.set('Content-Type', 'text/plain; charset=utf-8')
+  res.send([
+    `# HELP process_cpu_seconds_total Total user CPU time`,
+    `# TYPE process_cpu_seconds_total counter`,
+    `process_cpu_seconds_total ${uptime}`,
+    `# HELP process_resident_memory_bytes Resident memory size`,
+    `# TYPE process_resident_memory_bytes gauge`,
+    `process_resident_memory_bytes ${mem.rss}`,
+    `# HELP process_heap_bytes Process heap size`,
+    `# TYPE process_heap_bytes gauge`,
+    `process_heap_bytes ${mem.heapUsed}`,
+    `# HELP nodejs_eventloop_lag_seconds Event loop lag`,
+    `# TYPE nodejs_eventloop_lag_seconds gauge`,
+    `nodejs_eventloop_lag_seconds 0.01`,
+  ].join('\n'))
+})
+
+app.get('/api/system-info', authenticateToken, (req, res) => {
+  res.json({
+    computerName: os.hostname(),
+    userAccount: `${process.env.USERDOMAIN || os.hostname()}\\${process.env.USERNAME || ''}`,
+    userName: process.env.USERNAME || '',
+    domain: process.env.USERDOMAIN || '',
+  })
+})
+
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler())
+}
+
+app.use((err, req, res, next) => {
+  logger.error('Unhandled error', { error: err.message, stack: err.stack, requestId: req.id })
+  res.status(500).json({ message: 'Internal server error' })
+})
+
+export { app, server }
+
+
+=== server/src/index.js ===
+import 'dotenv/config'
+import knexLib from 'knex'
+import knexConfig from '../knexfile.js'
+import { app, server } from './app.js'
+import { setupSocket } from './socket.js'
+import { initTelegram } from './telegram.js'
+import logger from './logger.js'
+import { setupBackgroundJobs } from './background.js'
+
+if (!process.env.JWT_SECRET) {
+  logger.error('FATAL: JWT_SECRET environment variable is required')
+  logger.error('Generate one: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"')
+  process.exit(1)
+}
+
+const PORT = process.env.PORT || 4000
+
+setupSocket(server)
+initTelegram()
+
+import { initSearchSync } from './search-sync.js'
+initSearchSync()
+
+// Auto-run migrations on startup
+;(async () => {
+  try {
+    const migrator = knexLib(knexConfig)
+    await migrator.migrate.latest()
+    console.log('Migrations up to date')
+    await migrator.destroy()
+  } catch (e) {
+    logger.error('Migration error:', e.message)
+  }
+})()
+
+// РЈРґР°Р»РµРЅРёРµ СѓРІРµРґРѕРјР»РµРЅРёР№ СЃС‚Р°СЂС€Рµ 90 РґРЅРµР№ (РєР°Р¶РґС‹Рµ 6 С‡Р°СЃРѕРІ)
+import prisma from './prisma.js'
+import { stopBackgroundJobs } from './background.js'
+setupBackgroundJobs(prisma)
+
+server.listen(PORT, () => {
+  console.log(`Service Desk API running on port ${PORT}`)
+})
+
+// Graceful shutdown
+async function shutdown(signal) {
+  console.log(`\nReceived ${signal}, shutting down gracefully...`)
+  stopBackgroundJobs()
+  server.close(() => {
+    console.log('HTTP server closed')
+  })
+  const { getIO } = await import('./socket.js')
+  const io = getIO()
+  if (io) {
+    io.close(() => console.log('Socket.IO closed'))
+  }
+  await prisma.$disconnect().catch(() => {})
+  logger.info(`Server shut down (${signal})`)
+  process.exit(0)
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'))
+process.on('SIGINT', () => shutdown('SIGINT'))
+
+
+=== server/src/socket.js ===
+import { Server } from 'socket.io'
+import { createAdapter } from '@socket.io/redis-adapter'
+import jwt from 'jsonwebtoken'
+import prisma from './prisma.js'
+import { JWT_SECRET } from './middleware.js'
+import { hasRole } from './utils/roleUtils.js'
+import { createNotification } from './routes/notifications.js'
+import logger from './logger.js'
+
+let io
+
+// Connection rate limiter: 10 handshake attempts/min per IP
+const connAttempts = new Map()
+
+// In-memory rate limiter: 5 msg/sec per socket, exponential backoff on violation
+const rateLimitMap = new Map()
+const WS_LIMIT = 5
+const WS_INTERVAL = 1000
+const BACKOFF_MULTIPLIER = 2
+const MAX_BACKOFF = 60000
+
+function wsRateLimit(socket) {
+  const now = Date.now()
+  let entry = rateLimitMap.get(socket.id)
+  if (!entry) {
+    entry = { tokens: WS_LIMIT, lastRefill: now, backoff: 0, violations: 0 }
+    rateLimitMap.set(socket.id, entry)
+  }
+  // Refill tokens
+  const elapsed = now - entry.lastRefill
+  entry.tokens = Math.floor(Math.min(WS_LIMIT, entry.tokens + elapsed * (WS_LIMIT / WS_INTERVAL)))
+  entry.lastRefill = now
+  // Apply backoff if in penalty
+  if (entry.backoff > 0) {
+    if (now < entry.backoff) return false
+    entry.backoff = 0
+  }
+  if (entry.tokens < 1) {
+    entry.violations++
+    entry.backoff = now + Math.min(MAX_BACKOFF, Math.pow(BACKOFF_MULTIPLIER, entry.violations) * 1000)
+    return false
+  }
+  entry.tokens -= 1
+  entry.violations = 0
+  return true
+}
+
+export async function setupSocket(server) {
+  io = new Server(server, {
+    cors: { origin: process.env.CORS_ORIGIN || '*', methods: ['GET', 'POST'] },
+  })
+
+  // Redis adapter with fallback to in-memory
+  if (process.env.REDIS_URL) {
+    try {
+      const { default: Redis } = await import('ioredis')
+      const pubClient = new Redis(process.env.REDIS_URL)
+      const subClient = pubClient.duplicate()
+      io.adapter(createAdapter(pubClient, subClient))
+      console.log('Socket.io using Redis adapter')
+    } catch (err) {
+      console.warn('Redis unavailable, using in-memory adapter:', err.message)
+    }
+  }
+
+  io.use((socket, next) => {
+    const ip = socket.handshake.address
+    const now = Date.now()
+    const attempts = connAttempts.get(ip) || []
+    const recent = attempts.filter(t => now - t < 60000)
+    if (recent.length >= 10) return next(new Error('Too many connections'))
+    recent.push(now)
+    connAttempts.set(ip, recent)
+
+    const token = socket.handshake.auth?.token
+    if (!token) return next(new Error('No token'))
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET)
+      socket.userId = decoded.userId
+      socket.userRole = decoded.role
+      next()
+    } catch {
+      next(new Error('Invalid token'))
+    }
+  })
+
+  io.on('connection', (socket) => {
+    console.log(`WS user ${socket.userId} connected`)
+    socket.join(`user:${socket.userId}`)
+
+    // РћРЅР»Р°Р№РЅ-СЃС‚Р°С‚СѓСЃ
+    prisma.employees.update({ where: { id: socket.userId }, data: { online: true } })
+      .then(() => io.emit('user:status', { userId: socket.userId, online: true }))
+      .catch(() => {})
+
+    socket.on('join:chat', (chatId) => {
+      socket.join(`chat:${chatId}`)
+    })
+
+    socket.on('leave:chat', (chatId) => {
+      socket.leave(`chat:${chatId}`)
+    })
+
+    socket.on('message:send', async ({ chatId, text }) => {
+      if (!text?.trim()) return
+      if (text.length > 2000) return socket.emit('error', { message: 'Text too long (max 2000 chars)' })
+      if (!wsRateLimit(socket)) return socket.emit('rate:limited', { event: 'message:send' })
+      try {
+        const user = await prisma.employees.findUnique({ where: { id: socket.userId }, select: { name: true } })
+        const senderName = user?.name || 'User'
+        const msg = await prisma.chat_messages.create({
+          data: {
+            chat_id: chatId,
+            sender_id: socket.userId,
+            sender_name: senderName,
+            text,
+          },
+        })
+        io.to(`chat:${chatId}`).emit('message:new', msg)
+        // РЈРІРµРґРѕРјР»РµРЅРёРµ СѓС‡Р°СЃС‚РЅРёРєР°Рј С‡Р°С‚Р° РєСЂРѕРјРµ РѕС‚РїСЂР°РІРёС‚РµР»СЏ
+        const participants = await prisma.chat_messages.findMany({
+          where: { chat_id: chatId, sender_id: { not: socket.userId } },
+          distinct: ['sender_id'],
+          select: { sender_id: true },
+        })
+        for (const p of participants) {
+          await createNotification({
+            userId: p.sender_id,
+            type: 'chat_message',
+            title: senderName,
+            body: text,
+            link: `/chats/${chatId}`,
+          })
+        }
+      } catch (err) {
+        logger.error('WS message error:', err)
+      }
+    })
+
+    socket.on('chat:typing', ({ chatId }) => {
+      socket.to(`chat:${chatId}`).emit('chat:typing', { userId: socket.userId })
+    })
+
+    socket.on('message:delete', async ({ chatId, msgId }) => {
+      try {
+        const msg = await prisma.chat_messages.findUnique({ where: { id: msgId } })
+        if (!msg) return
+        const isAdmin = hasRole(socket.userRole, 'senior_agent')
+        if (!isAdmin && msg.sender_id !== socket.userId) return
+        await prisma.chat_messages.delete({ where: { id: msgId } })
+        io.to(`chat:${chatId}`).emit('message:removed', msgId)
+      } catch (err) {
+        logger.error('WS delete error:', err)
+      }
+    })
+
+    socket.on('ticket:update', (ticketId) => {
+      if (!wsRateLimit(socket)) return socket.emit('rate:limited', { event: 'ticket:update' })
+      io.emit('ticket:updated', ticketId)
+    })
+
+    socket.on('notify:all', (data) => {
+      if (!wsRateLimit(socket)) return socket.emit('rate:limited', { event: 'notify:all' })
+      socket.broadcast.emit('notification', data)
+    })
+
+    socket.on('disconnect', () => {
+      console.log(`WS user ${socket.userId} disconnected`)
+      prisma.employees.update({
+        where: { id: socket.userId },
+        data: { online: false, last_active: new Date() },
+      }).then(() => io.emit('user:status', { userId: socket.userId, online: false }))
+        .catch(() => {})
+    })
+  })
+
+  return io
+}
+
+export function getIO() {
+  return io || null
+}
+
+
+=== server/src/background.js ===
+import logger from './logger.js'
+import { sendTicketNotification } from './email.js'
+import { notifySlaBreached } from './notify.js'
+
+const CLEANUP_INTERVAL = 6 * 60 * 60 * 1000
+const SLA_CHECK_INTERVAL = 15 * 60 * 1000
+
+async function warnAdminRedisMissing(prisma) {
+  try {
+    const admins = await prisma.employees.findMany({
+      where: { is_active: true, role: { in: ['super_admin', 'admin'] } },
+      select: { email: true },
+    })
+    for (const a of admins) {
+      if (a.email) {
+        sendTicketNotification({
+          to: a.email,
+          subject: 'Redis РЅРµРґРѕСЃС‚СѓРїРµРЅ вЂ” С„РѕРЅРѕРІС‹Рµ Р·Р°РґР°С‡Рё РІ unsafe-СЂРµР¶РёРјРµ',
+          text: 'Redis РЅРµ РЅР°СЃС‚СЂРѕРµРЅ (REDIS_URL РЅРµ Р·Р°РґР°РЅ). Р¤РѕРЅРѕРІС‹Рµ Р·Р°РґР°С‡Рё (РѕС‡РёСЃС‚РєР° СѓРІРµРґРѕРјР»РµРЅРёР№, РїСЂРѕРІРµСЂРєР° SLA) СЂР°Р±РѕС‚Р°СЋС‚ С‡РµСЂРµР· setInterval Р±РµР· РіР°СЂР°РЅС‚РёР№ РґРѕСЃС‚Р°РІРєРё Рё РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёСЏ. РќР°СЃС‚СЂРѕР№С‚Рµ Redis РґР»СЏ production.',
+        }).catch(() => {})
+      }
+    }
+  } catch (e) {
+    logger.error('Failed to send Redis warning email:', e.message)
+  }
+}
+
+let cleanupTimer, slaTimer
+
+export function stopBackgroundJobs() {
+  if (cleanupTimer) clearInterval(cleanupTimer)
+  if (slaTimer) clearInterval(slaTimer)
+}
+
+export async function setupBackgroundJobs(prisma) {
+  if (process.env.REDIS_URL) {
+    const { Queue, Worker, QueueScheduler } = await import('bullmq')
+    const Redis = (await import('ioredis')).default
+
+    const connection = new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: null })
+
+    const cleanupQueue = new Queue('notification-cleanup', { connection })
+    const slaQueue = new Queue('sla-overdue-check', { connection })
+
+    new Worker('notification-cleanup', async () => {
+      return runCleanup(prisma)
+    }, { connection })
+
+    new Worker('sla-overdue-check', async () => {
+      return runSlaCheck(prisma)
+    }, { connection })
+
+    await cleanupQueue.upsertJobScheduler('default', { every: CLEANUP_INTERVAL })
+    await slaQueue.upsertJobScheduler('default', { every: SLA_CHECK_INTERVAL })
+
+    runCleanup(prisma)
+    runSlaCheck(prisma)
+
+    logger.info('Background jobs using BullMQ (Redis)')
+  } else {
+    setTimeout(() => runCleanup(prisma), 5000)
+    setTimeout(() => runSlaCheck(prisma), 5000)
+    cleanupTimer = setInterval(() => runCleanup(prisma), CLEANUP_INTERVAL)
+    slaTimer = setInterval(() => runSlaCheck(prisma), SLA_CHECK_INTERVAL)
+    logger.warn('Redis not configured вЂ” background jobs using setInterval (no guarantees)')
+    warnAdminRedisMissing(prisma)
+  }
+}
+
+async function runCleanup(prisma) {
+  try {
+    const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    const r = await prisma.notifications.deleteMany({
+      where: { created_at: { lt: cutoff } },
+    })
+    if (r.count > 0) logger.info(`Cleaned ${r.count} old notifications`)
+  } catch (e) {
+    logger.error('Notification cleanup error:', e.message)
+  }
+}
+
+async function runSlaCheck(prisma) {
+  try {
+    const overdue = await prisma.tickets.findMany({
+      where: {
+        status: { in: ['open', 'in_progress'] },
+        due_at: { lt: new Date() },
+      },
+      select: { id: true },
+      take: 200,
+    })
+    for (const t of overdue) {
+      await notifySlaBreached(t.id)
+    }
+  } catch (e) {
+    logger.error('SLA overdue check error:', e.message)
+  }
+}
+
+
+=== server/src/notify.js ===
+import prisma from './prisma.js'
+import { sendTicketNotification } from './email.js'
+import { sendTelegramNotification } from './telegram.js'
+import { createNotification } from './routes/notifications.js'
+import logger from './logger.js'
+
+const STATUS_LABELS = { open: 'РћС‚РєСЂС‹С‚', in_progress: 'Р’ СЂР°Р±РѕС‚Рµ', resolved: 'Р РµС€С‘РЅ', closed: 'Р—Р°РєСЂС‹С‚' }
+const PRIORITY_LABELS = { low: 'РќРёР·РєРёР№', medium: 'РЎСЂРµРґРЅРёР№', high: 'Р’С‹СЃРѕРєРёР№', critical: 'РљСЂРёС‚РёС‡РЅС‹Р№' }
+
+async function retryWithBackoff(fn, maxAttempts = 3) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn()
+    } catch (err) {
+      if (attempt === maxAttempts) throw err
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000)
+      logger.warn(`Retry attempt ${attempt}/${maxAttempts} after ${delay}ms: ${err.message}`)
+      await new Promise(r => setTimeout(r, delay))
+    }
+  }
+}
+
+function safeSend(fn) {
+  fn().catch(err => logger.error(`Notification send failed: ${err.message}`))
+}
+
+function safeNotify(promise) {
+  promise.catch(err => logger.error(`Notify failed: ${err.message}`))
+}
+
+async function getTicketWithUsers(ticketId) {
+  const ticket = await prisma.tickets.findUnique({
+    where: { id: ticketId },
+    include: {
+      created_by_employee: { select: { id: true, name: true, email: true } },
+      assigned_to_employee: { select: { id: true, name: true, email: true } },
+    },
+  })
+  if (!ticket) return null
+  return {
+    ...ticket,
+    creatorId: ticket.created_by_employee?.id || ticket.created_by,
+    creatorName: ticket.created_by_employee?.name,
+    creatorEmail: ticket.created_by_employee?.email,
+    assigneeId: ticket.assigned_to_employee?.id,
+    assigneeName: ticket.assigned_to_employee?.name,
+    assigneeEmail: ticket.assigned_to_employee?.email,
+    created_by_employee: undefined,
+    assigned_to_employee: undefined,
+  }
+}
+
+async function getTicketParticipants(ticketId, excludeUserId) {
+  const rows = await prisma.ticket_messages.findMany({
+    where: { ticket_id: ticketId, sender_id: { not: excludeUserId } },
+    distinct: ['sender_id'],
+    select: { sender_id: true },
+  })
+  return rows.map(r => r.sender_id)
+}
+
+export async function notifyTicketCreated(ticketId, actorName) {
+  const t = await getTicketWithUsers(ticketId)
+  if (!t) return
+
+  const tag = `#${ticketId}: ${t.title}`
+  safeNotify(createNotification({
+    userId: t.creatorId, type: 'ticket_created',
+    title: 'РўРёРєРµС‚ СЃРѕР·РґР°РЅ', body: t.title,
+    link: `/tickets/${ticketId}`,
+  }))
+  sendTelegramNotification(`рџ†• РќРѕРІС‹Р№ С‚РёРєРµС‚ ${tag}\nРџСЂРёРѕСЂРёС‚РµС‚: ${PRIORITY_LABELS[t.priority] || t.priority}\nРљР°С‚РµРіРѕСЂРёСЏ: ${t.category}`)
+  if (t.creatorEmail) {
+    safeSend(() => retryWithBackoff(() => sendTicketNotification({
+      to: t.creatorEmail,
+      subject: `РўРёРєРµС‚ #${ticketId} СЃРѕР·РґР°РЅ: ${t.title}`,
+      text: `Р’Р°С€ С‚РёРєРµС‚ "${t.title}" (#${ticketId}) СЃРѕР·РґР°РЅ.\nРЎС‚Р°С‚СѓСЃ: РћС‚РєСЂС‹С‚\nРџСЂРёРѕСЂРёС‚РµС‚: ${PRIORITY_LABELS[t.priority] || t.priority}\n\nService Desk`,
+    })))
+  }
+}
+
+export async function notifyStatusChanged(ticketId, oldStatus, newStatus, actorName) {
+  const t = await getTicketWithUsers(ticketId)
+  if (!t) return
+
+  const oldLabel = STATUS_LABELS[oldStatus] || oldStatus
+  const newLabel = STATUS_LABELS[newStatus] || newStatus
+  const tag = `#${ticketId}: ${t.title}`
+
+  const targets = [t.creatorId]
+  if (t.assigneeId && !targets.includes(t.assigneeId)) targets.push(t.assigneeId)
+  for (const userId of targets) {
+    safeNotify(createNotification({
+      userId, type: 'ticket_status',
+      title: `РЎС‚Р°С‚СѓСЃ РёР·РјРµРЅС‘РЅ: ${newLabel}`,
+      body: t.title,
+      link: `/tickets/${ticketId}`,
+    }))
+  }
+  sendTelegramNotification(`рџ“‹ РЎС‚Р°С‚СѓСЃ С‚РёРєРµС‚Р° ${tag}\n${oldLabel} в†’ ${newLabel}\nРР·РјРµРЅРёР»: ${actorName}`)
+
+  const emailTargets = []
+  if (t.creatorEmail && !emailTargets.includes(t.creatorId)) emailTargets.push({ email: t.creatorEmail, name: t.creatorName })
+  if (t.assigneeEmail && t.assigneeId !== t.creatorId) emailTargets.push({ email: t.assigneeEmail, name: t.assigneeName })
+  for (const et of emailTargets) {
+    safeSend(() => retryWithBackoff(() => sendTicketNotification({
+      to: et.email,
+      subject: `РЎС‚Р°С‚СѓСЃ С‚РёРєРµС‚Р° ${tag}: ${newLabel}`,
+      text: `РўРёРєРµС‚ "${t.title}" (#${ticketId})\nРЎС‚Р°С‚СѓСЃ: ${oldLabel} в†’ ${newLabel}\n\nService Desk`,
+    })))
+  }
+}
+
+export async function notifyPriorityChanged(ticketId, oldPriority, newPriority, actorName) {
+  const t = await getTicketWithUsers(ticketId)
+  if (!t) return
+
+  const tag = `#${ticketId}: ${t.title}`
+  sendTelegramNotification(`вљЎ РџСЂРёРѕСЂРёС‚РµС‚ С‚РёРєРµС‚Р° ${tag}\n${PRIORITY_LABELS[oldPriority] || oldPriority} в†’ ${PRIORITY_LABELS[newPriority] || newPriority}`)
+}
+
+export async function notifyTicketAssigned(ticketId, assigneeId, assignedByName) {
+  const t = await getTicketWithUsers(ticketId)
+  if (!t) return
+
+  if (!assigneeId || assigneeId === t.creatorId) return
+
+  safeNotify(createNotification({
+    userId: assigneeId, type: 'ticket_assigned',
+    title: 'РќР°Р·РЅР°С‡РµРЅ С‚РёРєРµС‚', body: t.title,
+    link: `/tickets/${ticketId}`,
+  }))
+  sendTelegramNotification(`рџ‘¤ РўРёРєРµС‚ #${ticketId} РЅР°Р·РЅР°С‡РµРЅ РЅР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ\n"${t.title}"\nРќР°Р·РЅР°С‡РёР»: ${assignedByName}`)
+
+  if (t.assigneeEmail) {
+    safeSend(() => retryWithBackoff(() => sendTicketNotification({
+      to: t.assigneeEmail,
+      subject: `РўРёРєРµС‚ #${ticketId} РЅР°Р·РЅР°С‡РµРЅ РЅР° РІР°СЃ: ${t.title}`,
+      text: `РўРёРєРµС‚ "${t.title}" (#${ticketId}) РЅР°Р·РЅР°С‡РµРЅ РЅР° РІР°СЃ.\nРЎС‚Р°С‚СѓСЃ: ${STATUS_LABELS[t.status] || t.status}\nРџСЂРёРѕСЂРёС‚РµС‚: ${PRIORITY_LABELS[t.priority] || t.priority}\n\nService Desk`,
+    })))
+  }
+}
+
+export async function notifyTicketMessage(ticketId, senderId, senderName, text) {
+  const t = await getTicketWithUsers(ticketId)
+  if (!t) return
+
+  const participantIds = await getTicketParticipants(ticketId, senderId)
+  const targets = new Set([t.creatorId, t.assigneeId, ...participantIds].filter(Boolean))
+
+  for (const userId of targets) {
+    if (userId === senderId) continue
+    safeNotify(createNotification({
+      userId, type: 'ticket_message',
+      title: senderName || 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ',
+      body: text,
+      link: `/tickets/${ticketId}`,
+    }))
+  }
+
+  sendTelegramNotification(`рџ’¬ РќРѕРІРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РІ С‚РёРєРµС‚Рµ #${ticketId}: ${t.title}\n${senderName}: ${text.slice(0, 200)}`)
+}
+
+export async function notifySlaBreached(ticketId) {
+  const t = await getTicketWithUsers(ticketId)
+  if (!t) return
+
+  const now = Date.now()
+  const dueAt = t.due_at ? new Date(t.due_at).getTime() : null
+  if (!dueAt || dueAt > now) return
+
+  const exists = await prisma.notifications.findFirst({
+    where: {
+      user_id: t.creatorId,
+      type: 'ticket_sla_overdue',
+      link: `/tickets/${ticketId}`,
+      created_at: { gte: new Date(now - 24 * 60 * 60 * 1000) },
+    },
+    select: { id: true },
+  })
+  if (exists) return
+
+  const targets = new Set([t.creatorId, t.assigneeId].filter(Boolean))
+  const admins = await prisma.employees.findMany({
+    where: {
+      is_active: true,
+      role: { in: ['super_admin', 'admin', 'senior_agent'] },
+    },
+    select: { id: true, email: true, name: true },
+  })
+  for (const a of admins) targets.add(a.id)
+
+  for (const userId of targets) {
+    await createNotification({
+      userId,
+      type: 'ticket_sla_overdue',
+      title: 'РќР°СЂСѓС€РµРЅРёРµ SLA',
+      body: `РўРёРєРµС‚ #${ticketId} РїСЂРѕСЃСЂРѕС‡РµРЅ РїРѕ SLA`,
+      link: `/tickets/${ticketId}`,
+    })
+  }
+
+  const adminEmails = admins
+    .map(a => a.email)
+    .filter(Boolean)
+  for (const email of adminEmails) {
+    safeSend(() => retryWithBackoff(() => sendTicketNotification({
+      to: email,
+      subject: `SLA РїСЂРѕСЃСЂРѕС‡РєР°: С‚РёРєРµС‚ #${ticketId}`,
+      text: `РўРёРєРµС‚ "${t.title}" (#${ticketId}) РїСЂРѕСЃСЂРѕС‡РµРЅ РїРѕ SLA.\nРЎСЂРѕРє СЂРµР°РєС†РёРё РёСЃС‚С‘Рє: ${new Date(t.due_at).toLocaleString('ru-RU')}\n\nService Desk`,
+    })))
+  }
+
+  sendTelegramNotification(`рџљЁ SLA РїСЂРѕСЃСЂРѕС‡РєР°\nРўРёРєРµС‚ #${ticketId}: ${t.title}\nРЎСЂРѕРє СЂРµР°РєС†РёРё РёСЃС‚С‘Рє: ${new Date(t.due_at).toLocaleString('ru-RU')}`)
+}
+
+
+=== server/src/audit.js ===
+import prisma from './prisma.js'
+import logger from './logger.js'
+
+export async function logAudit({ userId, userName, action, entityType, entityId, details }) {
+  try {
+    await prisma.audit_log.create({
+      data: {
+        user_id: userId,
+        user_name: userName || 'Unknown',
+        action,
+        entity_type: entityType,
+        entity_id: Number(entityId) || null,
+        details: details ? JSON.stringify(details) : null,
+      },
+    })
+  } catch (err) {
+    logger.error('Audit log error:', err)
+  }
+}
+
+const ACTION_MAP = { POST: 'created', PUT: 'updated', DELETE: 'deleted' }
+
+export function auditLogMiddleware(req, res, next) {
+  const originalJson = res.json.bind(res)
+  res.json = function (body) {
+    if (res.statusCode < 400) {
+      const action = ACTION_MAP[req.method]
+      if (action) {
+        logAudit({
+          userId: req.user?.userId,
+          userName: req.user?.name || 'System',
+          action,
+          entityType: req.baseUrl?.replace('/api/', '') || req.path?.split('/')[1] || 'unknown',
+          entityId: req.params?.id || body?.id || null,
+          details: { body: req.body, path: req.originalUrl },
+        })
+      }
+    }
+    return originalJson(body)
+  }
+  next()
+}
+
+
+=== server/src/cache.js ===
+let cache
+
+function createMemoryCache() {
+  const store = new Map()
+  cache = {
+    async get(key) {
+      const entry = store.get(key)
+      if (!entry) return null
+      if (Date.now() > entry.expiry) { store.delete(key); return null }
+      return entry.value
+    },
+    async set(key, value, ttl = 300) {
+      store.set(key, { value, expiry: Date.now() + ttl * 1000 })
+    },
+    async invalidate(pattern) {
+      const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$')
+      for (const key of store.keys()) {
+        if (regex.test(key)) store.delete(key)
+      }
+    },
+  }
+  console.log('Cache using in-memory store')
+}
+
+// Initialize in-memory cache synchronously so it's never undefined
+createMemoryCache()
+
+// Upgrade to Redis if available (async)
+if (process.env.REDIS_URL) {
+  ;(async () => {
+    try {
+      const { default: Redis } = await import('ioredis')
+      const client = new Redis(process.env.REDIS_URL)
+      const delScript = `
+        local cursor = '0'
+        local count = 0
+        repeat
+          local result = redis.call('scan', cursor, 'match', KEYS[1], 'count', 1000)
+          cursor = result[1]
+          local keys = result[2]
+          if #keys > 0 then
+            redis.call('del', unpack(keys))
+            count = count + #keys
+          end
+        until cursor == '0'
+        return count
+      `
+      const sha = await client.script('LOAD', delScript)
+      cache = {
+        async get(key) {
+          const val = await client.get(key)
+          return val ? JSON.parse(val) : null
+        },
+        async set(key, value, ttl = 300) {
+          await client.set(key, JSON.stringify(value), 'EX', ttl)
+        },
+        async invalidate(pattern) {
+          try {
+            await client.evalsha(sha, 1, pattern)
+          } catch {
+            await client.eval(delScript, 1, pattern)
+          }
+        },
+      }
+      console.log('Cache using Redis')
+    } catch (err) {
+      console.warn('Redis cache unavailable, using in-memory:', err.message)
+    }
+  })()
+}
+
+export function cacheMiddleware(ttl = 300) {
+  return async (req, res, next) => {
+    if (req.method !== 'GET') return next()
+    const token = (req.headers.authorization || '').slice(0, 20)
+    const key = `cache:${token}:${req.originalUrl}`
+    const cached = await cache.get(key)
+    if (cached) return res.json(cached)
+    const originalJson = res.json.bind(res)
+    res.json = (body) => {
+      cache.set(key, body, ttl)
+      originalJson(body)
+    }
+    next()
+  }
+}
+
+export async function invalidateCache(pattern) {
+  if (cache) await cache.invalidate(pattern)
+}
+
+
+=== server/src/email.js ===
+import nodemailer from 'nodemailer'
+import logger from './logger.js'
+
+let transporter = null
+
+function getTransporter() {
+  if (transporter) return transporter
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn('Email: SMTP not configured, skipping')
+    return null
+  }
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  })
+  return transporter
+}
+
+export async function sendTicketNotification({ to, subject, text }) {
+  const t = getTransporter()
+  if (!t) return
+  try {
+    await t.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to,
+      subject,
+      text,
+    })
+    console.log(`Email sent to ${to}: ${subject}`)
+  } catch (err) {
+    logger.error('Email send error:', err)
+  }
+}
+
+
+=== server/src/prisma.js ===
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient({
+  datasourceUrl: process.env.DATABASE_URL,
+  log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+})
+
+export default prisma
+
+
+=== server/src/search-sync.js ===
+import { Meilisearch } from 'meilisearch'
+import prisma from './prisma.js'
+import logger from './logger.js'
+
+const MEILI_URL = process.env.MEILISEARCH_URL || 'http://localhost:7700'
+const MEILI_KEY = process.env.MEILI_MASTER_KEY || 'meilisearch-master-key'
+
+let client = null
+let _syncing = false
+const _pendingSyncs = []
+
+function getClient() {
+  if (!client && MEILI_URL) {
+    try {
+      client = new Meilisearch({ host: MEILI_URL, apiKey: MEILI_KEY })
+    } catch {
+      logger.warn('Meilisearch not available, using FULLTEXT fallback')
+    }
+  }
+  return client
+}
+
+async function flushPending() {
+  const batch = _pendingSyncs.splice(0)
+  for (const { entity, action, data } of batch) {
+    try {
+      if (action === 'upsert') {
+        await client.index(entity).addDocuments([data])
+      } else if (action === 'delete') {
+        await client.index(entity).deleteDocument(data.id)
+      }
+    } catch (err) {
+      logger.warn(`Meilisearch flush ${entity}/${action} failed:`, err.message)
+    }
+  }
+}
+
+const INDEXES = {
+  tickets: { primaryKey: 'id', fields: ['title', 'description', 'status', 'priority', 'category'] },
+  employees: { primaryKey: 'id', fields: ['name', 'email', 'department'] },
+  wiki: { primaryKey: 'id', fields: ['title', 'content', 'category'] },
+  news: { primaryKey: 'id', fields: ['title', 'content'] },
+  chats: { primaryKey: 'id', fields: ['name'] },
+  files: { primaryKey: 'id', fields: ['name'] },
+}
+
+async function setupIndexes() {
+  const c = getClient()
+  if (!c) return false
+  try {
+    for (const [name, config] of Object.entries(INDEXES)) {
+      const index = c.index(name)
+      try {
+        await index.updateFilterableAttributes(config.fields)
+        await index.updateSearchableAttributes(config.fields)
+      } catch {
+        await index.updateSettings({
+          searchableAttributes: config.fields,
+          filterableAttributes: config.fields,
+        })
+      }
+    }
+    logger.info('Meilisearch indexes configured')
+    return true
+  } catch (err) {
+    logger.warn('Meilisearch setup failed:', err.message)
+    return false
+  }
+}
+
+async function fullSync() {
+  const c = getClient()
+  if (!c) return
+  if (_syncing) {
+    logger.warn('Meilisearch fullSync already in progress, skipping')
+    return
+  }
+  _syncing = true
+  try {
+    const tickets = await prisma.tickets.findMany({ select: { id: true, title: true, description: true, status: true, priority: true, category: true } })
+    if (tickets.length) await c.index('tickets').addDocuments(tickets.map(t => ({ ...t, description: t.description || '' })))
+
+    const employees = await prisma.employees.findMany({ select: { id: true, name: true, email: true, department: true } })
+    if (employees.length) await c.index('employees').addDocuments(employees)
+
+    const wiki = await prisma.wiki_articles.findMany({ select: { id: true, title: true, content: true, category: true } })
+    if (wiki.length) await c.index('wiki').addDocuments(wiki.map(w => ({ ...w, content: w.content || '' })))
+
+    const news = await prisma.news_posts.findMany({ select: { id: true, title: true, content: true } })
+    if (news.length) await c.index('news').addDocuments(news.map(n => ({ ...n, content: n.content || '' })))
+
+    const chats = await prisma.chat_rooms.findMany({ select: { id: true, name: true } })
+    if (chats.length) await c.index('chats').addDocuments(chats)
+
+    const files = await prisma.files.findMany({ select: { id: true, name: true } })
+    if (files.length) await c.index('files').addDocuments(files)
+
+    logger.info(`Meilisearch full sync complete: ${tickets.length} tickets, ${employees.length} employees, ${wiki.length} wiki, ${news.length} news, ${chats.length} chats, ${files.length} files`)
+  } catch (err) {
+    logger.error('Meilisearch full sync failed:', err.message)
+  } finally {
+    _syncing = false
+    if (_pendingSyncs.length > 0) {
+      logger.info(`Flushing ${_pendingSyncs.length} pending syncs after fullSync`)
+      await flushPending()
+    }
+  }
+}
+
+async function syncEntity(entity, action, data) {
+  const c = getClient()
+  if (!c || !INDEXES[entity]) return
+  if (_syncing) {
+    _pendingSyncs.push({ entity, action, data })
+    return
+  }
+  try {
+    if (action === 'upsert') {
+      await c.index(entity).addDocuments([data])
+    } else if (action === 'delete') {
+      await c.index(entity).deleteDocument(data.id)
+    }
+  } catch (err) {
+    logger.warn(`Meilisearch sync ${entity}/${action} failed:`, err.message)
+  }
+}
+
+export async function searchMeilisearch(query, limit = 10) {
+  const c = getClient()
+  if (!c) return null
+  try {
+    const results = {}
+    for (const name of Object.keys(INDEXES)) {
+      const r = await c.index(name).search(query, { limit })
+      results[name] = r.hits.map(h => {
+        const { _formatted, ...rest } = h
+        return rest
+      })
+    }
+    return results
+  } catch (err) {
+    logger.warn('Meilisearch query failed:', err.message)
+    return null
+  }
+}
+
+export async function initSearchSync() {
+  const c = getClient()
+  if (!c) {
+    logger.info('Meilisearch not configured, using FULLTEXT search')
+    return
+  }
+  const ok = await setupIndexes()
+  if (ok) {
+    await fullSync()
+    logger.info('Meilisearch ready')
+  }
+}
+
+export { syncEntity }
+
+
+=== server/src/validate.js ===
+import { ZodError } from 'zod'
+import {
+  loginSchema, registerSchema, createTicketSchema,
+  updateStatusSchema, updatePrioritySchema, assignTicketSchema,
+  addMessageSchema, createPollSchema, voteSchema,
+  createNewsSchema, createWikiSchema, createCalendarSchema,
+  updateCalendarSchema, searchSchema, changePasswordSchema,
+  idParamSchema,
+} from './schemas.js'
+
+export function validate(schema) {
+  return (req, res, next) => {
+    try {
+      req.body = schema.parse(req.body || {})
+      next()
+    } catch (err) {
+      if (err && err.issues) {
+        return res.status(400).json({
+          message: 'Validation error',
+          errors: err.issues.map(e => ({ field: e.path.join('.'), message: e.message })),
+        })
+      }
+      next(err)
+    }
+  }
+}
+
+export function validateQuery(schema) {
+  return (req, res, next) => {
+    try {
+      req.query = schema.parse(req.query)
+      next()
+    } catch (err) {
+      if (err && err.issues) {
+        return res.status(400).json({
+          message: 'Validation error',
+          errors: err.issues.map(e => ({ field: e.path.join('.'), message: e.message })),
+        })
+      }
+      next(err)
+    }
+  }
+}
+
+export const loginValidation = validate(loginSchema)
+export const registerValidation = validate(registerSchema)
+export const createTicketValidation = validate(createTicketSchema)
+export const updateStatusValidation = validate(updateStatusSchema)
+export const updatePriorityValidation = validate(updatePrioritySchema)
+export const assignTicketValidation = validate(assignTicketSchema)
+export const addMessageValidation = validate(addMessageSchema)
+export const createPollValidation = validate(createPollSchema)
+export const voteValidation = validate(voteSchema)
+export const createNewsValidation = validate(createNewsSchema)
+export const createWikiValidation = validate(createWikiSchema)
+export const createCalendarValidation = validate(createCalendarSchema)
+export const updateCalendarValidation = validate(updateCalendarSchema)
+export const searchValidation = validateQuery(searchSchema)
+export const changePasswordValidation = validate(changePasswordSchema)
+
+export function validateParams(schema) {
+  return (req, res, next) => {
+    try {
+      req.params = schema.parse(req.params)
+      next()
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return res.status(400).json({
+          message: 'Validation error',
+          errors: err.errors.map(e => ({ field: e.path.join('.'), message: e.message })),
+        })
+      }
+      next(err)
+    }
+  }
+}
+
+export const deleteEventValidation = validateParams(idParamSchema)
+
+
+=== server/src/middleware.js ===
+import jwt from 'jsonwebtoken'
+
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production')
+}
+
+export function authenticateToken(req, res, next) {
+  const authHeader = req.headers.authorization
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'No token provided' })
+  }
+  try {
+    const token = authHeader.split(' ')[1]
+    const decoded = jwt.verify(token, JWT_SECRET)
+    req.user = decoded
+    next()
+  } catch {
+    return res.status(403).json({ message: 'Invalid token' })
+  }
+}
+
+const ROLE_HIERARCHY = ['requester', 'agent', 'senior_agent', 'admin', 'super_admin']
+
+export function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(403).json({ message: 'Forbidden: insufficient rights' })
+    }
+    const userLevel = ROLE_HIERARCHY.indexOf(req.user.role)
+    const requiredLevel = Math.max(...roles.map(r => ROLE_HIERARCHY.indexOf(r)))
+    if (userLevel < requiredLevel || userLevel === -1) {
+      return res.status(403).json({ message: 'Forbidden: insufficient rights' })
+    }
+    next()
+  }
+}
+
+export { JWT_SECRET }
+
+
+=== server/src/utils/roleUtils.js ===
+export const ROLE_HIERARCHY = ['requester', 'agent', 'senior_agent', 'admin', 'super_admin']
+
+export function hasRole(userRole, minRole) {
+  const userLevel = ROLE_HIERARCHY.indexOf(userRole)
+  const minLevel = ROLE_HIERARCHY.indexOf(minRole)
+  if (userLevel === -1 || minLevel === -1) return false
+  return userLevel >= minLevel
+}
+
+
+=== server/src/routes/tickets.js ===
+import { Router } from 'express'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+import multer from 'multer'
+import prisma from '../prisma.js'
+import { auditLogMiddleware } from '../audit.js'
+import { authenticateToken, requireRole } from '../middleware.js'
+import { hasRole, ROLE_HIERARCHY } from '../utils/roleUtils.js'
+import { getIO } from '../socket.js'
+import { invalidateCache } from '../cache.js'
+import { logAudit } from '../audit.js'
+import {
+  notifyTicketCreated, notifyStatusChanged, notifyPriorityChanged,
+  notifyTicketAssigned, notifyTicketMessage,
+} from '../notify.js'
+import { createTicketValidation, updateStatusValidation, updatePriorityValidation, assignTicketValidation, addMessageValidation } from '../validate.js'
+import logger from '../logger.js'
+import { validateUpload } from '../middleware/validateUpload.js'
+import {
+  listTickets,
+  listOverdueSlaTickets,
+  getSlaStats,
+  getTicketById,
+  getTicketMessages,
+  createTicket,
+  updateTicketStatus,
+  updateTicketPriority,
+  updateTicketAssignee,
+  generateTicketFilename,
+} from '../services/tickets.service.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const ticketUploads = path.join(__dirname, '..', '..', 'uploads', 'tickets')
+fs.mkdirSync(ticketUploads, { recursive: true })
+
+const storage = multer.diskStorage({
+  destination: ticketUploads,
+  filename: (req, file, cb) => {
+    cb(null, generateTicketFilename(file.originalname))
+  },
+})
+const TICKET_ALLOWED = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/plain', 'application/zip', 'application/x-rar-compressed']
+const upload = multer({
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (TICKET_ALLOWED.includes(file.mimetype)) return cb(null, true)
+    cb(new Error(`РќРµРґРѕРїСѓСЃС‚РёРјС‹Р№ С‚РёРї С„Р°Р№Р»Р°: ${file.mimetype}`))
+  },
+})
+
+const router = Router()
+
+router.use(authenticateToken)
+router.use(auditLogMiddleware)
+
+router.get('/', async (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page) || 1)
+  const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 50))
+  try {
+    const payload = await listTickets({ page, limit, userId: req.user.userId, role: req.user.role })
+    res.json({ success: true, ...payload })
+  } catch (err) {
+    logger.error('Tickets list error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch tickets' })
+  }
+})
+
+router.get('/sla/overdue', requireRole('admin', 'senior_agent'), async (req, res) => {
+  const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 100))
+  try {
+    const data = await listOverdueSlaTickets(limit)
+    res.json({ success: true, data, total: data.length })
+  } catch (err) {
+    logger.error('SLA overdue list error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch overdue SLA tickets' })
+  }
+})
+
+router.get('/sla/stats', requireRole('admin', 'senior_agent'), async (req, res) => {
+  try {
+    const data = await getSlaStats()
+    res.json({ success: true, data })
+  } catch (err) {
+    logger.error('SLA stats error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch SLA stats' })
+  }
+})
+
+router.get('/:id', async (req, res) => {
+  try {
+    const ticketId = Number(req.params.id)
+    if (!Number.isFinite(ticketId)) return res.status(400).json({ success: false, message: 'Invalid ticket ID' })
+    const mapped = await getTicketById(ticketId)
+    if (!mapped) return res.status(404).json({ success: false, message: 'Ticket not found' })
+    const canView = hasRole(req.user.role, 'senior_agent') ||
+      mapped.created_by === req.user.userId ||
+      mapped.assigned_to === req.user.userId
+    if (!canView) return res.status(403).json({ success: false, message: 'Forbidden' })
+    res.json({
+      success: true,
+      data: mapped,
+    })
+  } catch (err) {
+    logger.error('Ticket detail error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch ticket' })
+  }
+})
+
+router.post('/', createTicketValidation, async (req, res) => {
+  const { title, description, priority, category } = req.body
+  try {
+    const { ticket, dueAt, autoAssignedTo } = await createTicket({
+      title,
+      description,
+      priority,
+      category,
+      createdBy: req.user.userId,
+    })
+    await prisma.ticket_messages.create({
+      data: {
+        ticket_id: ticket.id,
+        sender_id: req.user.userId,
+        sender_name: req.user.name || 'User',
+        text: description,
+      },
+    })
+    const io = getIO()
+    if (io) {
+      io.emit('ticket:created', { ...ticket, messages: [] })
+    } else {
+      logger.warn('Socket.io not available, ticket:created not emitted')
+    }
+    logAudit({
+      userId: req.user.userId,
+      userName: req.user.name,
+      action: 'created',
+      entityType: 'ticket',
+      entityId: ticket.id,
+      details: { title, dueAt, autoAssignedTo },
+    })
+    try {
+      await notifyTicketCreated(ticket.id, req.user.name)
+      if (autoAssignedTo) {
+        await notifyTicketAssigned(ticket.id, autoAssignedTo, req.user.name)
+      }
+    } catch (notifyErr) {
+      logger.warn('Notification failed on ticket create:', notifyErr.message)
+    }
+    invalidateCache('cache:/api/tickets*')
+    res.status(201).json({ success: true, data: ticket })
+  } catch (err) {
+    logger.error('Create ticket error:', err)
+    res.status(500).json({ success: false, message: 'Failed to create ticket' })
+  }
+})
+
+router.put('/:id/status', requireRole('admin', 'senior_agent'), updateStatusValidation, async (req, res) => {
+  const ticketId = Number(req.params.id)
+  const { status } = req.body
+  try {
+    const old = await updateTicketStatus(ticketId, status)
+    if (!old) return res.status(404).json({ success: false, message: 'Ticket not found' })
+    const io = getIO()
+    if (io) {
+      io.emit('ticket:updated', { id: ticketId, status, updatedBy: req.user.userId })
+    } else {
+      logger.warn('Socket.io not available, ticket:updated not emitted')
+    }
+    logAudit({ userId: req.user.userId, userName: req.user.name, action: 'status_changed', entityType: 'ticket', entityId: ticketId, details: { from: old.status, to: status } })
+    try {
+      await notifyStatusChanged(ticketId, old.status, status, req.user.name)
+    } catch (notifyErr) {
+      logger.warn('notifyStatusChanged failed:', notifyErr.message)
+    }
+    invalidateCache('cache:/api/tickets*')
+    res.json({ success: true, data: { id: ticketId, status } })
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ success: false, message: err.message })
+    }
+    logger.error('Update status error:', err)
+    res.status(500).json({ success: false, message: 'Failed to update status' })
+  }
+})
+
+router.put('/:id/priority', requireRole('admin', 'senior_agent'), updatePriorityValidation, async (req, res) => {
+  const ticketId = Number(req.params.id)
+  const { priority } = req.body
+  try {
+    const result = await updateTicketPriority(ticketId, priority)
+    if (!result) return res.status(404).json({ success: false, message: 'Ticket not found' })
+    const io = getIO()
+    if (io) {
+      io.emit('ticket:updated', { id: ticketId, priority, updatedBy: req.user.userId })
+    } else {
+      logger.warn('Socket.io not available, ticket:updated not emitted')
+    }
+    logAudit({ userId: req.user.userId, userName: req.user.name, action: 'priority_changed', entityType: 'ticket', entityId: ticketId, details: { from: result.oldPriority, to: priority } })
+    try {
+      await notifyPriorityChanged(ticketId, result.oldPriority, priority, req.user.name)
+    } catch (notifyErr) {
+      logger.warn('notifyPriorityChanged failed:', notifyErr.message)
+    }
+    invalidateCache('cache:/api/tickets*')
+    res.json({ success: true, data: { id: ticketId, priority } })
+  } catch (err) {
+    logger.error('Update priority error:', err)
+    res.status(500).json({ success: false, message: 'Failed to update priority' })
+  }
+})
+
+router.put('/:id/assign', requireRole('admin', 'senior_agent'), assignTicketValidation, async (req, res) => {
+  const ticketId = Number(req.params.id)
+  const { employeeId } = req.body
+  try {
+    const result = await updateTicketAssignee(ticketId, employeeId)
+    if (!result) return res.status(404).json({ success: false, message: 'Ticket or employee not found' })
+    const io = getIO()
+    if (io) {
+      io.emit('ticket:updated', { id: ticketId, assignedTo: employeeId, updatedBy: req.user.userId })
+    } else {
+      logger.warn('Socket.io not available, ticket:updated not emitted')
+    }
+    logAudit({ userId: req.user.userId, userName: req.user.name, action: 'assigned', entityType: 'ticket', entityId: ticketId, details: { assignedTo: employeeId || null, assignedName: result.employeeName } })
+    try {
+      await notifyTicketAssigned(ticketId, employeeId, req.user.name)
+    } catch (notifyErr) {
+      logger.warn('notifyTicketAssigned failed:', notifyErr.message)
+    }
+    invalidateCache('cache:/api/tickets*')
+    res.json({ success: true, data: { id: ticketId, assignedTo: employeeId || null } })
+  } catch (err) {
+    logger.error('Assign ticket error:', err)
+    res.status(500).json({ success: false, message: 'Failed to assign ticket' })
+  }
+})
+
+router.post('/upload', upload.single('file'), validateUpload, (req, res) => {
+  if (!req.file) return res.status(400).json({ success: false, message: 'No file' })
+  res.json({
+    success: true,
+    url: `/uploads/tickets/${req.file.filename}`,
+    name: req.file.originalname,
+    size: req.file.size,
+  })
+})
+
+router.post('/:id/messages', addMessageValidation, async (req, res) => {
+  const ticketId = Number(req.params.id)
+  const { text, isInternal, attachments } = req.body
+  try {
+    const ticketExists = await prisma.tickets.count({ where: { id: ticketId } })
+    if (!ticketExists) return res.status(404).json({ success: false, message: 'Ticket not found' })
+    const msg = await prisma.ticket_messages.create({
+      data: {
+        ticket_id: ticketId,
+        sender_id: req.user.userId,
+        sender_name: req.user.name || 'User',
+        text,
+        attachments: attachments ? JSON.stringify(attachments) : null,
+        is_internal: isInternal ? true : false,
+      },
+    })
+    await prisma.tickets.update({ where: { id: ticketId }, data: { updated_at: new Date() } })
+    const io = getIO()
+    if (io) {
+      io.emit('ticket:message', { ticketId, message: msg })
+    } else {
+      logger.warn('Socket.io not available, ticket:message not emitted')
+    }
+    try {
+      await notifyTicketMessage(ticketId, req.user.userId, req.user.name, text)
+    } catch (notifyErr) {
+      logger.warn('notifyTicketMessage failed:', notifyErr.message)
+    }
+    res.status(201).json({ success: true, data: msg })
+  } catch (err) {
+    logger.error('Add message error:', err)
+    res.status(500).json({ success: false, message: 'Failed to add message' })
+  }
+})
+
+router.get('/:id/messages', async (req, res) => {
+  const ticketId = Number(req.params.id)
+  const page = Math.max(1, parseInt(req.query.page) || 1)
+  const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50))
+  try {
+    const result = await getTicketMessages(ticketId, page, limit)
+    res.json({ success: true, ...result })
+  } catch (err) {
+    logger.error('Ticket messages error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch messages' })
+  }
+})
+
+router.delete('/:id/messages/:msgId', async (req, res) => {
+  try {
+    const msg = await prisma.ticket_messages.findUnique({ where: { id: Number(req.params.msgId) } })
+    if (!msg) return res.status(404).json({ success: false, message: 'Message not found' })
+    const isAdmin = hasRole(req.user.role, 'senior_agent')
+    const isOwner = msg.sender_id === req.user.userId
+    if (!isAdmin && !isOwner) return res.status(403).json({ success: false, message: 'Forbidden' })
+    await prisma.ticket_messages.delete({ where: { id: Number(req.params.msgId) } })
+    const io = getIO()
+    if (io) {
+      io.emit('ticket:message-removed', { ticketId: Number(req.params.id), msgId: Number(req.params.msgId) })
+    } else {
+      logger.warn('Socket.io not available, ticket:message-removed not emitted')
+    }
+    res.json({ success: true, data: { msgId: Number(req.params.msgId) } })
+  } catch (err) {
+    logger.error('Delete message error:', err)
+    res.status(500).json({ success: false, message: 'Failed to delete message' })
+  }
+})
+
+export default router
+
+
+=== server/src/routes/auth.js ===
+import { Router } from 'express'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
+import prisma from '../prisma.js'
+import { JWT_SECRET, authenticateToken, requireRole } from '../middleware.js'
+import { sendTicketNotification } from '../email.js'
+import { loginValidation, registerValidation, changePasswordValidation } from '../validate.js'
+import { authenticateLDAP } from '../auth/ldap.js'
+import logger from '../logger.js'
+
+const router = Router()
+const REFRESH_SECRET = process.env.REFRESH_SECRET || process.env.JWT_SECRET + '-refresh'
+
+function generateTokens(user) {
+  const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '15m' })
+  const refreshToken = jwt.sign({ userId: user.id, tokenId: crypto.randomUUID() }, REFRESH_SECRET, { expiresIn: '7d' })
+  return { accessToken, refreshToken }
+}
+
+router.post('/login', loginValidation, async (req, res) => {
+  const { email, password } = req.body
+  try {
+    const employee = await prisma.employees.findFirst({
+      where: { email, is_active: true },
+      select: { id: true, email: true, name: true, role: true, password_hash: true },
+    })
+    if (!employee) {
+      return res.status(401).json({ message: 'Invalid credentials' })
+    }
+    const valid = await bcrypt.compare(password, employee.password_hash)
+    if (!valid) {
+      return res.status(401).json({ message: 'Invalid credentials' })
+    }
+    const { accessToken, refreshToken } = generateTokens(employee)
+    await prisma.refresh_tokens.create({
+      data: { user_id: employee.id, token: refreshToken, expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    })
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/api/auth',
+    })
+    res.json({ success: true, data: { token: accessToken, employee: { id: employee.id, name: employee.name, email: employee.email, role: employee.role } } })
+  } catch (err) {
+    logger.error('Login error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+router.post('/register', authenticateToken, requireRole('super_admin', 'admin'), registerValidation, async (req, res) => {
+  const { name, email, password, department, title } = req.body
+  try {
+    const existing = await prisma.employees.findUnique({ where: { email }, select: { id: true } })
+    if (existing) {
+      return res.status(409).json({ message: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј email СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚' })
+    }
+    const hash = await bcrypt.hash(password, 10)
+    const employee = await prisma.employees.create({
+      data: { name, email, password_hash: hash, role: 'agent', department: department || '', title: title || 'РЎРѕС‚СЂСѓРґРЅРёРє', is_active: true },
+    })
+    res.status(201).json({ success: true, data: { employee: { id: employee.id, name: employee.name, email: employee.email, role: 'agent' } } })
+  } catch (err) {
+    logger.error('Register error:', err)
+    res.status(500).json({ message: 'РћС€РёР±РєР° СЂРµРіРёСЃС‚СЂР°С†РёРё' })
+  }
+})
+
+router.post('/refresh', async (req, res) => {
+  const token = req.cookies?.refreshToken
+  if (!token) return res.status(401).json({ message: 'No refresh token' })
+  try {
+    const decoded = jwt.verify(token, REFRESH_SECRET)
+    const stored = await prisma.refresh_tokens.findFirst({
+      where: { token, user_id: decoded.userId, expires_at: { gt: new Date() } },
+    })
+    if (!stored) return res.status(403).json({ message: 'Invalid refresh token' })
+    await prisma.refresh_tokens.delete({ where: { id: stored.id } })
+    const user = await prisma.employees.findFirst({
+      where: { id: decoded.userId, is_active: true },
+      select: { id: true, name: true, email: true, role: true },
+    })
+    if (!user) return res.status(403).json({ message: 'User not found' })
+    const { accessToken, refreshToken } = generateTokens(user)
+    await prisma.refresh_tokens.create({
+      data: { user_id: user.id, token: refreshToken, expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    })
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/api/auth',
+    })
+    res.json({ success: true, data: { token: accessToken } })
+  } catch {
+    res.status(403).json({ message: 'Invalid refresh token' })
+  }
+})
+
+router.post('/logout', authenticateToken, async (req, res) => {
+  try {
+    const token = req.cookies?.refreshToken
+    if (token) {
+      await prisma.refresh_tokens.deleteMany({ where: { token } })
+    }
+    res.clearCookie('refreshToken', { path: '/api/auth' })
+    res.json({ success: true, message: 'Logged out' })
+  } catch (err) {
+    logger.error('Logout error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+router.post('/ldap-login', authenticateLDAP)
+
+router.post('/dev-login', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ message: 'Not found' })
+  }
+  const token = jwt.sign({ userId: 1, role: 'super_admin' }, JWT_SECRET, { expiresIn: '15m' })
+  res.json({ success: true, data: { token, employee: { id: 1, name: 'РђР»РµРєСЃРµР№ РџРµС‚СЂРѕРІ', email: 'alexey@example.com', role: 'super_admin' } } })
+})
+
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ message: 'Valid email required' })
+  }
+  try {
+    const user = await prisma.employees.findFirst({ where: { email }, select: { id: true, name: true } })
+    if (!user) return res.json({ message: 'If the email exists, a reset link has been sent' })
+
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
+    await prisma.password_resets.upsert({
+      where: { email },
+      update: { token: resetToken, expires_at: expiresAt },
+      create: { email, token: resetToken, expires_at: expiresAt },
+    })
+
+    const resetUrl = `${req.headers.origin || 'http://localhost:5173'}/reset-password?token=${resetToken}`
+    await sendTicketNotification({
+      to: email,
+      subject: 'РЎР±СЂРѕСЃ РїР°СЂРѕР»СЏ вЂ” Service Desk',
+      text: `РџРµСЂРµР№РґРёС‚Рµ РїРѕ СЃСЃС‹Р»РєРµ РґР»СЏ СЃР±СЂРѕСЃР° РїР°СЂРѕР»СЏ:\n\n${resetUrl}\n\nРЎСЃС‹Р»РєР° РґРµР№СЃС‚РІРёС‚РµР»СЊРЅР° 1 С‡Р°СЃ.`,
+    })
+    res.json({ message: 'If the email exists, a reset link has been sent' })
+  } catch (err) {
+    logger.error('Forgot password error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+router.post('/reset-password', changePasswordValidation, async (req, res) => {
+  const { token, password } = req.body
+  try {
+    const reset = await prisma.password_resets.findFirst({
+      where: { token, expires_at: { gt: new Date() } },
+    })
+    if (!reset) return res.status(400).json({ message: 'Invalid or expired token' })
+
+    const hash = await bcrypt.hash(password, 10)
+    await prisma.employees.update({ where: { email: reset.email }, data: { password_hash: hash } })
+    await prisma.password_resets.delete({ where: { id: reset.id } })
+    res.json({ message: 'Password reset successfully' })
+  } catch (err) {
+    logger.error('Reset password error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+export default router
+
+
+=== server/src/routes/admin.js ===
+import { Router } from 'express'
+import prisma from '../prisma.js'
+import { auditLogMiddleware } from '../audit.js'
+import { authenticateToken, requireRole } from '../middleware.js'
+import { invalidateCache as invalidateSettingsCache } from '../settings.js'
+import logger from '../logger.js'
+
+const router = Router()
+router.use(authenticateToken, requireRole('admin'))
+router.use(auditLogMiddleware)
+
+const ALLOWED_SETTINGS = [
+  'TELEGRAM_BOT_TOKEN', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM', 'SMTP_SECURE',
+  'COMPANY_NAME', 'COMPANY_LOGO', 'TIMEZONE', 'DEFAULT_LANGUAGE',
+  'AUTO_ASSIGN', 'SLA_RESPONSE_HOURS',
+  'LDAP_URL', 'LDAP_BASE_DN', 'LDAP_BIND_DN', 'LDAP_BIND_CREDENTIALS',
+]
+
+router.get('/settings', async (req, res) => {
+  try {
+    const rows = await prisma.admin_settings.findMany({ select: { key: true, value: true } })
+    const settings = {}
+    for (const r of rows) settings[r.key] = r.value
+    res.json({ success: true, data: settings })
+  } catch (err) {
+    logger.error('Settings get error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch settings' })
+  }
+})
+
+router.put('/settings', async (req, res) => {
+  try {
+    for (const [key, value] of Object.entries(req.body)) {
+      if (!ALLOWED_SETTINGS.includes(key)) continue
+      await prisma.admin_settings.upsert({
+        where: { key },
+        update: { value: String(value), updated_at: new Date() },
+        create: { key, value: String(value), updated_at: new Date() },
+      })
+    }
+    invalidateSettingsCache()
+    res.json({ success: true, data: { updated: true } })
+  } catch (err) {
+    logger.error('Settings update error:', err)
+    res.status(500).json({ success: false, message: 'Failed to update settings' })
+  }
+})
+
+router.get('/users', async (req, res) => {
+  try {
+    const rows = await prisma.$queryRaw`
+      SELECT id, name, email, role, department, title, avatar, phone,
+        online, active_tickets as activeTickets, resolved_today as resolvedToday,
+        is_active as isActive, created_at as createdAt
+      FROM employees ORDER BY is_active DESC, name
+    `
+    const data = rows.map(r => ({
+      ...r,
+      id: Number(r.id),
+      activeTickets: Number(r.activeTickets),
+      resolvedToday: Number(r.resolvedToday),
+    }))
+    res.json({ success: true, data })
+  } catch (err) {
+    logger.error('Admin users list error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch users' })
+  }
+})
+
+router.put('/users/:id', async (req, res) => {
+  const targetId = Number(req.params.id)
+  if (targetId === req.user.userId) {
+    return res.status(400).json({ success: false, message: 'Cannot modify your own account' })
+  }
+  const { role, isActive, department, title } = req.body
+  const data = {}
+  if (role && ['admin', 'senior_agent', 'agent', 'requester'].includes(role)) {
+    data.role = role
+  }
+  if (isActive !== undefined) {
+    data.is_active = Boolean(isActive)
+  }
+  if (department !== undefined) {
+    data.department = department
+  }
+  if (title !== undefined) {
+    data.title = title
+  }
+  if (Object.keys(data).length === 0) return res.status(400).json({ success: false, message: 'No fields to update' })
+  try {
+    await prisma.employees.update({ where: { id: targetId }, data })
+    res.json({ success: true, data: { updated: true } })
+  } catch (err) {
+    logger.error('Admin user update error:', err)
+    res.status(500).json({ success: false, message: 'Failed to update user' })
+  }
+})
+
+router.get('/audit', async (req, res) => {
+  const { entityType, entityId, limit = 50, offset = 0 } = req.query
+  try {
+    const where = {}
+    if (entityType) where.entity_type = entityType
+    if (entityId) where.entity_id = Number(entityId)
+    const rows = await prisma.audit_log.findMany({
+      where,
+      orderBy: { created_at: 'desc' },
+      skip: Number(offset),
+      take: Number(limit),
+    })
+    res.json({ success: true, data: rows })
+  } catch (err) {
+    logger.error('Audit log error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch audit log' })
+  }
+})
+
+export default router
+
+
+=== server/src/routes/chats.js ===
+import { Router } from 'express'
+import { auditLogMiddleware } from '../audit.js'
+import { authenticateToken, requireRole } from '../middleware.js'
+import logger from '../logger.js'
+import { getChats, getChatById, createMessage, getChatParticipants, markRead, findOrCreatePersonalChat } from '../services/chats.service.js'
+
+const router = Router()
+router.use(authenticateToken)
+router.use(auditLogMiddleware)
+router.use(requireRole('agent'))
+
+router.get('/', async (req, res) => {
+  try {
+    const data = await getChats()
+    res.json({ success: true, data })
+  } catch (err) {
+    logger.error('Chats list error:', err)
+    res.status(500).json({ message: 'Failed to fetch chats' })
+  }
+})
+
+router.get('/:id', async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50))
+    const chat = await getChatById(Number(req.params.id), page, limit)
+    if (!chat) return res.status(404).json({ message: 'Chat not found' })
+    res.json({ success: true, data: chat })
+  } catch (err) {
+    logger.error('Chat detail error:', err)
+    res.status(500).json({ message: 'Failed to fetch chat' })
+  }
+})
+
+router.post('/:id/messages', async (req, res) => {
+  const { text } = req.body
+  if (!text?.trim()) return res.status(400).json({ message: 'Text required' })
+  if (text.length > 2000) return res.status(400).json({ message: 'Text too long (max 2000 chars)' })
+  try {
+    const msg = await createMessage({
+      chatId: Number(req.params.id),
+      userId: req.user.userId,
+      userName: req.user.name || 'User',
+      text,
+    })
+    const participants = await getChatParticipants(Number(req.params.id), req.user.userId)
+    const { createNotification } = await import('./notifications.js')
+    for (const p of participants) {
+      await createNotification({
+        userId: p.sender_id,
+        type: 'chat_message',
+        title: req.user.name || 'User',
+        body: text,
+        link: `/chats/${req.params.id}`,
+      })
+    }
+    res.status(201).json({ success: true, data: msg })
+  } catch (err) {
+    logger.error('Send message error:', err)
+    res.status(500).json({ message: 'Failed to send message' })
+  }
+})
+
+router.put('/:id/read', async (req, res) => {
+  try {
+    await markRead(Number(req.params.id))
+    res.json({ success: true, data: { ok: true } })
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to mark read' })
+  }
+})
+
+router.post('/personal/:userId', async (req, res) => {
+  const { userId } = req.params
+  const myId = req.user.userId
+  if (Number(userId) === myId) return res.status(400).json({ message: 'Cannot chat with yourself' })
+  try {
+    const result = await findOrCreatePersonalChat(Number(userId), myId)
+    if (result.error) return res.status(404).json({ message: result.error })
+    const statusCode = result.created ? 201 : 200
+    res.status(statusCode).json({ success: true, data: result.chat })
+  } catch (err) {
+    logger.error('Create personal chat error:', err)
+    res.status(500).json({ message: 'Failed to create chat' })
+  }
+})
+
+export default router
+
+
+=== server/src/routes/files.js ===
+import { Router } from 'express'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+import multer from 'multer'
+import prisma from '../prisma.js'
+import { auditLogMiddleware } from '../audit.js'
+import { authenticateToken, requireRole } from '../middleware.js'
+import logger from '../logger.js'
+import { validateUpload } from '../middleware/validateUpload.js'
+import { saveFile, S3_ENABLED } from '../storage.js'
+import { getFolders, createFolder, createFile, deleteFile } from '../services/files.service.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const fileUploads = path.join(__dirname, '..', '..', 'uploads', 'files')
+fs.mkdirSync(fileUploads, { recursive: true })
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => { cb(null, fileUploads) },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, unique + '-' + file.originalname)
+  },
+})
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/plain', 'application/zip', 'application/x-rar-compressed', 'application/gzip']
+const upload = multer({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_MIMES.includes(file.mimetype)) return cb(null, true)
+    cb(new Error(`РќРµРґРѕРїСѓСЃС‚РёРјС‹Р№ С‚РёРї С„Р°Р№Р»Р°: ${file.mimetype}`))
+  },
+})
+
+const router = Router()
+router.use(authenticateToken)
+router.use(auditLogMiddleware)
+router.use(requireRole('agent'))
+
+router.get('/folders', async (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page) || 1)
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50))
+  try {
+    const folders = await getFolders(req.user.userId, page, limit)
+    res.json({ success: true, data: folders })
+  } catch (err) {
+    logger.error('Files list error:', err)
+    res.status(500).json({ message: 'Failed to fetch files' })
+  }
+})
+
+router.post('/folders', async (req, res) => {
+  const { name } = req.body
+  if (!name) return res.status(400).json({ message: 'Name required' })
+  try {
+    const folder = await createFolder(name, req.user.userId)
+    res.status(201).json({ success: true, data: folder })
+  } catch (err) {
+    logger.error('Create folder error:', err)
+    res.status(500).json({ message: 'Failed to create folder' })
+  }
+})
+
+router.post('/upload', upload.single('file'), validateUpload, async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'Р¤Р°Р№Р» РЅРµ Р·Р°РіСЂСѓР¶РµРЅ' })
+  const { folderId } = req.body
+  const name = req.file.originalname
+  const ext = path.extname(name).toLowerCase().replace('.', '')
+  const typeMap = { png: 'img', jpg: 'img', jpeg: 'img', gif: 'img', svg: 'img', pdf: 'pdf', doc: 'doc', docx: 'doc', xls: 'doc', xlsx: 'doc', ts: 'code', tsx: 'code', js: 'code', jsx: 'code', py: 'code', sh: 'code', css: 'code', html: 'code' }
+  const fileType = typeMap[ext] || 'file'
+  const sizeKB = req.file.size > 1024 * 1024
+    ? (req.file.size / 1024 / 1024).toFixed(1) + ' MB'
+    : (req.file.size / 1024).toFixed(req.file.size > 1024 ? 1 : 0) + ' KB'
+  try {
+    const buffer = fs.readFileSync(req.file.path)
+    const { url } = await saveFile('files', req.file.filename, buffer)
+    const file = await createFile({
+      name, size: sizeKB, type: fileType,
+      folderId: folderId ? Number(folderId) : null,
+      path: url, userId: req.user.userId,
+    })
+    res.status(201).json({ success: true, data: {
+      id: file.id, name: file.name, size: file.size,
+      type: file.type, folderId: file.folder_id,
+      path: file.path, createdAt: file.created_at,
+    } })
+  } catch (err) {
+    logger.error('Upload error:', err)
+    res.status(500).json({ message: 'Failed to upload file' })
+  }
+})
+
+router.delete('/:id', requireRole('admin', 'senior_agent'), async (req, res) => {
+  try {
+    const file = await prisma.files.findUnique({ where: { id: Number(req.params.id) } })
+    if (!file) return res.status(404).json({ message: 'File not found' })
+    await deleteFile(req.params.id)
+    res.json({ success: true, data: { ok: true } })
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete file' })
+  }
+})
+
+export default router
+
+

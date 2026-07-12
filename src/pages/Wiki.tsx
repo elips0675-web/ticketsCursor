@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, BookOpen, Plus, Clock, User, Tag, Layers, ImageIcon, Download } from 'lucide-react'
+import { Search, BookOpen, Plus, Clock, User, Layers, ImageIcon, Download } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import type { WikiArticle } from '@/types'
 import { useAuth } from '@/context/AuthContext'
@@ -32,8 +33,7 @@ const CATEGORIES = ['Все', 'Руководство', 'Правила', 'Ин�
 export default function WikiPage() {
   const { canManage } = useAuth()
   const { t } = useTranslation()
-  const [articles, setArticles] = useState<WikiArticle[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Все')
   const [article, setArticle] = useState<WikiArticle | null>(null)
@@ -54,19 +54,20 @@ export default function WikiPage() {
     try {
       const { url } = await api.post('/wiki/upload-image', form)
       setNewContent((prev) => prev + `\n\n![${file.name}](${url})\n`)
-    } catch { /* toast handled by api client */ }
+    } catch {
+      /* toast handled by api client */
+    }
     setUploadingImg(false)
     if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
-  useEffect(() => {
-    api.get('/wiki')
-      .then((data) => {
-        setArticles((data?.data || data || []).map(mapArticle))
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [])
+  const articlesQuery = useQuery({
+    queryKey: ['wiki'],
+    queryFn: () => api.get('/wiki').then((data) => ((data?.data || data || []) as any[]).map(mapArticle)),
+  })
+
+  const articles = articlesQuery.data ?? []
+  const loading = articlesQuery.isLoading
 
   const filtered = useMemo(() => {
     let items = articles
@@ -81,24 +82,29 @@ export default function WikiPage() {
     return items
   }, [articles, search, category])
 
-  const handleCreate = async () => {
-    if (!newTitle.trim() || !newContent.trim()) return
-    try {
-      const created = mapArticle(await api.post('/wiki', {
+  const createMutation = useMutation({
+    mutationFn: () => {
+      if (!newTitle.trim() || !newContent.trim()) return Promise.reject(new Error('Invalid form'))
+      return api.post('/wiki', {
         title: newTitle,
         content: newContent,
         category: newCategory,
-        tags: newTags.split(',').map((t) => t.trim()).filter(Boolean),
-      }))
-      setArticles((prev) => [created, ...prev])
-      setArticle(created)
-    } catch { /* toast handled by api client */ }
-    setOpen(false)
-    setNewTitle('')
-    setNewContent('')
-    setNewCategory('Руководство')
-    setNewTags('')
-  }
+        tags: newTags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+      })
+    },
+    onSuccess: (created) => {
+      queryClient.invalidateQueries({ queryKey: ['wiki'] })
+      setArticle(mapArticle(created))
+      setOpen(false)
+      setNewTitle('')
+      setNewContent('')
+      setNewCategory('Руководство')
+      setNewTags('')
+    },
+  })
 
   const exportCSV = () => {
     const data = filtered
@@ -217,7 +223,11 @@ export default function WikiPage() {
                       {uploadingImg ? t('wiki.uploading') : t('wiki.addImage')}
                     </Button>
                   </div>
-                  <Button onClick={handleCreate} className="w-full">
+                  <Button
+                    onClick={() => createMutation.mutate()}
+                    className="w-full"
+                    disabled={createMutation.isPending}
+                  >
                     {t('common.create')}
                   </Button>
                 </div>
@@ -251,7 +261,9 @@ export default function WikiPage() {
         </Select>
       </div>
 
-      {loading ? <SkeletonCardGrid count={6} cols={2} /> : article ? (
+      {loading ? (
+        <SkeletonCardGrid count={6} cols={2} />
+      ) : article ? (
         <div className="rounded-xl border bg-card p-6 space-y-4">
           <div className="flex items-start justify-between">
             <div>

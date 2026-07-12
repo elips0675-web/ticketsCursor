@@ -12,9 +12,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
 
 interface SearchResult {
@@ -59,7 +57,9 @@ export default function SearchPage() {
       try {
         const data = await api.get(`/search?q=${encodeURIComponent(q)}`)
         setResults(data || { tickets: [], employees: [], wiki: [], news: [], chats: [], files: [] })
-      } catch { /* toast handled by api client */ } finally {
+      } catch {
+        /* toast handled by api client */
+      } finally {
         setLoading(false)
         setSearched(true)
       }

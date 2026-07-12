@@ -4,6 +4,7 @@ import fs from 'fs'
 import { fileURLToPath } from 'url'
 import multer from 'multer'
 import prisma from '../prisma.js'
+import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { hasRole, ROLE_HIERARCHY } from '../utils/roleUtils.js'
 import { getIO } from '../socket.js'
@@ -52,6 +53,7 @@ const upload = multer({
 const router = Router()
 
 router.use(authenticateToken)
+router.use(auditLogMiddleware)
 
 router.get('/', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page) || 1)

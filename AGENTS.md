@@ -38,8 +38,8 @@
 |------|-----------|---------------|
 | **При коммите** | Husky → lint-staged | `eslint --fix` + `prettier --write` на изменённых файлах |
 | **В CI (GitHub Actions)** | `tsc --noEmit` | TypeScript strict type-check |
-| | `eslint . --max-warnings 50` | Синтаксис, неисп. переменные, импорты |
-| | `vitest run` | Юнит-тесты (14 клиентских + 17 серверных) |
+| | `eslint . --max-warnings 100` | Синтаксис, неисп. переменные, импорты |
+| | `vitest run` | Юнит-тесты (154 клиентских + 116 серверных) |
 | | `vite build` | Сборка production |
 | **Ручной запуск** | `npm run lint` | ESLint (warnings: `no-explicit-any`, `no-unused-vars`) |
 | | `npm run type-check` | `tsc --noEmit` |
@@ -197,6 +197,31 @@ docker compose up -d --build
 - **seed.sql**: `idx_employees_role_active` для `getLeastLoadedAssignee`
 - **k8s/hpa.yaml**: HPA api 2→8, frontend 2→6, CPU 70% / Memory 80%
 - **use-push.ts**: `.catch()` на unhandled rejection
+
+### Этап 17 — Code review fixes (Правка kimi.txt + Правка kimi1.txt, 7+8 проблем)
+- **ESLint**: убран `'server/'` из игнора, добавлен Node.js-конфиг через `globals.node`
+- **main.tsx**: убран дублирующийся `QueryClientProvider` (остался только в App.tsx)
+- **App.tsx**: `/register` обёрнут в `<ProtectedRoute adminOnly>`
+- **auditLogMiddleware**: перенесён из `mount()` в app.js внутрь каждого роутера после `authenticateToken` (12 файлов)
+- **notify.js**: добавлен `safeNotify()` — .catch() на все вызовы `createNotification` (4 места)
+- **socket.js**: вынесен `import { createNotification }` наверх (был динамический импорт на каждое сообщение)
+- **socket.js**: `message:delete` использует `hasRole()` вместо прямой проверки (super_admin теперь проходит)
+- **socket.js**: `wsRateLimit` — добавлен `Math.floor()` для токенов
+- **background.js**: `.catch(() => {})` на `sendTicketNotification` в `warnAdminRedisMissing`
+- **files.js**: добавлен `import prisma` (был missing import)
+- **validate.js**: добавлен `import { ZodError } from 'zod'`
+- **Kanban.tsx**: добавлены `MessageSquare, User` из lucide-react (были missing imports)
+- **Lint**: 0 errors, 115 warnings (сервер теперь линтится)
+- **docker-compose.yml**: JWT_SECRET fallback (`:-dev-jwt-secret-change-in-production`)
+- **docker-compose.yml**: удалён mysql_replica (мёртвый код), удалён REPLICA_DATABASE_URL
+- **prisma.js**: убрана опция `replicas` (была неиспользуема)
+- **mysql/**: удалены replica.cnf, primary.cnf, init-replica.sh
+- **socket.js**: добавлен connection rate limit (10 handshake/min per IP)
+- **background.js**: экспортирован `stopBackgroundJobs()`, setInterval сохраняется в `cleanupTimer`/`slaTimer`
+- **index.js**: вызов `stopBackgroundJobs()` в shutdown handler
+- **cache.js**: `SCRIPT LOAD` + `evalsha` с fallback на `eval`
+- **package.json**: удалён `@tauri-apps/cli` (мёртвый вес)
+- **app.js**: добавлен `beforeSend` в Sentry — фильтр PII (Authorization, Cookie, stack vars)
 
 ### Этап 16 — Полный функциональный аудит (Промт тест.txt, ~200 проверок)
 - ✅ Раздел 1: Auth + RBAC — добавлен logout endpoint (инвалидация refresh token)

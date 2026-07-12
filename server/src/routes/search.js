@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import prisma from '../prisma.js'
+import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
 import { searchMeilisearch } from '../search-sync.js'

@@ -1,0 +1,151 @@
+🔴 Критичные проблемы
+1. React 19 + TypeScript 5 — но package.json содержит конфликт версий
+JSON
+// package.json — строка 67
+"@types/react": "^19.1.0",
+// а в devDependencies строка 70 — дублирование!
+"@tailwindcss/postcss": "^4.1.4",  // уже есть в dependencies "^4.3.2"
+Проблема: @tailwindcss/postcss указан дважды — в dependencies и devDependencies с разными версиями. npm может резолвить непредсказуемо.
+Фикс:
+JSON
+// Убрать из devDependencies, оставить только в dependencies
+2. ESLint конфиг — server/ в игноре, но серверные тесты валидируются CI
+JavaScript
+// eslint.config.js — строка 11
+'server/',  // полностью исключён из линтинга
+Проблема: Серверный код (Express + Prisma) не линтится вообще. В CI (npm run lint) проверяется только фронтенд. Это создаёт "слепую зону" для бэкенда.
+Фикс: Создать отдельный server/eslint.config.js с правилами для Node.js, или убрать 'server/' из игнора и настроить override для .js файлов.
+3. Playwright конфиг — globalSetup требует auth.json, но файл не в .gitignore
+TypeScript
+// playwright.config.ts — строка 12
+storageState: 'auth.json',
+Проблема: auth.json содержит cookies/tokens аутентификации. Если случайно закоммитить — утечка credentials. В .gitignore его нет (проверил по загруженным файлам).
+Фикс: Добавить в .gitignore:
+plain
+auth.json
+playwright-report/
+test-results/
+4. Docker Compose — JWT_SECRET обязателен, но нет fallback
+yaml
+# docker-compose.yml — строка 49
+JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+Проблема: При docker compose up без .env сервис api упадёт с ошибкой. Но DB_ROOT_PASSWORD, DB_USER, DB_PASSWORD имеют дефолты (:-root, :-sduser), а JWT_SECRET — нет. Несогласованность.
+Фикс: Либо добавить дефолт (небезопасно для продакшена):
+yaml
+JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
+Либо оставить как есть, но документировать явно в README.
+5. MySQL Replica — read_only=1, но Prisma не умеет read replicas
+Из docker-compose.yml и TECHNICAL.md:
+Важно: Prisma Free не поддерживает read replicas нативно. Для использования реплики в Node.js нужен отдельный PrismaClient с URL реплики и middleware для роутинга read-запросов.
+Проблема: Реплика запущена, но код не использует её. Это мёртвый ресурс + лишняя сложность инфраструктуры.
+Фикс: Либо убрать реплику из docker-compose.yml (если не планируется Prisma Accelerate/PlanetScale), либо реализовать middleware для split read/write. Пример из TECHNICAL.md — только теория, в коде не реализовано.
+🟡 Средние проблемы
+6. Rate Limiting — только на API, WebSocket без rate limit на handshake
+Из CHANGELOG.md:
+Rate limiting WebSocket: 5 сообщений/сек
+Но в STRUCTURE.md и TECHNICAL.md нет упоминания о rate limit на handshake WebSocket. Злоумышленник может открывать тысячи соединений без аутентификации.
+Фикс: Добавить io.use() middleware с IP-based rate limit до handshake:
+JavaScript
+const connectionAttempts = new Map(); // или Redis
+io.use((socket, next) => {
+  const ip = socket.handshake.address;
+  const attempts = connectionAttempts.get(ip) || 0;
+  if (attempts > 10) return next(new Error('Too many connections'));
+  connectionAttempts.set(ip, attempts + 1);
+  setTimeout(() => connectionAttempts.set(ip, attempts), 60000);
+  next();
+});
+7. BullMQ — setInterval fallback, но нет graceful shutdown для fallback
+Из CHANGELOG.md:
+Без Redis: setInterval fallback (как было)
+Проблема: При fallback на setInterval нет clearInterval в обработчике SIGTERM. Процесс может зависнуть при shutdown.
+Фикс: В background.js сохранять intervalId и очищать в shutdown hook.
+8. Cache delPattern — Lua-скрипт, но без EVALSHA оптимизации
+Из CHANGELOG.md:
+Redis invalidate() переписан на Lua-скрипт (атомарное keys + del)
+Проблема: Каждый вызов EVAL отправляет весь скрипт по сети. Redis поддерживает EVALSHA — хеш скрипта, который выполняется без передачи тела.
+Фикс: Предзагрузить скрипт через SCRIPT LOAD при инициализации:
+JavaScript
+const sha = await redis.script('LOAD', luaScript);
+// затем использовать redis.evalsha(sha, ...)
+9. Zod v4 — breaking changes, но package.json уже на v4
+JSON
+"zod": "^4.4.3"
+Проблема: Zod v4 имеет breaking changes относительно v3 (другой API для .pipe(), .transform(), .refine()). В TECHNICAL.md указано Zod 3.x, а в package.json — v4. Если код писался под v3 — сломается.
+Фикс: Проверить все схемы в server/src/utils/validators/ на совместимость с v4. Особенно z.object().pipe() → z.pipeline() в v4.
+10. PWA + Tauri — дублирование функционала
+В package.json есть и vite-plugin-pwa, и @tauri-apps/cli. В AGENTS.md:
+Tauri (десктоп) — config + Rust
+Проблема: Два разных способа "установки" приложения (PWA в браузере + Tauri-десктоп). Tauri требует Rust toolchain, увеличивает CI время. Если не используется активно — мёртвый вес.
+Фикс: Либо выбрать один подход (PWA для всех платформ), либо вынести Tauri в отдельный репозиторий/branch.
+🟢 Мелочи и DX-проблемы
+11. Husky v9 — prepare: "husky" устарело
+В package.json:
+JSON
+"prepare": "husky"
+В Husky v9 правильно:
+JSON
+"prepare": "husky install"
+Или если используется husky init:
+JSON
+"prepare": "husky"
+Но тогда нужен .husky/ с хуками. В загруженных файлах .husky/ нет — хуки не настроены.
+Фикс: Либо добавить .husky/pre-commit, либо убрать prepare скрипт.
+12. Vitest coverage пороги занижены
+JSON
+// из TECHNICAL.md
+"statements": 20, "branches": 15, "functions": 15, "lines": 25
+Проблема: Пороги критически низкие. 20% statements — это фактически "нет тестов". В CHANGELOG.md заявлено 51% coverage, но пороги не подняты.
+Фикс: Поднять пороги до реальных значений:
+JSON
+"statements": 50, "branches": 40, "functions": 40, "lines": 50
+13. i18n — LanguageDetector есть, но нет fallbackLng
+В package.json есть i18next-browser-languagedetector, но в AGENTS.md нет упоминания о fallbackLng. Если детектор не сработает (приватный режим браузера) — приложение может не загрузить переводы.
+Фикс: В конфиге i18next:
+JavaScript
+fallbackLng: 'ru',
+14. Sentry DSN — опциональный, но без beforeSend фильтра
+В TECHNICAL.md:
+JavaScript
+Sentry.init({ dsn: process.env.SENTRY_DSN })
+Проблема: В логи Sentry могут попасть PII (personally identifiable information) — email пользователей, токены, пароли.
+Фикс: Добавить beforeSend:
+JavaScript
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  beforeSend(event) {
+    if (event.exception) {
+      // скрыть sensitive data из stack trace
+      event.exception.values?.forEach(v => {
+        if (v.stacktrace) {
+          v.stacktrace.frames?.forEach(f => {
+            f.vars = undefined; // убрать локальные переменные
+          });
+        }
+      });
+    }
+    return event;
+  }
+});
+📊 Сводная таблица
+Table
+Приоритет	Проблема	Сложность фикса	Риск
+🔴	Дублирование @tailwindcss/postcss	1 мин	Сборка ломается
+🔴	Сервер не линтится	30 мин	Баги в проде
+🔴	auth.json не в .gitignore	1 мин	Утечка токенов
+🔴	MySQL replica — мёртвый код	2 ч	Лишние ресурсы
+🟡	WebSocket handshake без rate limit	1 ч	DoS
+🟡	setInterval без clear в shutdown	30 мин	Зависания
+🟡	Zod v4 breaking changes	2 ч	Runtime errors
+🟡	Tauri — неиспользуемый код	30 мин	CI bloat
+🟢	Husky не настроен	15 мин	Нет pre-commit
+🟢	Coverage пороги занижены	5 мин	Ложное спокойствие
+🟢	Sentry без PII-фильтра	30 мин	Утечка данных
+🛠️ Что допилить в первую очередь
+Убрать дубль @tailwindcss/postcss — однострочный фикс
+Добавить auth.json в .gitignore — однострочный фикс
+Настроить ESLint для сервера — создать server/eslint.config.js
+Проверить Zod v4 совместимость — запустить npm run type-check в server/
+Решить с MySQL replica — либо использовать, либо убрать
+Добавить WebSocket connection rate limit — защита от DoS
+Поднять coverage пороги — синхронизировать с реальными 51%/55%

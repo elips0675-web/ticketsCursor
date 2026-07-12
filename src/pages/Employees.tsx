@@ -24,7 +24,6 @@ import {
   Download,
   MessageCircle,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { useTickets } from '@/context/ticket-context'
 import { SkeletonCardGrid, SkeletonTableRow } from '@/components/skeletons'
 import { useAuth } from '@/context/AuthContext'
@@ -47,7 +46,6 @@ export default function Employees() {
   const { t } = useTranslation()
   const { employees, loading } = useTickets()
   const navigate = useNavigate()
-  const { token } = useAuth()
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
   const [view, setView] = useState<'cards' | 'table'>('cards')
@@ -58,7 +56,9 @@ export default function Employees() {
     try {
       const chat = await api.post(`/chats/personal/${userId}`)
       navigate(`/chats/${chat.id}`)
-    } catch { /* toast handled by api client */ }
+    } catch {
+      /* toast handled by api client */
+    }
   }
 
   const roleLabels: Record<string, string> = {
@@ -207,7 +207,16 @@ export default function Employees() {
       </div>
 
       {loading ? (
-        view === 'cards' ? <SkeletonCardGrid count={6} cols={3} /> : <div className="space-y-1"><SkeletonTableRow /><SkeletonTableRow /><SkeletonTableRow /><SkeletonTableRow /></div>
+        view === 'cards' ? (
+          <SkeletonCardGrid count={6} cols={3} />
+        ) : (
+          <div className="space-y-1">
+            <SkeletonTableRow />
+            <SkeletonTableRow />
+            <SkeletonTableRow />
+            <SkeletonTableRow />
+          </div>
+        )
       ) : view === 'cards' ? (
         <div className="space-y-8">
           {groupedByDept.map(([dept, emps]) => (

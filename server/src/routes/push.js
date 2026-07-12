@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import webpush from 'web-push'
 import prisma from '../prisma.js'
+import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import logger from '../logger.js'
 
@@ -14,6 +15,7 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 
 const router = Router()
 router.use(authenticateToken)
+router.use(auditLogMiddleware)
 
 router.get('/vapid-key', (req, res) => {
   if (!VAPID_PUBLIC_KEY) return res.status(500).json({ message: 'VAPID not configured' })

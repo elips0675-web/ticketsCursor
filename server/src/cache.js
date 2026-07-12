@@ -45,6 +45,7 @@ if (process.env.REDIS_URL) {
         until cursor == '0'
         return count
       `
+      const sha = await client.script('LOAD', delScript)
       cache = {
         async get(key) {
           const val = await client.get(key)
@@ -54,7 +55,11 @@ if (process.env.REDIS_URL) {
           await client.set(key, JSON.stringify(value), 'EX', ttl)
         },
         async invalidate(pattern) {
-          await client.eval(delScript, 1, pattern)
+          try {
+            await client.evalsha(sha, 1, pattern)
+          } catch {
+            await client.eval(delScript, 1, pattern)
+          }
         },
       }
       console.log('Cache using Redis')

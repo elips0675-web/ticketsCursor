@@ -35,6 +35,7 @@ initSearchSync()
 
 // Удаление уведомлений старше 90 дней (каждые 6 часов)
 import prisma from './prisma.js'
+import { stopBackgroundJobs } from './background.js'
 setupBackgroundJobs(prisma)
 
 server.listen(PORT, () => {
@@ -44,6 +45,7 @@ server.listen(PORT, () => {
 // Graceful shutdown
 async function shutdown(signal) {
   console.log(`\nReceived ${signal}, shutting down gracefully...`)
+  stopBackgroundJobs()
   server.close(() => {
     console.log('HTTP server closed')
   })

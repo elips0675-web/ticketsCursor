@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTickets } from '@/context/ticket-context'
-import { ArrowLeft, Monitor, Send, Terminal } from 'lucide-react'
+import { ArrowLeft, Monitor, Send } from 'lucide-react'
 import type { TicketPriority } from '@/types'
 
 export default function NewTicket() {

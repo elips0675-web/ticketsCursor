@@ -1,8 +1,36 @@
 import logger from './logger.js'
+import { sendTicketNotification } from './email.js'
 import { notifySlaBreached } from './notify.js'
 
 const CLEANUP_INTERVAL = 6 * 60 * 60 * 1000
 const SLA_CHECK_INTERVAL = 15 * 60 * 1000
+
+async function warnAdminRedisMissing(prisma) {
+  try {
+    const admins = await prisma.employees.findMany({
+      where: { is_active: true, role: { in: ['super_admin', 'admin'] } },
+      select: { email: true },
+    })
+    for (const a of admins) {
+      if (a.email) {
+        sendTicketNotification({
+          to: a.email,
+          subject: 'Redis недоступен — фоновые задачи в unsafe-режиме',
+          text: 'Redis не настроен (REDIS_URL не задан). Фоновые задачи (очистка уведомлений, проверка SLA) работают через setInterval без гарантий доставки и масштабирования. Настройте Redis для production.',
+        }).catch(() => {})
+      }
+    }
+  } catch (e) {
+    logger.error('Failed to send Redis warning email:', e.message)
+  }
+}
+
+let cleanupTimer, slaTimer
+
+export function stopBackgroundJobs() {
+  if (cleanupTimer) clearInterval(cleanupTimer)
+  if (slaTimer) clearInterval(slaTimer)
+}
 
 export async function setupBackgroundJobs(prisma) {
   if (process.env.REDIS_URL) {
@@ -32,9 +60,10 @@ export async function setupBackgroundJobs(prisma) {
   } else {
     setTimeout(() => runCleanup(prisma), 5000)
     setTimeout(() => runSlaCheck(prisma), 5000)
-    setInterval(() => runCleanup(prisma), CLEANUP_INTERVAL)
-    setInterval(() => runSlaCheck(prisma), SLA_CHECK_INTERVAL)
-    logger.info('Background jobs using setInterval (no Redis)')
+    cleanupTimer = setInterval(() => runCleanup(prisma), CLEANUP_INTERVAL)
+    slaTimer = setInterval(() => runSlaCheck(prisma), SLA_CHECK_INTERVAL)
+    logger.warn('Redis not configured — background jobs using setInterval (no guarantees)')
+    warnAdminRedisMissing(prisma)
   }
 }
 

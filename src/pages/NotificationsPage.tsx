@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -37,19 +37,23 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     setLoading(true)
-    api.get('/notifications')
-      .then(data => { setNotifications(data || []); setLoading(false) })
+    api
+      .get('/notifications')
+      .then((data) => {
+        setNotifications(data || [])
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
   const markRead = async (id: number) => {
     await api.put(`/notifications/${id}/read`)
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: 1 } : n))
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: 1 } : n)))
   }
 
   const markAllRead = async () => {
     await api.put('/notifications/read-all')
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })))
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: 1 })))
   }
 
   const clearAll = async () => {
@@ -57,9 +61,9 @@ export default function NotificationsPage() {
     setNotifications([])
   }
 
-  const types = [...new Set(notifications.map(n => n.type))]
+  const types = [...new Set(notifications.map((n) => n.type))]
 
-  const filtered = notifications.filter(n => {
+  const filtered = notifications.filter((n) => {
     if (filter === 'unread' && n.is_read) return false
     if (typeFilter && n.type !== typeFilter) return false
     if (search) {
@@ -75,12 +79,16 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t('notifications.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {notifications.filter(n => !n.is_read).length} {t('notifications.unread')}
+            {notifications.filter((n) => !n.is_read).length} {t('notifications.unread')}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={markAllRead}>{t('notifications.markAllRead')}</Button>
-          <Button variant="outline" size="sm" onClick={clearAll}>{t('notifications.clearAll')}</Button>
+          <Button variant="outline" size="sm" onClick={markAllRead}>
+            {t('notifications.markAllRead')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={clearAll}>
+            {t('notifications.clearAll')}
+          </Button>
         </div>
       </div>
 
@@ -104,11 +112,23 @@ export default function NotificationsPage() {
 
       {types.length > 0 && (
         <div className="flex gap-1.5 flex-wrap">
-          <Button key="all" variant={typeFilter === '' ? 'default' : 'secondary'} size="sm" className="text-xs" onClick={() => setTypeFilter('')}>
+          <Button
+            key="all"
+            variant={typeFilter === '' ? 'default' : 'secondary'}
+            size="sm"
+            className="text-xs"
+            onClick={() => setTypeFilter('')}
+          >
             {t('common.all')}
           </Button>
-          {types.map(type => (
-            <Button key={type} variant={typeFilter === type ? 'default' : 'secondary'} size="sm" className="text-xs" onClick={() => setTypeFilter(type)}>
+          {types.map((type) => (
+            <Button
+              key={type}
+              variant={typeFilter === type ? 'default' : 'secondary'}
+              size="sm"
+              className="text-xs"
+              onClick={() => setTypeFilter(type)}
+            >
               {TYPE_LABELS[type] || type}
             </Button>
           ))}
@@ -128,8 +148,11 @@ export default function NotificationsPage() {
         </Card>
       ) : (
         <div className="space-y-2">
-          {filtered.map(n => (
-            <Card key={n.id} className={`hover:shadow-sm transition-shadow ${!n.is_read ? 'border-l-2 border-l-primary' : ''}`}>
+          {filtered.map((n) => (
+            <Card
+              key={n.id}
+              className={`hover:shadow-sm transition-shadow ${!n.is_read ? 'border-l-2 border-l-primary' : ''}`}
+            >
               <div className="flex items-start gap-4 p-4">
                 <Badge variant="secondary" className={TYPE_COLORS[n.type] || ''}>
                   {TYPE_LABELS[n.type] || n.type}
@@ -141,12 +164,27 @@ export default function NotificationsPage() {
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   {n.link && (
-                    <Button variant="ghost" size="icon" className="w-7 h-7" onClick={() => { markRead(n.id); navigate(n.link) }} aria-label={t('common.open')}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-7 h-7"
+                      onClick={() => {
+                        markRead(n.id)
+                        navigate(n.link)
+                      }}
+                      aria-label={t('common.open')}
+                    >
                       <ExternalLink className="w-3.5 h-3.5" />
                     </Button>
                   )}
                   {!n.is_read && (
-                    <Button variant="ghost" size="icon" className="w-7 h-7" onClick={() => markRead(n.id)} aria-label={t('notifications.markRead')}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-7 h-7"
+                      onClick={() => markRead(n.id)}
+                      aria-label={t('notifications.markRead')}
+                    >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   )}

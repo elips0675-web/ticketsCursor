@@ -1,11 +1,23 @@
-import { useEffect, useState } from "react"
-import { useTranslation } from "react-i18next"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Shield, Users, Ticket, Activity, UserCog, ShieldCheck, RefreshCw, Clock, AlertTriangle, CheckCircle2, XCircle } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import {
+  Shield,
+  Users,
+  Ticket,
+  Activity,
+  UserCog,
+  ShieldCheck,
+  RefreshCw,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface Employee {
   id: number
@@ -52,12 +64,12 @@ export default function Admin() {
 
   const fetchData = async () => {
     setLoading(true)
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem('token')
     try {
       const [empRes, statsRes, slaRes] = await Promise.all([
-        fetch("/api/admin/users", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/employees/stats", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/tickets/sla/stats", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/employees/stats', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/tickets/sla/stats', { headers: { Authorization: `Bearer ${token}` } }),
       ])
       if (empRes.ok) {
         const raw = await empRes.json()
@@ -72,35 +84,41 @@ export default function Admin() {
         setSlaStats(body.data || body)
       }
     } catch (err) {
-      console.error("Admin fetch error:", err)
+      console.error('Admin fetch error:', err)
     }
     setLoading(false)
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   const roleBadge = (role: string) => {
-    const map: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-      admin: { label: t("employees.admin"), variant: "default" },
-      senior_agent: { label: t("employees.seniorAgent"), variant: "secondary" },
-      agent: { label: t("employees.agent"), variant: "outline" },
+    const map: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+      admin: { label: t('employees.admin'), variant: 'default' },
+      senior_agent: { label: t('employees.seniorAgent'), variant: 'secondary' },
+      agent: { label: t('employees.agent'), variant: 'outline' },
     }
-    const c = map[role] || { label: role, variant: "outline" as const }
-    return <Badge variant={c.variant} className="text-[10px]">{c.label}</Badge>
+    const c = map[role] || { label: role, variant: 'outline' as const }
+    return (
+      <Badge variant={c.variant} className="text-[10px]">
+        {c.label}
+      </Badge>
+    )
   }
 
-  const activeEmployees = employees.filter(e => e.isActive)
+  const activeEmployees = employees.filter((e) => e.isActive)
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t("admin.dashboard")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("admin.dashboardSubtitle")}</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin.dashboard')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('admin.dashboardSubtitle')}</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? "animate-spin" : ""}`} />
-          {t("admin.refresh")}
+          <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
+          {t('admin.refresh')}
         </Button>
       </div>
 
@@ -113,7 +131,7 @@ export default function Admin() {
               </div>
             </div>
             <div className="text-2xl font-bold">{activeEmployees.length}</div>
-            <p className="text-xs text-muted-foreground font-medium mt-1">{t("admin.employees")}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">{t('admin.employees')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -123,8 +141,8 @@ export default function Admin() {
                 <ShieldCheck className="w-5 h-5 text-green-600" />
               </div>
             </div>
-            <div className="text-2xl font-bold">{activeEmployees.filter(e => e.online).length}</div>
-            <p className="text-xs text-muted-foreground font-medium mt-1">{t("admin.online")}</p>
+            <div className="text-2xl font-bold">{activeEmployees.filter((e) => e.online).length}</div>
+            <p className="text-xs text-muted-foreground font-medium mt-1">{t('admin.online')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -135,7 +153,7 @@ export default function Admin() {
               </div>
             </div>
             <div className="text-2xl font-bold">{stats?.total || 0}</div>
-            <p className="text-xs text-muted-foreground font-medium mt-1">{t("admin.totalTickets")}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">{t('admin.totalTickets')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -146,7 +164,7 @@ export default function Admin() {
               </div>
             </div>
             <div className="text-2xl font-bold">{stats ? stats.open + stats.inProgress : 0}</div>
-            <p className="text-xs text-muted-foreground font-medium mt-1">{t("admin.active")}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">{t('admin.active')}</p>
           </CardContent>
         </Card>
       </div>
@@ -155,19 +173,22 @@ export default function Admin() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
             <UserCog className="w-4 h-4 text-primary" />
-            {t("admin.employees")}
+            {t('admin.employees')}
           </CardTitle>
-          <Button variant="outline" size="sm" onClick={() => navigate("/admin/users")}>
-            {t("admin.manage")}
+          <Button variant="outline" size="sm" onClick={() => navigate('/admin/users')}>
+            {t('admin.manage')}
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
-            {activeEmployees.slice(0, 8).map(emp => (
+            {activeEmployees.slice(0, 8).map((emp) => (
               <div key={emp.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-muted/30 transition-colors">
                 <Avatar className="w-9 h-9">
                   <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                    {emp.name.split(' ').map(n => n[0]).join('')}
+                    {emp.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
@@ -175,13 +196,15 @@ export default function Admin() {
                     <span className="text-sm font-bold truncate">{emp.name}</span>
                     {roleBadge(emp.role)}
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{emp.email} · {emp.department}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {emp.email} · {emp.department}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className={emp.online ? "text-green-600 font-medium" : ""}>
-                    {emp.online ? t("admin.online") : t("admin.offline")}
+                  <span className={emp.online ? 'text-green-600 font-medium' : ''}>
+                    {emp.online ? t('admin.online') : t('admin.offline')}
                   </span>
-                  <span>{t("admin.ticketCount", { count: emp.activeTickets })}</span>
+                  <span>{t('admin.ticketCount', { count: emp.activeTickets })}</span>
                 </div>
               </div>
             ))}
@@ -193,17 +216,17 @@ export default function Admin() {
         <CardHeader>
           <CardTitle className="text-sm flex items-center gap-2">
             <Shield className="w-4 h-4 text-primary" />
-            {t("admin.roleStats")}
+            {t('admin.roleStats')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { role: "admin", label: t("admin.admins"), icon: Shield },
-              { role: "senior_agent", label: t("admin.seniorAgents"), icon: UserCog },
-              { role: "agent", label: t("admin.agents"), icon: Users },
+              { role: 'admin', label: t('admin.admins'), icon: Shield },
+              { role: 'senior_agent', label: t('admin.seniorAgents'), icon: UserCog },
+              { role: 'agent', label: t('admin.agents'), icon: Users },
             ].map(({ role, label, icon: Icon }) => {
-              const count = employees.filter(e => e.role === role).length
+              const count = employees.filter((e) => e.role === role).length
               return (
                 <div key={role} className="flex items-center gap-3 bg-muted/30 rounded-lg p-4">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -225,39 +248,43 @@ export default function Admin() {
           <CardHeader>
             <CardTitle className="text-sm flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
-              {t("admin.slaTitle")}
+              {t('admin.slaTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="flex items-center gap-3 bg-green-50 dark:bg-green-950/30 rounded-lg p-4">
+              <div className="flex items-center gap-3 bg-green-50 rounded-lg p-4">
                 <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
                 <div>
-                  <div className="text-xl font-bold text-green-700 dark:text-green-400">{slaStats.onTime}</div>
-                  <p className="text-xs text-muted-foreground">{t("admin.slaOnTime")}</p>
+                  <div className="text-xl font-bold text-green-700 ">{slaStats.onTime}</div>
+                  <p className="text-xs text-muted-foreground">{t('admin.slaOnTime')}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-red-50 dark:bg-red-950/30 rounded-lg p-4">
+              <div className="flex items-center gap-3 bg-red-50 rounded-lg p-4">
                 <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
                 <div>
-                  <div className="text-xl font-bold text-red-700 dark:text-red-400">{slaStats.overdue}</div>
-                  <p className="text-xs text-muted-foreground">{t("admin.slaOverdue")}</p>
+                  <div className="text-xl font-bold text-red-700">{slaStats.overdue}</div>
+                  <p className="text-xs text-muted-foreground">{t('admin.slaOverdue')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-muted/30 rounded-lg p-4">
                 <XCircle className="w-5 h-5 text-muted-foreground shrink-0" />
                 <div>
                   <div className="text-xl font-bold">{slaStats.noSla}</div>
-                  <p className="text-xs text-muted-foreground">{t("admin.slaNoSla")}</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.slaNoSla')}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4">
+              <div className="flex items-center gap-3 bg-blue-50 rounded-lg p-4">
                 <Activity className="w-5 h-5 text-blue-600 shrink-0" />
                 <div>
-                  <div className="text-xl font-bold text-blue-700 dark:text-blue-400">
-                    {(() => { const d = slaStats.total - slaStats.noSla; return d > 0 ? Math.round((slaStats.onTime / d) * 100) : 0 })()}%
+                  <div className="text-xl font-bold text-blue-700">
+                    {(() => {
+                      const d = slaStats.total - slaStats.noSla
+                      return d > 0 ? Math.round((slaStats.onTime / d) * 100) : 0
+                    })()}
+                    %
                   </div>
-                  <p className="text-xs text-muted-foreground">{t("admin.slaCompliance")}</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.slaCompliance')}</p>
                 </div>
               </div>
             </div>

@@ -112,10 +112,9 @@
 - **Admin.tsx / AdminUsers.tsx / AdminPush.tsx** — уже были на API
 - Убраны DEMO-данные из 7 страниц
 
-### Этап 9 — Тёмная тема
-- **ThemeContext** — провайдер с переключением light/dark, сохранение в localStorage
-- **ThemeToggle** — кнопка в сайдбаре (десктоп + мобильное меню)
-- CSS-переменные `.dark` уже были в index.css
+### Этап 9 — Тёмная тема (удалена позже)
+- Была реализована (ThemeContext, ThemeToggle, `.dark` CSS-переменные)
+- Позже удалена по решению — тёмная тема не нужна в корп. системе
 
 ### Этап 10 — Финальная проверка проекта
 - Установлен недостающий пакет `multer` на сервере (ломало тесты)
@@ -151,7 +150,7 @@
 | Аутентификация (JWT, логин, регистрация) | ✅ API + UI |
 | PWA (service worker, push, install prompt) | ✅ injectManifest |
 | WebSocket (real-time уведомления, чаты) | ✅ Socket.io |
-| Тёмная тема (CSS vars, переключатель) | ✅ (переключатель скрыт) |
+| Тёмная тема (CSS vars, переключатель) | ❌ удалена |
 | CI/CD (GitHub Actions) | ✅ .github/workflows/ci.yml |
 | Docker (compose, 3 контейнера) | ✅ docker-compose.yml |
 | Vercel (SPA routing) | ✅ vercel.json |

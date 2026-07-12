@@ -313,7 +313,6 @@
     "notifications": "Notifications",
     "pushNotifications": "Push Notifications",
     "emailNotifications": "Email Notifications",
-    "darkTheme": "Dark Theme",
     "currentDevice": "Current Device",
     "computerPlaceholder": "e.g. PC-IT-01",
     "accountPlaceholder": "Domain\\User",

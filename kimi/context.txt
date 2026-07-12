@@ -113,10 +113,9 @@
 - **Admin.tsx / AdminUsers.tsx / AdminPush.tsx** вЂ” СѓР¶Рµ Р±С‹Р»Рё РЅР° API
 - РЈР±СЂР°РЅС‹ DEMO-РґР°РЅРЅС‹Рµ РёР· 7 СЃС‚СЂР°РЅРёС†
 
-### Р­С‚Р°Рї 9 вЂ” РўС‘РјРЅР°СЏ С‚РµРјР°
-- **ThemeContext** вЂ” РїСЂРѕРІР°Р№РґРµСЂ СЃ РїРµСЂРµРєР»СЋС‡РµРЅРёРµРј light/dark, СЃРѕС…СЂР°РЅРµРЅРёРµ РІ localStorage
-- **ThemeToggle** вЂ” РєРЅРѕРїРєР° РІ СЃР°Р№РґР±Р°СЂРµ (РґРµСЃРєС‚РѕРї + РјРѕР±РёР»СЊРЅРѕРµ РјРµРЅСЋ)
-- CSS-РїРµСЂРµРјРµРЅРЅС‹Рµ `.dark` СѓР¶Рµ Р±С‹Р»Рё РІ index.css
+### Р­С‚Р°Рї 9 вЂ” РўС‘РјРЅР°СЏ С‚РµРјР° (СѓРґР°Р»РµРЅР° РїРѕР·Р¶Рµ)
+- Р‘С‹Р»Р° СЂРµР°Р»РёР·РѕРІР°РЅР° (ThemeContext, ThemeToggle, `.dark` CSS-РїРµСЂРµРјРµРЅРЅС‹Рµ)
+- РџРѕР·Р¶Рµ СѓРґР°Р»РµРЅР° РїРѕ СЂРµС€РµРЅРёСЋ вЂ” С‚С‘РјРЅР°СЏ С‚РµРјР° РЅРµ РЅСѓР¶РЅР° РІ РєРѕСЂРї. СЃРёСЃС‚РµРјРµ
 
 ### Р­С‚Р°Рї 10 вЂ” Р¤РёРЅР°Р»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° РїСЂРѕРµРєС‚Р°
 - РЈСЃС‚Р°РЅРѕРІР»РµРЅ РЅРµРґРѕСЃС‚Р°СЋС‰РёР№ РїР°РєРµС‚ `multer` РЅР° СЃРµСЂРІРµСЂРµ (Р»РѕРјР°Р»Рѕ С‚РµСЃС‚С‹)
@@ -152,7 +151,7 @@
 | РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ (JWT, Р»РѕРіРёРЅ, СЂРµРіРёСЃС‚СЂР°С†РёСЏ) | вњ… API + UI |
 | PWA (service worker, push, install prompt) | вњ… injectManifest |
 | WebSocket (real-time СѓРІРµРґРѕРјР»РµРЅРёСЏ, С‡Р°С‚С‹) | вњ… Socket.io |
-| РўС‘РјРЅР°СЏ С‚РµРјР° (CSS vars, РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ) | вњ… (РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ СЃРєСЂС‹С‚) |
+| РўС‘РјРЅР°СЏ С‚РµРјР° (CSS vars, РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ) | вќЊ СѓРґР°Р»РµРЅР° |
 | CI/CD (GitHub Actions) | вњ… .github/workflows/ci.yml |
 | Docker (compose, 3 РєРѕРЅС‚РµР№РЅРµСЂР°) | вњ… docker-compose.yml |
 | Vercel (SPA routing) | вњ… vercel.json |
@@ -219,6 +218,7 @@ docker compose up -d --build
 - **schemas.ts/schemas.js**: Zod v4 вЂ” .email({ message: }) РІРјРµСЃС‚Рѕ .email('...')
 - **app.js**: mount() Р±РѕР»СЊС€Рµ РЅРµ РґСѓР±Р»РёСЂСѓРµС‚ /api/v1/, swagger/docs С‚РѕР»СЊРєРѕ /api/docs
 - **App.tsx**: AdminLayout РѕР±С‘СЂРЅСѓС‚ РІ ErrorBoundary
+- **AuthContext.tsx**: logout вЂ” СЃРѕС…СЂР°РЅРµРЅРёРµ token РґРѕ РѕС‡РёСЃС‚РєРё (fixed race condition)
 - **.gitignore**: СѓР±СЂР°РЅ check-console.mjs (СЃРєСЂРёРїС‚ РЅСѓР¶РµРЅ РЅРѕРІС‹Рј СЂР°Р·СЂР°Р±РѕС‚С‡РёРєР°Рј)
 - **TECHNICAL.md**: СѓРґР°Р»С‘РЅ СЂР°Р·РґРµР» MySQL Read Replicas
 - **docker-compose.yml**: JWT_SECRET fallback (`:-dev-jwt-secret-change-in-production`)
@@ -1981,16 +1981,16 @@ export default function App() {
                       }
                     />
 
-                      <Route
-                        path="/admin"
-                        element={
-                          <ProtectedRoute adminOnly>
-                            <Page>
-                              <AdminLayout />
-                            </Page>
-                          </ProtectedRoute>
-                        }
-                      >
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <Page>
+                            <AdminLayout />
+                          </Page>
+                        </ProtectedRoute>
+                      }
+                    >
                       <Route
                         index
                         element={
@@ -2882,15 +2882,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
+    const t = token
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)
-    fetch(`${API_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { Authorization: `Bearer ${token}` },
-    }).catch(() => {})
+    if (t) {
+      fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${t}` },
+      }).catch(() => {})
+    }
   }
 
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin'

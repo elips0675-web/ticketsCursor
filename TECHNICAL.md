@@ -659,19 +659,6 @@ Client ──► GET /api/search?q= ──► Meilisearch (если доступ
 
 ## Кэширование
 
-### MySQL Read Replicas (docker-compose)
-
-В docker-compose настроена репликация primary → replica:
-
-- **Primary** (`mysql`): `server_id=1`, binlog включён, порт `3307`
-- **Replica** (`mysql_replica`): `server_id=2`, `read_only=1`, порт `3308`
-- Автоматическая настройка через `mysql/init-replica.sh`
-- Пользователь `replicator` с правами `REPLICATION SLAVE`
-
-> **Важно**: Prisma Free не поддерживает read replicas нативно.
-> Для использования реплики в Node.js нужен отдельный PrismaClient
-> с URL реплики и middleware для роутинга read-запросов.
-
 ### Автоматические бэкапы (docker-compose)
 
 Сервис `db_backup` на базе `alpine`:

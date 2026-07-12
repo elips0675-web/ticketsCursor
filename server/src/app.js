@@ -97,11 +97,8 @@ app.use('/uploads', (req, res, next) => {
   }
 })
 
-const V1 = '/api/v1'
-
 function mount(prefix, router, ...mw) {
   app.use(`/api${prefix}`, ...mw, router)
-  app.use(`${V1}${prefix}`, ...mw, router)
 }
 
 mount('/auth', authRouter, authLimiter)
@@ -118,7 +115,7 @@ mount('/push', pushRouter, apiLimiter)
 mount('/search', searchRouter, apiLimiter)
 mount('/admin', adminRouter, adminLimiter)
 
-app.use([`/api/docs`, `${V1}/docs`], swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }' }))
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }' }))
 
 app.get('/', (req, res) => {
   res.json({ app: 'Service Desk API', version: '1.0.0' })

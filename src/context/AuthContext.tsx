@@ -65,15 +65,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
+    const t = token
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)
-    fetch(`${API_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { Authorization: `Bearer ${token}` },
-    }).catch(() => {})
+    if (t) {
+      fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${t}` },
+      }).catch(() => {})
+    }
   }
 
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin'

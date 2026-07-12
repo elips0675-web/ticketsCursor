@@ -48,17 +48,18 @@ router.put('/settings', async (req, res) => {
 
 router.get('/users', async (req, res) => {
   try {
-    const rows = await prisma.$queryRaw`
-      SELECT id, name, email, role, department, title, avatar, phone,
-        online, active_tickets as activeTickets, resolved_today as resolvedToday,
-        is_active as isActive, created_at as createdAt
-      FROM employees ORDER BY is_active DESC, name
-    `
+    const rows = await prisma.employees.findMany({
+      orderBy: [{ is_active: 'desc' }, { name: 'asc' }],
+    })
     const data = rows.map(r => ({
-      ...r,
-      id: Number(r.id),
-      activeTickets: Number(r.activeTickets),
-      resolvedToday: Number(r.resolvedToday),
+      id: r.id, name: r.name, email: r.email,
+      role: r.role, department: r.department, title: r.title,
+      avatar: r.avatar, phone: r.phone,
+      online: r.online,
+      activeTickets: r.active_tickets || 0,
+      resolvedToday: r.resolved_today || 0,
+      isActive: r.is_active,
+      createdAt: r.created_at,
     }))
     res.json({ success: true, data })
   } catch (err) {
@@ -74,7 +75,13 @@ router.put('/users/:id', async (req, res) => {
   }
   const { role, isActive, department, title } = req.body
   const data = {}
-  if (role && ['admin', 'senior_agent', 'agent', 'requester'].includes(role)) {
+  if (role) {
+    if (role === 'super_admin') {
+      return res.status(403).json({ success: false, message: 'Cannot assign super_admin via API' })
+    }
+    if (!['admin', 'senior_agent', 'agent', 'requester'].includes(role)) {
+      return res.status(400).json({ success: false, message: 'Invalid role' })
+    }
     data.role = role
   }
   if (isActive !== undefined) {

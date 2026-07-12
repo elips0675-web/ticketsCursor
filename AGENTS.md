@@ -212,6 +212,15 @@ docker compose up -d --build
 - **validate.js**: добавлен `import { ZodError } from 'zod'`
 - **Kanban.tsx**: добавлены `MessageSquare, User` из lucide-react (были missing imports)
 - **Lint**: 0 errors, 115 warnings (сервер теперь линтится)
+- **docker-compose.yml**: убрано монтирование primary.cnf (файл удалён)
+- **package.json**: удалён scripts.tauri (Tauri CLI удалён ранее)
+- **admin.js**: $queryRaw → findMany(), явный guard super_admin (403)
+- **schemas.ts/schemas.js**: Zod v4 — .email({ message: }) вместо .email('...')
+- **app.js**: mount() больше не дублирует /api/v1/, swagger/docs только /api/docs
+- **App.tsx**: AdminLayout обёрнут в ErrorBoundary
+- **AuthContext.tsx**: logout — сохранение token до очистки (fixed race condition)
+- **.gitignore**: убран check-console.mjs (скрипт нужен новым разработчикам)
+- **TECHNICAL.md**: удалён раздел MySQL Read Replicas
 - **docker-compose.yml**: JWT_SECRET fallback (`:-dev-jwt-secret-change-in-production`)
 - **docker-compose.yml**: удалён mysql_replica (мёртвый код), удалён REPLICA_DATABASE_URL
 - **prisma.js**: убрана опция `replicas` (была неиспользуема)

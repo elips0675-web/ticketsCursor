@@ -9,8 +9,7 @@ Thumbs.db
 playwright-report/
 test-results/
 
-# Playwright check script
-check-console.mjs
+# Playwright screenshots
 screenshot*.png
 
 auth.json

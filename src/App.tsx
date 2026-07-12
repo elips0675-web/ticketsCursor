@@ -127,7 +127,9 @@ export default function App() {
                       path="/admin"
                       element={
                         <ProtectedRoute adminOnly>
-                          <AdminLayout />
+                          <Page>
+                            <AdminLayout />
+                          </Page>
                         </ProtectedRoute>
                       }
                     >

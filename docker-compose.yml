@@ -14,7 +14,6 @@ services:
       - mysql_data:/var/lib/mysql
       - mysql_backup:/backup
       - ./server/seed.sql:/docker-entrypoint-initdb.d/seed.sql
-      - ./mysql/primary.cnf:/etc/mysql/conf.d/replication.cnf
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s

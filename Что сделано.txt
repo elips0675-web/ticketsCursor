@@ -205,4 +205,4 @@
 РЕПОЗИТОРИЙ
 
   https://github.com/elips0675-web/ticketsCursor
-  Последний коммит: d224195 — fix(ticket-context): replace hardcoded localhost:4000 with API_URL; fix(notify): per-user SLA dedup; fix(tickets): permission check on POST /:id/messages
+  Последний коммит: bf05126 — fix(api): handleResponse single res.json(); fix(auth): loading state; fix(ProtectedRoute): spinner; fix(utils): dynamic date-fns locale; fix(use-push): isSubscribing ref; fix(Kanban): DnD fallback; fix(i18n): rm duplicate hasAccount

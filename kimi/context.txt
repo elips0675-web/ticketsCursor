@@ -3646,15 +3646,16 @@ export default class ErrorBoundary extends Component<Props, State> {
 
 
 === src/components/ProtectedRoute.tsx ===
-import { Navigate } from "react-router-dom"
-import { useAuth } from "@/context/AuthContext"
-import type { ReactNode } from "react"
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
+import type { ReactNode } from 'react'
 
 export default function ProtectedRoute({ children, adminOnly }: { children: ReactNode; adminOnly?: boolean }) {
   const { token, user, loading } = useAuth()
-  if (loading) return <div className="flex items-center justify-center h-screen text-muted-foreground text-sm">Р—Р°РіСЂСѓР·РєР°вЂ¦</div>
+  if (loading)
+    return <div className="flex items-center justify-center h-screen text-muted-foreground text-sm">Р—Р°РіСЂСѓР·РєР°вЂ¦</div>
   if (!token) return <Navigate to="/login" replace />
-  if (adminOnly && user?.role !== "admin" && user?.role !== "super_admin") return <Navigate to="/" replace />
+  if (adminOnly && user?.role !== 'admin' && user?.role !== 'super_admin') return <Navigate to="/" replace />
   return <>{children}</>
 }
 
@@ -3721,7 +3722,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(getInitialToken)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { setLoading(false) }, [])
+  useEffect(() => {
+    setLoading(false)
+  }, [])
 
   const login = (t: string, u: User) => {
     localStorage.setItem('token', t)
@@ -3960,7 +3963,10 @@ async function authFetch(url: string, token: string | null, options?: RequestIni
     ...options,
     headers: { ...options?.headers, Authorization: `Bearer ${token}` },
   })
-  if (res.status === 401 || res.status === 403) { authLogout(); throw new Error('РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°') }
+  if (res.status === 401 || res.status === 403) {
+    authLogout()
+    throw new Error('РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°')
+  }
   if (!res.ok) throw new Error(`API error: ${res.status}`)
   return res.json()
 }

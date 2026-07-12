@@ -177,6 +177,8 @@ export async function setupSocket(server) {
   return io
 }
 
+export { wsRateLimit }
+
 export function getIO() {
   return io || null
 }

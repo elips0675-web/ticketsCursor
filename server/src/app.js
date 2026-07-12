@@ -9,6 +9,7 @@ import os from 'os'
 import * as Sentry from '@sentry/node'
 import logger from './logger.js'
 import { requestId } from './middleware/requestId.js'
+import { trackRequest, getMetricsLines } from './middleware/metrics.js'
 
 if (process.env.SENTRY_DSN) {
   Sentry.init({
@@ -74,6 +75,7 @@ app.use(cors({
 }))
 app.use(helmet())
 app.use(requestId)
+app.use(trackRequest)
 app.use(express.json())
 app.use(cookieParser())
 
@@ -128,8 +130,10 @@ app.get('/api/health', (req, res) => {
 app.get('/api/metrics', (req, res) => {
   const mem = process.memoryUsage()
   const uptime = process.uptime()
+  const timingLines = getMetricsLines()
   res.set('Content-Type', 'text/plain; charset=utf-8')
   res.send([
+    ...timingLines,
     `# HELP process_cpu_seconds_total Total user CPU time`,
     `# TYPE process_cpu_seconds_total counter`,
     `process_cpu_seconds_total ${uptime}`,

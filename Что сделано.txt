@@ -99,7 +99,7 @@
 ТЕСТЫ
 
   • Клиентские: 154/154 (40 файлов, vitest + jsdom)
-  • Серверные: 116/116 (6 файлов, vitest + supertest)
+  • Серверные: 135/135 (8 файлов, vitest + supertest, notify.test.js + metrics.test.js)
   • E2E: Playwright (логин, тикеты, чаты, админка, SLA)
   • Coverage: 51% Stmts / 55% Lines
   • Type-check + build: успешно
@@ -205,4 +205,12 @@
 РЕПОЗИТОРИЙ
 
   https://github.com/elips0675-web/ticketsCursor
-  Последний коммит: bf05126 — fix(api): handleResponse single res.json(); fix(auth): loading state; fix(ProtectedRoute): spinner; fix(utils): dynamic date-fns locale; fix(use-push): isSubscribing ref; fix(Kanban): DnD fallback; fix(i18n): rm duplicate hasAccount
+  Последний коммит: см. git log --oneline -1
+
+### Этап Доработка по Оценка deeps.txt
+- **Этап 1** (✅) notify.js — вынесен `sendTicketNotification` в `sendEmail()`, устранено дублирование
+- **Этап 2** (❌ пропущен) any в api.ts/mapTicket — осознанный trade-off, ESLint `no-explicit-any: warn` уже настроен
+- **Этап 3** (✅) Request timing metrics — создан `server/src/middleware/metrics.js` (trackRequest + getMetricsLines), подключен в app.js, /api/metrics выводит гистограммы
+- **Этап 4** (✅) Тесты:
+  - `server/src/services/__tests__/notify.test.js` — 14 тестов на все notify-функции
+  - `server/src/middleware/__tests__/metrics.test.js` — 5 тестов на middleware

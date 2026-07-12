@@ -1,132 +1,64 @@
-Критичные проблемы
-1. handleResponse в api.ts — двойной res.json()
+Проанализировал предоставленный контекст — это Service Desk (корпоративная система тикетов). Вижу, что проект полностью рабочий, но есть несколько областей для улучшения. Давай разберём по категориям:
+🔴 Критичные (безопасность / стабильность)
+1. Race condition в AuthContext.logout()
+tsx
+// Сейчас: token очищается ДО fetch
+const logout = () => {
+  const t = token        // читаем
+  localStorage.removeItem('token')  // чистим
+  setToken(null)         // state = null
+  if (t) { fetch(..., { headers: { Authorization: `Bearer ${t}` } }) } // t ещё жив, но race возможен
+}
+Фикс: сохранить t в замыкание, но уже исправлено в Этапе 17. Проверь, что у тебя именно такая версия.
+2. Missing import prisma в files.js
+В Этапе 17 указано, что добавлен import prisma — проверь, что он на месте:
+JavaScript
+import prisma from '../prisma.js'  // должен быть в начале files.js
+3. Zod v4 несовместимость
+В src/lib/schemas.ts используется:
 TypeScript
-async function handleResponse(res: Response): Promise<any> {
-  // ...
-  const data = res.ok ? null : await res.json().catch(() => null)  // ❌ если !res.ok — читаем тело
-  if (!res.ok) {
-    throw new Error(data?.message || `Ошибка ${res.status}`)
-  }
-  // ...
-  const payload = await res.json().catch(() => null)  // ❌ читаем тело ВТОРОЙ раз
-Проблема: Response можно прочитать только один раз. Если res.ok === true, первый res.json() не вызывается (ternary), но если res.ok === false — тело уже прочитано, а потом пытаемся прочитать снова — будет ошибка.
+email: z.string().email({ message: '...' })
+В Zod v4 (который в package.json) .email() не принимает объект с message.
 Фикс:
 TypeScript
-async function handleResponse(res: Response): Promise<any> {
-  if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    window.location.href = '/login'
-    throw new Error('Сессия истекла')
-  }
-  if (res.status === 204) return null
-  
-  const payload = await res.json().catch(() => null)
-  if (!res.ok) {
-    throw new Error(payload?.message || `Ошибка ${res.status}`)
-  }
-  if (payload && typeof payload === 'object' && typeof payload.success === 'boolean') {
-    if (Object.prototype.hasOwnProperty.call(payload, 'data')) return payload.data
-    return payload
-  }
-  return payload
+email: z.string().email('Введите корректный email')
+🟡 Средние (UX / производительность)
+4. TanStack Query — staleTime слишком агрессивный
+tsx
+// App.tsx
+defaultOptions: { queries: { staleTime: 30_000 } }
+Для Service Desk 30 сек — это мало. Тикеты могут обновляться редко, а запросы идут часто.
+Фикс: увеличь до 2-5 минут для списков:
+tsx
+queries: {
+  staleTime: 5 * 60 * 1000, // 5 мин
+  gcTime: 10 * 60 * 1000,   // 10 мин (раньше cacheTime)
 }
-2. tickets.js — getTicketById без проверки прав на чтение сообщений
-В ticket-context.tsx mapTicket мапит messages из ответа API, но в tickets.js роут GET /:id возвращает messages без пагинации. Для тикетов с 1000+ сообщений — огромная нагрузка.
-Фикс: разделить эндпоинты:
-GET /:id — метаданные тикета (без messages)
-GET /:id/messages — уже есть, с пагинацией
-Или добавить ?includeMessages=false по умолчанию.
-3. SocketContext — stale closure на socket
+5. Virtualizer не используется в Tickets.tsx
+В Этапе 14 добавлен @tanstack/react-virtual для TicketDetail и ChatDetail, но Tickets.tsx (список тикетов) может тормозить при >500 записей.
+Фикс: обернуть список в useVirtualizer если tickets.length > 100.
+6. Мёртвый код: requester роль не полностью интегрирована
+В types/index.ts EmployeeRole не включает 'requester':
 TypeScript
-const sendMessage = useCallback((chatId: number, text: string) => {
-  socket?.emit('message:send', { chatId, text })  // socket может быть null
-}, [socket])
-Если socket пересоздался между рендерами — callback устарел. Но тут [socket] в deps, так что ок. Настоящая проблема: socket state обновляется, но если компонент использует sendMessage в event listener без cleanup — stale closure.
-🟡 Средние проблемы
-4. ProtectedRoute — не проверяет user при adminOnly
-TypeScript
-if (adminOnly && user?.role !== "admin" && user?.role !== "super_admin")
-Ок, но user может быть null при первом рендере после refresh — пока AuthContext восстанавливает из localStorage. Будет редирект на /, потом обратно. Мигание.
-Фикс: добавить loading состояние в AuthContext:
-TypeScript
-const [loading, setLoading] = useState(true)
-useEffect(() => { setLoading(false) }, [])
-// ...
-if (loading) return <Spinner />
-5. TicketProvider — authFetch не обрабатывает 401
-TypeScript
-async function authFetch(url: string, token: string | null, options?: RequestInit) {
-  const res = await fetch(url, { ...options, headers: { ...options?.headers, Authorization: `Bearer ${token}` } })
-  if (!res.ok) throw new Error(`API error: ${res.status}`)
-  return res.json()
-}
-При 401 не редиректит на логин, просто падает с ошибкой. api.ts это делает, но TicketProvider использует свой authFetch.
-6. usePush — race condition на subscribe
-TypeScript
-const subscribe = useCallback(async () => {
-  // ...
-  setSubscribed(true)  // внутри try
-  // ...
-  setSubscribed(false)  // в catch
-}, [supported])
-Если пользователь быстро кликнет 2 раза — два параллельных запроса. Нужен AbortController или isSubscribing ref.
-7. Kanban.tsx — DnD без dataTransfer fallback
-TypeScript
-const handleDrop = (e: React.DragEvent, status: TicketStatus) => {
-  e.preventDefault()
-  const id = Number(e.dataTransfer.getData('text/plain'))
-  if (id) updateTicketStatus(id, status)
-  setDragId(null)
-}
-Если dataTransfer пуст (браузерная quirks) — id будет NaN. Нужен fallback на dragId state:
-TypeScript
-const id = Number(e.dataTransfer.getData('text/plain')) || dragId
-🟢 Мелочи / улучшения
-8. sidebar.tsx — requester роль не видит "Ещё" меню
-В bottomNavItems фильтруется по роли, но мобильное меню (MobileBottomNav) показывает "Ещё" для всех. В SidebarContent bottomItems включает /admin только для admin/super_admin, но /profile для всех. Ок, но нет ссылки на /notifications в сайдбаре.
-9. i18n — дублирующийся ключ hasAccount в en.json
-JSON
-"hasAccount": "Already have an account?",
-// ...
-"hasAccount": "Already have an account?",
-Дважды определён — валидный JSON, но второй перезаписывает первый.
-10. date-fns locale hardcoded в utils.ts
-TypeScript
-import { ru } from 'date-fns/locale'
-// ...
-return format(new Date(dateStr), 'd MMM yyyy', { locale: ru })
-При переключении языка на EN даты остаются русскими. Нужно брать locale из i18n.
-11. App.tsx — SentryRoutes типизация
-TypeScript
-const SentryRoutes =
-  typeof Sentry.withSentryReactRouterV6Routing === 'function' ? Sentry.withSentryReactRouterV6Routing(Routes) : Routes
-Sentry.withSentryReactRouterV6Routing deprecated в новых версиях @sentry/react. Если обновили до 10.x — может не работать.
-12. server/src/socket.js — prisma.employees → prisma.employees?
-JavaScript
-prisma.employees.update({ where: { id: socket.userId }, data: { online: true } })
-В Prisma schema модель называется Employee (PascalCase), но в клиенте — prisma.employee (camelCase)? Проверьте — в schema.prisma model Employee, значит в Prisma Client будет prisma.employee (единственное число, camelCase). Тут prisma.employees — опечатка, будет undefined.
-13. background.js — warnAdminRedisMissing вызывается только при старте
-Если Redis упал во время работы — админы не узнают. Нужен healthcheck в цикле.
-14. files.js — requireRole('admin', 'senior_agent') на DELETE
-В AGENTS.md написано "role check на DELETE (senior_agent+)", а в коде requireRole('admin', 'senior_agent'). requireRole использует Math.max по индексам иерархии, так что senior_agent пройдёт. Ок, но лучше явно requireRole('senior_agent').
-15. ticket-context.tsx — useTickets без проверки token
-TypeScript
-const ticketsQuery = useQuery({
-  queryKey: ['tickets'],
-  queryFn: async () => { /* ... */ },
-  enabled: !!token,
-})
-Если token протух после запроса — authFetch вернёт 401, но useQuery будет ретраить. Нужен глобальный interceptor на 401.
-📋 План доработки (по приоритету)
+export type EmployeeRole = 'agent' | 'senior_agent' | 'admin' | 'super_admin'
+// Должно быть:
+export type EmployeeRole = 'requester' | 'agent' | 'senior_agent' | 'admin' | 'super_admin'
+🟢 Мелочи (DX / качество кода)
+7. ESLint: 115 warnings
+Запусти npm run lint и пофикси:
+no-explicit-any — замени на конкретные типы
+no-unused-vars с _ префиксом — проверь, что argsIgnorePattern работает
+8. Playwright скрипт check-console.mjs
+В правилах написано: "после каждого изменения кода запускать Playwright скрипт". Но в .gitignore он был удалён из игнора (Этап 17). Убедись, что скрипт существует и проверяет hasRussianText: true.
+9. Дублирование auditLogMiddleware
+В app.js используется mount() без auditLogMiddleware, но в Этапе 17 написано, что он перенесён внутрь каждого роутера. Проверь tickets.js — там router.use(auditLogMiddleware) есть, а в app.js mount() не дублирует.
+Чек-лист "допила" (приоритет по убыванию)
 Table
-Приоритет	Задача	Файлы
-🔴 P0	Исправить двойной res.json()	src/lib/api.ts
-🔴 P0	Исправить prisma.employees → prisma.employee	server/src/socket.js
-🟡 P1	Добавить loading в AuthContext	src/context/AuthContext.tsx
-🟡 P1	Унифицировать authFetch с api.ts или добавить 401-обработку	src/context/ticket-context.tsx
-🟡 P1	Убрать messages из GET /:id по умолчанию	server/src/routes/tickets.js, src/context/ticket-context.tsx
-🟢 P2	Исправить дубль hasAccount в EN locale	src/i18n/locales/en.json
-🟢 P2	Динамический locale для date-fns	src/lib/utils.ts
-🟢 P2	Race condition в usePush	src/lib/use-push.ts
-🟢 P2	Fallback DnD в Kanban	src/pages/Kanban.tsx
+#	Задача	Файл	Сложность
+1	Исправить Zod .email()	src/lib/schemas.ts	1 мин
+2	Добавить 'requester' в EmployeeRole	src/types/index.ts	1 мин
+3	Проверить import prisma в files.js	server/src/routes/files.js	1 мин
+4	Увеличить staleTime / добавить gcTime	src/App.tsx	2 мин
+5	Почистить ESLint warnings до <50	весь проект	30 мин
+6	Добавить virtualizer в Tickets.tsx	src/pages/Tickets.tsx	1 час
+7	Проверить check-console.mjs	корень проекта	10 мин

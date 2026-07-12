@@ -1,0 +1,155 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+vi.mock('../../prisma.js', () => ({
+  default: {
+    tickets: {
+      findUnique: vi.fn(),
+    },
+    ticket_messages: {
+      findMany: vi.fn(),
+    },
+    employees: {
+      findMany: vi.fn(),
+    },
+    notifications: {
+      findFirst: vi.fn(),
+    },
+  },
+}))
+
+vi.mock('../../email.js', () => ({ sendTicketNotification: vi.fn().mockResolvedValue() }))
+vi.mock('../../telegram.js', () => ({ sendTelegramNotification: vi.fn() }))
+vi.mock('../../routes/notifications.js', () => ({ createNotification: vi.fn().mockResolvedValue() }))
+vi.mock('../../logger.js', () => ({ default: { warn: vi.fn(), error: vi.fn() } }))
+
+import prisma from '../../prisma.js'
+import { sendTicketNotification } from '../../email.js'
+import { sendTelegramNotification } from '../../telegram.js'
+import { createNotification } from '../../routes/notifications.js'
+import {
+  notifyTicketCreated,
+  notifyStatusChanged,
+  notifyPriorityChanged,
+  notifyTicketAssigned,
+  notifyTicketMessage,
+  notifySlaBreached,
+} from '../../notify.js'
+
+const mockTicket = {
+  id: 1,
+  title: 'Test ticket',
+  status: 'open',
+  priority: 'medium',
+  category: 'IT',
+  created_by: 10,
+  assigned_to: 20,
+  due_at: new Date(Date.now() - 3600000),
+  created_by_employee: { id: 10, name: 'Creator', email: 'creator@test.com' },
+  assigned_to_employee: { id: 20, name: 'Assignee', email: 'assignee@test.com' },
+}
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  prisma.tickets.findUnique.mockResolvedValue(mockTicket)
+  prisma.ticket_messages.findMany.mockResolvedValue([{ sender_id: 30 }])
+  prisma.employees.findMany.mockResolvedValue([
+    { id: 99, email: 'admin@test.com', name: 'Admin' },
+  ])
+  prisma.notifications.findFirst.mockResolvedValue(null)
+})
+
+describe('notifyTicketCreated', () => {
+  it('sends notification to creator', async () => {
+    await notifyTicketCreated(1, 'User')
+    expect(createNotification).toHaveBeenCalledWith(expect.objectContaining({
+      userId: 10, type: 'ticket_created',
+    }))
+  })
+
+  it('sends email to creator', async () => {
+    await notifyTicketCreated(1, 'User')
+    expect(sendTicketNotification).toHaveBeenCalledWith(expect.objectContaining({
+      to: 'creator@test.com',
+    }))
+  })
+
+  it('sends telegram notification', async () => {
+    await notifyTicketCreated(1, 'User')
+    expect(sendTelegramNotification).toHaveBeenCalled()
+  })
+
+  it('returns early if ticket not found', async () => {
+    prisma.tickets.findUnique.mockResolvedValue(null)
+    await notifyTicketCreated(999, 'User')
+    expect(createNotification).not.toHaveBeenCalled()
+  })
+})
+
+describe('notifyStatusChanged', () => {
+  it('notifies creator and assignee', async () => {
+    await notifyStatusChanged(1, 'open', 'in_progress', 'Admin')
+    expect(createNotification).toHaveBeenCalledTimes(2)
+  })
+
+  it('sends email to creator and assignee', async () => {
+    await notifyStatusChanged(1, 'open', 'resolved', 'Admin')
+    expect(sendTicketNotification).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('notifyPriorityChanged', () => {
+  it('sends telegram only', async () => {
+    await notifyPriorityChanged(1, 'low', 'critical', 'Admin')
+    expect(sendTelegramNotification).toHaveBeenCalled()
+    expect(createNotification).not.toHaveBeenCalled()
+  })
+})
+
+describe('notifyTicketAssigned', () => {
+  it('notifies assignee', async () => {
+    await notifyTicketAssigned(1, 20, 'Admin')
+    expect(createNotification).toHaveBeenCalledWith(expect.objectContaining({
+      userId: 20, type: 'ticket_assigned',
+    }))
+  })
+
+  it('does not notify if assignee is creator', async () => {
+    await notifyTicketAssigned(1, 10, 'Admin')
+    expect(createNotification).not.toHaveBeenCalled()
+  })
+})
+
+describe('notifyTicketMessage', () => {
+  it('notifies participants except sender', async () => {
+    await notifyTicketMessage(1, 10, 'Creator', 'Hello')
+    expect(createNotification).toHaveBeenCalled()
+    const calledFor = createNotification.mock.calls.map(c => c[0].userId)
+    expect(calledFor).not.toContain(10)
+  })
+})
+
+describe('notifySlaBreached', () => {
+  it('notifies all targets when not recently notified', async () => {
+    await notifySlaBreached(1)
+    expect(createNotification).toHaveBeenCalled()
+  })
+
+  it('skips users already notified in last 24h', async () => {
+    prisma.notifications.findFirst.mockResolvedValue({ id: 1 })
+    await notifySlaBreached(1)
+    expect(createNotification).not.toHaveBeenCalled()
+  })
+
+  it('sends email to admins', async () => {
+    await notifySlaBreached(1)
+    expect(sendTicketNotification).toHaveBeenCalledWith(expect.objectContaining({
+      to: 'admin@test.com',
+    }))
+  })
+
+  it('returns early if ticket not found', async () => {
+    prisma.tickets.findUnique.mockResolvedValue(null)
+    await notifySlaBreached(1)
+    expect(createNotification).not.toHaveBeenCalled()
+  })
+})

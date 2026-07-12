@@ -28,6 +28,10 @@ function safeNotify(promise) {
   promise.catch(err => logger.error(`Notify failed: ${err.message}`))
 }
 
+function sendEmail(to, subject, text) {
+  safeSend(() => retryWithBackoff(() => sendTicketNotification({ to, subject, text })))
+}
+
 async function getTicketWithUsers(ticketId) {
   const ticket = await prisma.tickets.findUnique({
     where: { id: ticketId },
@@ -71,11 +75,8 @@ export async function notifyTicketCreated(ticketId, actorName) {
   }))
   sendTelegramNotification(`🆕 Новый тикет ${tag}\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\nКатегория: ${t.category}`)
   if (t.creatorEmail) {
-    safeSend(() => retryWithBackoff(() => sendTicketNotification({
-      to: t.creatorEmail,
-      subject: `Тикет #${ticketId} создан: ${t.title}`,
-      text: `Ваш тикет "${t.title}" (#${ticketId}) создан.\nСтатус: Открыт\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\n\nService Desk`,
-    })))
+    sendEmail(t.creatorEmail, `Тикет #${ticketId} создан: ${t.title}`,
+      `Ваш тикет "${t.title}" (#${ticketId}) создан.\nСтатус: Открыт\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\n\nService Desk`)
   }
 }
 
@@ -103,11 +104,8 @@ export async function notifyStatusChanged(ticketId, oldStatus, newStatus, actorN
   if (t.creatorEmail && !emailTargets.includes(t.creatorId)) emailTargets.push({ email: t.creatorEmail, name: t.creatorName })
   if (t.assigneeEmail && t.assigneeId !== t.creatorId) emailTargets.push({ email: t.assigneeEmail, name: t.assigneeName })
   for (const et of emailTargets) {
-    safeSend(() => retryWithBackoff(() => sendTicketNotification({
-      to: et.email,
-      subject: `Статус тикета ${tag}: ${newLabel}`,
-      text: `Тикет "${t.title}" (#${ticketId})\nСтатус: ${oldLabel} → ${newLabel}\n\nService Desk`,
-    })))
+    sendEmail(et.email, `Статус тикета ${tag}: ${newLabel}`,
+      `Тикет "${t.title}" (#${ticketId})\nСтатус: ${oldLabel} → ${newLabel}\n\nService Desk`)
   }
 }
 
@@ -133,11 +131,8 @@ export async function notifyTicketAssigned(ticketId, assigneeId, assignedByName)
   sendTelegramNotification(`👤 Тикет #${ticketId} назначен на пользователя\n"${t.title}"\nНазначил: ${assignedByName}`)
 
   if (t.assigneeEmail) {
-    safeSend(() => retryWithBackoff(() => sendTicketNotification({
-      to: t.assigneeEmail,
-      subject: `Тикет #${ticketId} назначен на вас: ${t.title}`,
-      text: `Тикет "${t.title}" (#${ticketId}) назначен на вас.\nСтатус: ${STATUS_LABELS[t.status] || t.status}\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\n\nService Desk`,
-    })))
+    sendEmail(t.assigneeEmail, `Тикет #${ticketId} назначен на вас: ${t.title}`,
+      `Тикет "${t.title}" (#${ticketId}) назначен на вас.\nСтатус: ${STATUS_LABELS[t.status] || t.status}\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\n\nService Desk`)
   }
 }
 
@@ -205,11 +200,8 @@ export async function notifySlaBreached(ticketId) {
     .map(a => a.email)
     .filter(Boolean)
   for (const email of adminEmails) {
-    safeSend(() => retryWithBackoff(() => sendTicketNotification({
-      to: email,
-      subject: `SLA просрочка: тикет #${ticketId}`,
-      text: `Тикет "${t.title}" (#${ticketId}) просрочен по SLA.\nСрок реакции истёк: ${new Date(t.due_at).toLocaleString('ru-RU')}\n\nService Desk`,
-    })))
+    sendEmail(email, `SLA просрочка: тикет #${ticketId}`,
+      `Тикет "${t.title}" (#${ticketId}) просрочен по SLA.\nСрок реакции истёк: ${new Date(t.due_at).toLocaleString('ru-RU')}\n\nService Desk`)
   }
 
   sendTelegramNotification(`🚨 SLA просрочка\nТикет #${ticketId}: ${t.title}\nСрок реакции истёк: ${new Date(t.due_at).toLocaleString('ru-RU')}`)

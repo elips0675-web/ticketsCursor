@@ -39,7 +39,7 @@
 | **При коммите** | Husky → lint-staged | `eslint --fix` + `prettier --write` на изменённых файлах |
 | **В CI (GitHub Actions)** | `tsc --noEmit` | TypeScript strict type-check |
 | | `eslint . --max-warnings 100` | Синтаксис, неисп. переменные, импорты |
-| | `vitest run` | Юнит-тесты (154 клиентских + 116 серверных) |
+| | `vitest run` | Юнит-тесты (154 клиентских + 135 серверных) |
 | | `vite build` | Сборка production |
 | **Ручной запуск** | `npm run lint` | ESLint (warnings: `no-explicit-any`, `no-unused-vars`) |
 | | `npm run type-check` | `tsc --noEmit` |

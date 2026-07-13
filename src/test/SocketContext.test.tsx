@@ -9,7 +9,7 @@ const mockEmit = vi.fn()
 const mockClose = vi.fn()
 const mockIo = vi.fn(() => ({ on: mockOn, off: mockOff, emit: mockEmit, close: mockClose }))
 
-vi.mock('socket.io-client', () => ({ io: (...args: any[]) => mockIo(...args) }))
+vi.mock('socket.io-client', () => ({ io: (...args: unknown[]) => mockIo(...args) }))
 
 function renderWithToken(token: string | null) {
   return renderHook(() => useSocket(), {
@@ -17,7 +17,7 @@ function renderWithToken(token: string | null) {
       <AuthContext.Provider
         value={{
           token,
-          user: token ? ({ id: 1, name: 'T', email: 't@t.com', role: 'agent', avatar: null } as any) : null,
+          user: token ? { id: 1, name: 'T', email: 't@t.com', role: 'agent', avatar: null } : null,
           login: vi.fn(),
           logout: vi.fn(),
           loading: false,
@@ -47,7 +47,7 @@ describe('SocketProvider', () => {
   })
 
   it('calls sendMessage', () => {
-    mockOn.mockImplementation((event: string, cb: any) => {
+    mockOn.mockImplementation((event: string, cb: (...args: unknown[]) => void) => {
       if (event === 'connect') cb()
     })
     const { result } = renderWithToken('token')
@@ -58,7 +58,7 @@ describe('SocketProvider', () => {
   })
 
   it('calls joinChat and leaveChat', () => {
-    mockOn.mockImplementation((event: string, cb: any) => {
+    mockOn.mockImplementation((event: string, cb: (...args: unknown[]) => void) => {
       if (event === 'connect') cb()
     })
     const { result } = renderWithToken('token')
@@ -73,7 +73,7 @@ describe('SocketProvider', () => {
   })
 
   it('calls notifyAll', () => {
-    mockOn.mockImplementation((event: string, cb: any) => {
+    mockOn.mockImplementation((event: string, cb: (...args: unknown[]) => void) => {
       if (event === 'connect') cb()
     })
     const { result } = renderWithToken('token')

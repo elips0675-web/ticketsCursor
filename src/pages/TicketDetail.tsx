@@ -31,7 +31,7 @@ import {
 import type { TicketStatus, TicketPriority } from '@/types'
 import { API_URL } from '@/lib/api'
 
-function mapTicketDetail(raw: any): Ticket {
+function mapTicketDetail(raw: Record<string, unknown>): Ticket {
   return {
     id: raw.id,
     title: raw.title,
@@ -52,7 +52,7 @@ function mapTicketDetail(raw: any): Ticket {
         }
       : undefined,
     messages: Array.isArray(raw.messages)
-      ? raw.messages.map((m: any) => ({
+      ? (raw.messages as Record<string, unknown>[]).map((m: Record<string, unknown>) => ({
           id: m.id,
           ticketId: m.ticket_id,
           senderId: m.sender_id,
@@ -125,7 +125,7 @@ export default function TicketDetail() {
 
   useEffect(() => {
     if (!socket || !ticket) return
-    const onMessage = (data: { ticketId: number; message: any }) => {
+    const onMessage = (data: { ticketId: number; message: { senderName: string } }) => {
       if (data.ticketId === ticket.id) {
         toast.info(t('tickets.newMessageFrom', { name: data.message.senderName }))
       }
@@ -284,20 +284,20 @@ export default function TicketDetail() {
                               <p className="text-sm text-foreground/80">{msg.text}</p>
                               {msg.attachments && msg.attachments.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-2">
-                                  {msg.attachments.map((att: any, i: number) => (
+                                  {msg.attachments.map((att: Record<string, unknown>, i: number) => (
                                     <a
                                       key={i}
-                                      href={att.url}
+                                      href={att.url as string}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="flex items-center gap-1.5 text-xs bg-muted rounded-md px-2 py-1 hover:bg-muted/80 transition-colors"
                                     >
-                                      {att.url.match(/\.(png|jpg|jpeg|gif|svg)$/i) ? (
+                                      {(att.url as string).match(/\.(png|jpg|jpeg|gif|svg)$/i) ? (
                                         <ImageIcon className="w-3 h-3" />
                                       ) : (
                                         <FileText className="w-3 h-3" />
                                       )}
-                                      {att.name || att.url.split('/').pop()}
+                                      {(att.name as string) || (att.url as string).split('/').pop()}
                                     </a>
                                   ))}
                                 </div>
@@ -324,7 +324,7 @@ export default function TicketDetail() {
                             <p className="text-sm text-foreground/80">{msg.text}</p>
                             {msg.attachments && msg.attachments.length > 0 && (
                               <div className="flex flex-wrap gap-2 mt-2">
-                                {msg.attachments.map((att: any, i: number) => (
+                                {msg.attachments.map((att: Record<string, unknown>, i: number) => (
                                   <a
                                     key={i}
                                     href={att.url}

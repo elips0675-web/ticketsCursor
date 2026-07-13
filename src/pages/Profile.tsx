@@ -9,12 +9,13 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { User, Mail, Phone, Briefcase, MapPin, FileText, Settings, Camera, Save, Monitor, Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import type { EmployeeProfile } from '@/types'
 import { API_URL } from '@/lib/api'
 
 export default function ProfilePage() {
   const { t } = useTranslation()
   const { user: authUser, token } = useAuth()
-  const [employee, setEmployee] = useState<any>(null)
+  const [employee, setEmployee] = useState<EmployeeProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', phone: '', title: '', bio: '' })
@@ -44,7 +45,7 @@ export default function ProfilePage() {
       .then((res) => (res.ok ? res.json() : { data: [] }))
       .then((body) => {
         const data = body.data || body
-        const me = data.find((e: any) => e.id === authUser?.id) || {}
+        const me = (data as Record<string, unknown>[]).find((e) => e.id === authUser?.id) || {}
         setEmployee(me)
         setForm({
           name: me.name || '',

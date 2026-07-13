@@ -12,11 +12,11 @@ import { toast } from 'sonner'
 import { api, API_URL } from '@/lib/api'
 import { SkeletonCardGrid } from '@/components/skeletons'
 
-function mapFolder(raw: any): FileFolder {
+function mapFolder(raw: Record<string, unknown>): FileFolder {
   return {
     id: raw.id,
     name: raw.name,
-    files: (raw.files || []).map((file: any) => ({
+    files: ((raw.files as Record<string, unknown>[]) || []).map((file: Record<string, unknown>) => ({
       id: file.id,
       name: file.name,
       size: file.size,

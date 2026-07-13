@@ -13,9 +13,19 @@ const ACTION_COLORS: Record<string, string> = {
   assigned: 'bg-purple-100 text-purple-700',
 }
 
+interface AuditLogItem {
+  id: number
+  user_name: string
+  action: string
+  entity_id: number
+  entity_type: string
+  details: string
+  created_at: string
+}
+
 export default function AdminAudit() {
   const { t } = useTranslation()
-  const [logs, setLogs] = useState<any[]>([])
+  const [logs, setLogs] = useState<AuditLogItem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 

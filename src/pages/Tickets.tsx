@@ -35,10 +35,10 @@ export default function Tickets() {
 
   useEffect(() => {
     if (!socket) return
-    const onCreated = (ticket: any) => {
+    const onCreated = (ticket: { title: string }) => {
       toast.success(t('tickets.notifNewTicket'), { description: ticket.title })
     }
-    const onUpdated = (data: any) => {
+    const onUpdated = (data: { id: number }) => {
       toast.info(t('tickets.notifTicketUpdated'), { description: `#${data.id}` })
     }
     socket.on('ticket:created', onCreated)

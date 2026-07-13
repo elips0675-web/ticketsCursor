@@ -98,13 +98,12 @@
 
 ТЕСТЫ
 
-  • Клиентские: 163/163 (40 файлов, vitest + jsdom)
-  • Серверные: 239/239 (14 файлов, vitest + supertest, notify.test.js + metrics.test.js + middleware.test.js + socket.test.js + sla)
+  • Клиентские: 209/209 (44 файла, vitest + jsdom)
+  • Серверные: 295/295 (20 файлов, vitest + supertest)
   • E2E: Playwright (логин, тикеты, чаты, админка, SLA)
-  • Coverage server: 57.04% Stmts / 58.54% Lines
-    - Routes: 62.25% (auth 72.82%, tickets 74.71%, files 54.38%)
-    - Services: 94.29%
-  • Coverage client: ~52.55%
+  • Coverage server: 64.20% Stmts / 59.01% Branch / 65.97% Funcs / 65.43% Lines
+  • Coverage client: 57.33% Stmts / 48.29% Branch / 45.64% Funcs / 60.09% Lines
+  • ESLint: 0 errors, 0 warnings no-explicit-any (client), 3 errors (server test files)
   • Type-check + build: успешно
 
 ────────────────────────────────────────────────────────────────────────────
@@ -263,3 +262,18 @@
 ### Этап 6 — Node 20→22 (завершён)
 - server/Dockerfile: node:20-alpine → node:22-alpine (3 строки)
 - Dockerfile (client): node:20-alpine → node:22-alpine
+
+### Этап 7 — Coverage + ESLint финальные (завершён)
+- **ESLint**: 0 warnings no-explicit-any (исправлены 43 в 20 файлах: 11 production + 9 test)
+  - Добавлены интерфейсы: NotificationItem, AuditLogItem, SearchResultItem, EmployeeProfile
+  - Типизированы: Record<string, unknown>, LucideIcon, конкретные типы колбэков
+  - Убраны `as any` касты в ProtectedRoute.test.tsx и SocketContext.test.tsx
+- **Серверные тесты**: 239→**295** (6 новых файлов: cache, email, storage, validateUpload, clamav, background)
+  - Coverage: 57%→**64%** Stmts, 53%→**59%** Branch, 60%→**66%** Funcs, 60%→**65%** Lines
+  - Пороги обновлены: stmts 64, branches 55, functions 62, lines 63
+- **Клиентские тесты**: 163→**209** (5 новых expanded-файлов)
+  - Login.tsx: 24%→**88%** Stmts, Search.tsx: 33%→**85%**, Employees.tsx: 29%→**56%**
+  - Dashboard.expanded.test.tsx (8 тестов), Tickets.expanded.test.tsx (8), Employees.expanded.test.tsx (13)
+  - Login.expanded.test.tsx (11 тестов: API, LDAP, dev-login, валидация), Search.expanded.test.tsx (9)
+  - Coverage pages: 46%→**53%** Stmts, общий клиент: 52%→**57%**
+  - Пороги обновлены: stmts 57, branches 48, functions 45, lines 60

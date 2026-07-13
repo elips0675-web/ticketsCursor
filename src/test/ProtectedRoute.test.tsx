@@ -12,9 +12,7 @@ function renderWithAuth(token: string | null, role?: string) {
       <AuthContext.Provider
         value={{
           token,
-          user: token
-            ? ({ id: 1, name: 'Test', email: 'test@test.com', role: role || 'agent', avatar: null } as any)
-            : null,
+          user: token ? { id: 1, name: 'Test', email: 'test@test.com', role: role || 'agent', avatar: null } : null,
           login: vi.fn(),
           logout: vi.fn(),
           loading: false,
@@ -59,9 +57,7 @@ describe('ProtectedRoute adminOnly', () => {
         <AuthContext.Provider
           value={{
             token,
-            user: token
-              ? ({ id: 1, name: 'Test', email: 'test@test.com', role: role || 'agent', avatar: null } as any)
-              : null,
+            user: token ? { id: 1, name: 'Test', email: 'test@test.com', role: role || 'agent', avatar: null } : null,
             login: vi.fn(),
             logout: vi.fn(),
             loading: false,

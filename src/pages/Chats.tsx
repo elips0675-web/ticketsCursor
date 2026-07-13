@@ -12,7 +12,7 @@ import { SkeletonChatRow } from '@/components/skeletons'
 import type { ChatRoom } from '@/types'
 import { API_URL } from '@/lib/api'
 
-function mapChatRoom(raw: any): ChatRoom {
+function mapChatRoom(raw: Record<string, unknown>): ChatRoom {
   return {
     id: raw.id,
     name: raw.name,

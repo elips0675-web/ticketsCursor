@@ -31,7 +31,7 @@ interface TicketContextType {
 
 const TicketContext = createContext<TicketContextType | null>(null)
 
-function mapTicket(raw: any): Ticket {
+function mapTicket(raw: Record<string, unknown>): Ticket {
   return {
     id: raw.id,
     title: raw.title,
@@ -52,7 +52,7 @@ function mapTicket(raw: any): Ticket {
         }
       : undefined,
     messages: Array.isArray(raw.messages)
-      ? raw.messages.map((m: any) => ({
+      ? raw.messages.map((m: Record<string, unknown>) => ({
           id: m.id,
           ticketId: m.ticket_id,
           senderId: m.sender_id,
@@ -74,7 +74,7 @@ function mapTicket(raw: any): Ticket {
   }
 }
 
-function mapEmployee(e: any): Employee {
+function mapEmployee(e: Record<string, unknown>): Employee {
   return {
     id: e.id,
     name: e.name,

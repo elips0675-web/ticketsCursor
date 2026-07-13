@@ -7,11 +7,21 @@ import { useSocket } from '@/context/SocketContext'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
+interface NotificationItem {
+  id: number
+  type: string
+  title: string
+  body?: string
+  link?: string
+  is_read: number
+  created_at: string
+}
+
 export default function NotificationBell({ inSidebar }: { inSidebar?: boolean }) {
   const { user } = useAuth()
   const { socket } = useSocket()
   const navigate = useNavigate()
-  const [notifications, setNotifications] = useState<any[]>([])
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const ref = useRef<HTMLDivElement>(null)
@@ -28,7 +38,7 @@ export default function NotificationBell({ inSidebar }: { inSidebar?: boolean })
 
   useEffect(() => {
     if (!socket || !user) return
-    const handler = (notif: any) => {
+    const handler = (notif: NotificationItem) => {
       setNotifications((prev) => [notif, ...prev])
       if (notif.link) {
         toast(notif.title, {

@@ -29,7 +29,9 @@ import { SkeletonCardGrid, SkeletonTableRow } from '@/components/skeletons'
 import { api } from '@/lib/api'
 import type { Employee } from '@/types'
 
-const roleIcons: Record<string, any> = {
+import { type LucideIcon } from 'lucide-react'
+
+const roleIcons: Record<string, LucideIcon> = {
   agent: User,
   senior_agent: UserCog,
   admin: Shield,

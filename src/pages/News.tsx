@@ -11,7 +11,7 @@ import type { NewsPost } from '@/types'
 import { useAuth } from '@/context/AuthContext'
 import { api } from '@/lib/api'
 
-function mapNews(raw: any): NewsPost {
+function mapNews(raw: Record<string, unknown>): NewsPost {
   return {
     id: raw.id,
     title: raw.title,

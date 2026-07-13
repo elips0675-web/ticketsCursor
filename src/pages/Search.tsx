@@ -15,13 +15,27 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { api } from '@/lib/api'
 
+interface SearchResultItem {
+  id: number
+  title?: string
+  name?: string
+  status?: string
+  priority?: string
+  email?: string
+  department?: string
+  category?: string
+  mime_type?: string
+  size?: number
+  original_name?: string
+}
+
 interface SearchResult {
-  tickets: any[]
-  employees: any[]
-  wiki: any[]
-  news: any[]
-  chats: any[]
-  files: any[]
+  tickets: SearchResultItem[]
+  employees: SearchResultItem[]
+  wiki: SearchResultItem[]
+  news: SearchResultItem[]
+  chats: SearchResultItem[]
+  files: SearchResultItem[]
 }
 
 export default function SearchPage() {
@@ -190,6 +204,8 @@ export default function SearchPage() {
   )
 }
 
+import { type LucideIcon } from 'lucide-react'
+
 function Section({
   title,
   icon: Icon,
@@ -199,11 +215,11 @@ function Section({
   meta,
 }: {
   title: string
-  icon: any
-  results: any[]
-  href: (r: any) => string
-  label: (r: any) => string
-  meta: (r: any) => React.ReactNode
+  icon: LucideIcon
+  results: SearchResultItem[]
+  href: (r: SearchResultItem) => string
+  label: (r: SearchResultItem) => string
+  meta: (r: SearchResultItem) => React.ReactNode
 }) {
   const navigate = useNavigate()
   if (results.length === 0) return null
@@ -215,7 +231,7 @@ function Section({
         <span className="text-xs text-muted-foreground">({results.length})</span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {results.map((r: any) => (
+        {results.map((r) => (
           <button
             key={r.id}
             onClick={() => navigate(href(r))}

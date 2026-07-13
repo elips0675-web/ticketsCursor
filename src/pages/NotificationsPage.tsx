@@ -26,10 +26,20 @@ const TYPE_COLORS: Record<string, string> = {
   system: 'bg-gray-500/10 text-gray-600',
 }
 
+interface NotificationItem {
+  id: number
+  type: string
+  title: string
+  body?: string
+  link?: string
+  is_read: number
+  created_at: string
+}
+
 export default function NotificationsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [notifications, setNotifications] = useState<any[]>([])
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [search, setSearch] = useState('')

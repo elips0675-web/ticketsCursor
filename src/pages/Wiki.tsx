@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import { SkeletonCardGrid } from '@/components/skeletons'
 
-function mapArticle(raw: any): WikiArticle {
+function mapArticle(raw: Record<string, unknown>): WikiArticle {
   return {
     id: raw.id,
     title: raw.title,
@@ -63,7 +63,8 @@ export default function WikiPage() {
 
   const articlesQuery = useQuery({
     queryKey: ['wiki'],
-    queryFn: () => api.get('/wiki').then((data) => ((data?.data || data || []) as any[]).map(mapArticle)),
+    queryFn: () =>
+      api.get('/wiki').then((data) => ((data?.data || data || []) as Record<string, unknown>[]).map(mapArticle)),
   })
 
   const loading = articlesQuery.isLoading

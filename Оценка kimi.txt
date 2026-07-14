@@ -1,66 +1,151 @@
-Проект серьёзный, но есть конкретные зоны роста. Вот разбор по блокам:
-🔴 Критично — надо допилить
-1. Покрытие тестами (техдолг #1)
-Сейчас 64% сервер / 58.5% клиент, цель >70%. Где конкретно дырки:
+Вот честный разбор — что реально осталось не доделанным и как это закрыть. Проект сильно вырос (8.5/10), но есть 3 категории остатков: баги-на-будущее, не закрытые фичи из промтов и инфраструктурный долг.
+🔴 Что не так (остаточные проблемы)
+1. React Hooks — 28 warnings ESLint (потенциальные баги)
+react-hooks/exhaustive-deps и set-state-in-effect — это не просто "warning'и в консоли", это race conditions и infinite loops в продакшене. В корпоративном ПО, где сессии длинные, это критично.
+Где искать: скорее всего в Dashboard.tsx, Tickets.tsx, TicketDetail.tsx, ChatDetail.tsx — там где useEffect + setState без guard'ов, и хуки с пропущенными deps.
+2. Админ-панель — не закрытые фичи из промта #10
+Нет настроек компании (название, логотип, часовой пояс)
+Нет email-шаблонов с переменными ({{userName}}, {{ticketId}})
+Audit log пишется вручную (auditLogMiddleware вставлен в 12 файлов), но нет автоматического middleware на ВСЕ POST/PUT/DELETE
+Нет CSV экспорта аудита
+Нет фильтров по дате/типу в аудите
+3. Уведомления — не закрытые фичи из промта #11
+Нет уведомлений из чатов и календаря (только тикеты)
+Нет страницы "Все уведомления" (только dropdown колокольчика)
+Нет read receipts в чатах (WebSocket)
+4. WebSocket — не закрытые фичи из промта #12
+Нет user:online/offline broadcast (есть last_active в БД, но не real-time статус)
+Нет offline message queue (если юзер не в сети — сообщения теряются для WebSocket, остаются только в БД)
+Нет комнат ticket:{id} для real-time обновлений тикета (есть REST polling через React Query)
+5. Серверное покрытие — 64% → цель 70%
+background.js — нет тестов на BullMQ fallback (setInterval)
+search.js — нет тестов на FULLTEXT → LIKE fallback и SQL-injection guard
+tickets.service.js — 85%, остались ветки 500-ответов при throw
+6. Интеграционные тесты
+check-console.mjs проверяет 6 страниц, нужно 12+ (/admin, /calendar, /polls, /wiki, /chats, /employees, /search, /files, /profile, /kanban, /notifications, /register)
+Playwright 22 теста — мало для production. Нет сценариев: LDAP-логин, загрузка файла + ClamAV, SLA эскалация, drag&drop в чатах
+7. Инфраструктура
+Helmet CSP может ломать Vite HMR в dev — нужно conditional policy
+WebSocket rate-limit — 10 handshake/min per IP ломается за NAT (100 человек в офисе = 1 IP). Нужен whitelist внутренних сетей или skipSuccessfulRequests
+Sentry — не интегрирован в error-handling middleware (PII filter есть, но не подключен к window.onerror)
+🛠️ Как допилить (план по приоритетам)
+Этап A (1-2 дня) — React Hooks warnings → 0
+Цель: убрать 28 warnings, устранить race conditions.
+Стратегия: не рефакторить всё подряд, а применить 3 паттерна массово:
+Guard в useEffect — если setState вызывается в effect'е, добавить if (isMounted) или if (!data) return
+useCallback для handler'ов — все функции, передаваемые в deps useEffect, обернуть в useCallback
+eslint-disable-line с комментарием — только для осознанных случаев (например, intentional mount effect)
+Конкретные файлы (предположительно):
+src/pages/Dashboard.tsx — эффект с setStats без guard
+src/pages/Tickets.tsx — фильтры в useEffect без memo
+src/context/ticket-context.tsx — socket listener в useEffect без cleanup guard
+src/pages/ChatDetail.tsx — typing indicator setInterval + setState
+Критерий готовности: npm run lint → 0 warnings.
+Этап B (2-3 дня) — Server coverage 64% → 70%
+Файлы для покрытия:
 Table
-Модуль	Что не покрыто	Действие
-Dashboard.tsx Branch	69% — не покрыт Space+Enter на карточках	Добавить userEvent.keyboard('{space}') и Enter в тесты
-Server routes	62% — не все error-бранчи в контроллерах	Мокать сервисы на throw, проверять 500-ответы
-React hooks warnings	28 штук — exhaustive-deps, set-state-in-effect	Переписать эффекты, вынести state-логику в хуки
-2. ESLint — 3 ошибки + 28 warnings
-3 errors в серверных тестах: beforeEach/afterEach no-undef — добавить 'vitest-globals' в env ESLint
-28 react-hooks warnings — не просто "предупреждения", а потенциальные баги гонки состояний. Нужен рефакторинг, не подавление.
-3. Express 5 + app.router — проверить breaking changes
-Express 5.2.1 требует async ошибки в next(err) — убедиться, что все throw в async-роутах ловит центральный error handler, а не падает процесс.
-🟠 Средний приоритет — улучшит качество
-4. Типизация — добить остатки any
-Хотя no-explicit-any: error и 0 warnings, в контексте написано "осознанный trade-off" — значит где-то всё ещё unknown без guard'ов. Проверить:
-api.ts — generic <T> работает корректно с Zod-схемами?
-socket.js — типизация event payload'ов через Socket<ServerToClientEvents, ClientToServerEvents>
-ticket-context.tsx — типы для optimistic updates
-5. Redis cache — race condition
-В Этапе K2 был Lua-скрипт для атомарной инвалидации, но staleTime 5 мин + gcTime 10 мин на клиенте могут давать несогласованность. Проверить:
-Инвалидация кэша при WebSocket-эмитах (ticket:updated → queryClient.invalidateQueries)
-dedup SLA уведомлений — проверить, что notifySlaBreached не блокирует алерты assignee (Qwen #2)
-6. Безопасность — мелочи
-helmet в Express 5 — проверить, что contentSecurityPolicy не ломает Vite HMR в dev
-rate-limit WebSocket handshake — 10/min per IP, но за NAT'ом в офисе 100 сотрудников = блок. Добавить skipSuccessfulRequests или whitelist для внутренних IP
-🟡 Низкий приоритет — "приятно иметь"
-7. Sentry/APM
-В TECHNICAL.md написано "не приоритетно", но для production-ready системы без мониторинга — слепая зона. Минимум: интегрировать Sentry в error-handling middleware и window.onerror на фронте.
-8. Dark theme
-Удалили осознанно, но если корпоративные пользователи работают ночью — стоит вернуть через prefers-color-scheme без переключателя.
-9. E2E покрытие
-22 теста — мало для 50+ endpoint'ов. Критичные сценарии без E2E:
-LDAP-логин (только unit)
-File upload + ClamAV (опциональный сервис)
-SLA эскалация (фоновый процесс, сложно мокать)
-📋 Конкретный план "допила"
-Этап 21 — Dashboard 100% + тесты
-bash
-# Добавить в Dashboard.expanded.test.tsx:
-- userEvent.keyboard('{space}') на карточку статуса
-- userEvent.keyboard('{enter}') на виджет сотрудников
-- Проверить редирект с queryParams (status, priority)
-Этап 22 — ESLint hooks
-bash
-# 1. Переписать set-state-in-effect:
-#    Плохо: useEffect(() => setState(x), [x])
-#    Хорошо: useEffect(() => { if (x !== state) setState(x) }, [x])
-# 2. exhaustive-deps: добавить недостающие deps или вынести в useCallback
-Этап 23 — Server coverage 64% → 70%
-Добавить тесты на throw в tickets.service.js (85% → 95%)
-Покрыть background.js — мок BullMQ, проверить setInterval fallback
-Покрыть search.js — FULLTEXT fallback, LIKE fallback, SQL-injection guard
-Этап 24 — Интеграционные тесты
-check-console.mjs — расширить до 10 страниц (добавить /admin, /calendar, /polls)
-Playwright: добавить сценарий "agent назначает тикет → проверяет дашборд"
-🎯 Итоговая оценка
+Файл	Что тестировать
+server/src/utils/background.js	BullMQ Queue создание, Worker, fallback на setInterval при отсутствии Redis, graceful shutdown очередей
+server/src/routes/search.js	FULLTEXT ошибка → LIKE fallback, короткий запрос <2 символов, SQL-injection guard (параметризованный $queryRaw)
+server/src/services/tickets.service.js	throw в createTicket (DB constraint), throw в autoAssign (нет агентов), SLA пересчёт при невалидной категории
+Техника: использовать vi.spyOn на Prisma для симуляции ошибок БД.
+Этап C (2-3 дня) — Админ-панель: дожать фичи
+Что делать:
+Настройки компании — новая таблица Settings (уже есть в Prisma!), форма в AdminSettings.tsx
+Поля: companyName, logoUrl, timezone, defaultLanguage
+Загрузка логотипа — через существующий storage.js adapter
+Email-шаблоны — хранить в Settings как JSON:
+JSON
+{
+  "emailTemplates": {
+    "ticketAssigned": "Тикет #{{ticketId}} назначен вам, {{userName}}",
+    "slaBreached": "SLA просрочен: {{ticketTitle}}"
+  }
+}
+Парсер replaceVariables(template, vars) в notify.js
+UI: textarea с preview (replace на mock-данные)
+Audit log auto-write — middleware в app.js:
+JavaScript
+app.use(/\/api\/(?!auth\/).*/, auditLogAuto()); // все кроме auth
+Логировать: method, path, userId, timestamp, IP
+Сохранять в AuditLog модель
+Фильтры + CSV экспорт аудита — расширить GET /api/admin/audit-log
+Query params: ?from=2026-01-01&to=2026-01-31&userId=5&action=ticket_updated
+CSV: UTF-8 BOM, колонки: Дата, Пользователь, Действие, Сущность, IP
+Этап D (2 дня) — Уведомления: чаты + календарь + страница "Все"
+Что делать:
+Триггеры — в chats.service.js и calendar.service.js добавить notify({ type: 'in_app', ... }) при:
+Новом сообщении в чате (всем участникам кроме автора)
+Создании события календаря (участникам)
+Страница /notifications — новый роут + NotificationsPage.tsx
+Таблица: Тип | Текст | Дата | Статус | Действие
+Фильтр по типу (тикет/чат/календарь/системное)
+Кнопки "Отметить прочитанными", "Удалить все"
+API: GET /api/notifications, PUT /api/notifications/read-all, DELETE /api/notifications/clear-all
+WebSocket push — при notification:new рендерить toast через sonner (уже есть!), но теперь и для чатов/календаря
+Этап E (1-2 дня) — WebSocket: online/offline + ticket rooms
+Что делать:
+Online/offline — в socket.js:
+При connection → io.emit('user:online', { userId })
+При disconnect → io.emit('user:offline', { userId })
+Обновлять isOnline в Prisma (или использовать last_active + 5 минут логику на фронте)
+Ticket rooms — при входе в TicketDetail.tsx:
+TypeScript
+socket.emit('ticket:join', ticketId);
+Сервер: socket.join(ticket:${ticketId})
+При изменении статуса/приоритета тикета: io.to(ticket:${id}).emit('ticket:updated', ticket)
+На фронте: слушать ticket:updated и делать queryClient.invalidateQueries(['ticket', id])
+Offline message queue — опционально, можно skip если используется React Query (данные и так из БД приходят). Но для "push-уведомлений" — нужно накапливать в Redis offline:{userId} при отсутствии сокета.
+Этап F (2 дня) — Интеграционные тесты
+check-console.mjs — расширить до 12 страниц:
+JavaScript
+const pages = ['/', '/wiki', '/chats', '/tickets', '/employees', '/search', 
+               '/admin', '/calendar', '/polls', '/files', '/profile', '/notifications'];
+Playwright — добавить 13 тестов (22→35):
 Table
-Метрика	Сейчас	Цель	Сложность
-Server coverage	64%	70%	Средняя (2-3 дня)
-Client coverage	58.5%	65%	Средняя (2-3 дня)
-ESLint errors	3	0	Легко (2 часа)
-React hooks warnings	28	0	Сложная (3-5 дней)
-E2E тесты	22	35+	Средняя (2-3 дня)
-Главный риск: 28 react-hooks warnings — это не "стиль", а потенциальные баги в продакшене (race conditions, infinite loops). Их надо чинить первыми, а не coverage.
+Сценарий	Что проверять
+ldap-login.spec.ts	Логин через LDAP, auto-provisioning
+file-upload.spec.ts	Drag&drop, preview, удаление
+sla-escalation.spec.ts	Создать тикет с dueAt в прошлом, проверить email/Telegram mock
+calendar-event.spec.ts	Создать событие, проверить виджет "Ближайшие"
+admin-audit.spec.ts	Сменить роль, проверить audit log
+notification-flow.spec.ts	Создать тикет, проверить badge + dropdown
+Этап G (1 день) — Инфраструктура: helmet, WS rate-limit, Sentry
+Helmet CSP — conditional:
+JavaScript
+if (process.env.NODE_ENV === 'development') {
+  app.use(helmet({ contentSecurityPolicy: false }));
+} else {
+  app.use(helmet()); // strict
+}
+WS rate-limit NAT fix — skipSuccessfulRequests: true + whitelist local subnets:
+JavaScript
+const wsRateLimit = new RateLimiter({
+  keyPrefix: 'ws_handshake',
+  points: 10,
+  duration: 60,
+  skip: (req) => ['127.0.0.1', '10.0.0.0/8', '192.168.0.0/16'].includes(req.ip)
+});
+Sentry — подключить к errorHandler.js:
+JavaScript
+Sentry.captureException(err, { 
+  tags: { requestId: req.requestId },
+  user: { id: req.employeeId }
+});
+📋 Итоговый roadmap (если нужно всё сделать)
+Table
+Этап	Дни	Результат	Риск
+A — ESLint hooks	1-2	0 warnings, стабильность	Низкий
+B — Server tests	2-3	70% coverage	Низкий
+C — Admin фичи	2-3	Полноценная админка	Средний (logo upload)
+D — Notifications	2	Полный модуль уведомлений	Низкий
+E — WebSocket	1-2	Real-time статусы + тикеты	Средний (socket rooms)
+F — E2E + console	2	35 Playwright, 12 check-console	Низкий
+G — Infra	1	Helmet, Sentry, WS limit	Низкий
+Итого: 11-15 рабочих дней до состояния "9/10, закрыты все промты".
+🎯 Что делать прямо сейчас (если время ограничено)
+Если нужно максимум пользы за минимум времени, бери:
+Этап A (1 день) — убирает реальные баги
+Этап D (2 дня) — закрывает недоделанный промт #11 (уведомления)
+Этап E (1 день) — закрывает промт #12 (WebSocket online + ticket rooms)
+Это 4 дня работы и поднимает проект с 8.5 до 9.0/10.

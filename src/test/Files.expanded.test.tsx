@@ -1,10 +1,12 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from './setup'
 import { AllTheProviders } from './test-utils'
 import Files from '@/pages/Files'
+import * as apiModule from '@/lib/api'
+import { toast } from 'sonner'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -25,6 +27,10 @@ vi.mock('react-i18next', () => ({
       })[key] || key,
   }),
 }))
+
+const emptyFoldersHandler = http.get('http://localhost:4000/api/files/folders', () => {
+  return HttpResponse.json([{ id: 1, name: 'Пустая папка', user_id: 1, is_shared: false, files: [], totalFiles: 0 }])
+})
 
 beforeEach(() => {
   localStorage.setItem('token', 'test-token')
@@ -106,6 +112,108 @@ describe('Files', () => {
     await user.click(pdfTab)
     await waitFor(() => {
       expect(screen.getByText('report.pdf')).toBeInTheDocument()
+    })
+  })
+
+  it('switches folder on click', async () => {
+    const user = userEvent.setup()
+    render(<Files />, { wrapper: AllTheProviders })
+    await screen.findByText('Документы')
+    await user.click(screen.getByText('Проекты'))
+    expect(screen.getByText('Проекты')).toBeInTheDocument()
+  })
+
+  it('switches to list view and opens file on click', async () => {
+    const openSpy = vi.fn()
+    vi.stubGlobal('open', openSpy)
+    const user = userEvent.setup()
+    render(<Files />, { wrapper: AllTheProviders })
+    await screen.findByText('report.pdf')
+    await user.click(screen.getByLabelText('Вид списком'))
+    await waitFor(() => {
+      expect(screen.getByText('report.pdf')).toBeInTheDocument()
+    })
+    await user.click(screen.getByText('report.pdf'))
+    await waitFor(() => {
+      expect(openSpy).toHaveBeenCalled()
+    })
+    vi.unstubAllGlobals()
+  })
+
+  it('triggers file input via dropzone click', async () => {
+    render(<Files />, { wrapper: AllTheProviders })
+    await screen.findByText('Перетащите файлы сюда')
+    const dropzone = screen.getByLabelText('Перетащите файлы сюда')
+    expect(dropzone).toBeInTheDocument()
+  })
+
+  it('uploads file via drag and drop', async () => {
+    server.use(emptyFoldersHandler)
+    const uploadSpy = vi.spyOn(apiModule.api, 'post')
+    render(<Files />, { wrapper: AllTheProviders })
+    await screen.findByText('Перетащите файлы сюда')
+    const file = new File(['test'], 'test.pdf', { type: 'application/pdf' })
+    const outerDiv = screen.getByText('Файлы').closest('.space-y-6')
+    fireEvent.drop(outerDiv!, { dataTransfer: { files: [file] } })
+    await waitFor(() => {
+      expect(uploadSpy).toHaveBeenCalled()
+    })
+    uploadSpy.mockRestore()
+  })
+
+  it('shows upload error toast', async () => {
+    server.use(
+      http.get('http://localhost:4000/api/files/folders', () => {
+        return HttpResponse.json([{ id: 1, name: 'Документы', user_id: 1, is_shared: true, files: [], totalFiles: 0 }])
+      }),
+      http.post('http://localhost:4000/api/files/upload', () => {
+        return HttpResponse.error()
+      }),
+    )
+    const toastSpy = vi.spyOn(toast, 'error')
+    render(<Files />, { wrapper: AllTheProviders })
+    await screen.findByText('Перетащите файлы сюда')
+    const file = new File(['test'], 'test.pdf', { type: 'application/pdf' })
+    const fileInput = document.querySelector('input[type="file"]')!
+    Object.defineProperty(fileInput, 'files', { value: [file] })
+    fireEvent.change(fileInput)
+    await waitFor(() => {
+      expect(toastSpy).toHaveBeenCalled()
+    })
+    toastSpy.mockRestore()
+  })
+
+  it('shows drag overlay when dragging over', async () => {
+    render(<Files />, { wrapper: AllTheProviders })
+    await screen.findByText('Перетащите файлы сюда')
+    const outerDiv = screen.getByText('Файлы').closest('.space-y-6')
+    fireEvent.dragEnter(outerDiv!)
+    await waitFor(() => {
+      expect(screen.getByText('Отпустите файлы для загрузки')).toBeInTheDocument()
+    })
+  })
+
+  it('opens file from grid card via keyboard', async () => {
+    const openSpy = vi.fn()
+    vi.stubGlobal('open', openSpy)
+    render(<Files />, { wrapper: AllTheProviders })
+    const card = await screen.findByText('report.pdf')
+    const cardContainer = card.closest('[role="button"]')
+    fireEvent.keyDown(cardContainer!, { key: 'Enter' })
+    await waitFor(() => {
+      expect(openSpy).toHaveBeenCalled()
+    })
+    vi.unstubAllGlobals()
+  })
+
+  it('shows empty search results message', async () => {
+    const user = userEvent.setup()
+    render(<Files />, { wrapper: AllTheProviders })
+    await screen.findByText('report.pdf')
+    const input = screen.getByPlaceholderText('Поиск в папке')
+    await user.type(input, 'nonexistent')
+    await waitFor(() => {
+      expect(screen.getByText('Ничего не найдено')).toBeInTheDocument()
     })
   })
 })

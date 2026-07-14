@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Tickets from '@/pages/Tickets'
 import { SocketContext } from '@/context/SocketContext'
 import type { ReactNode } from 'react'
@@ -124,6 +125,10 @@ vi.mock('@/context/ticket-context', () => ({
   TicketProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+})
+
 function TestWrapper({
   children,
   socket,
@@ -135,20 +140,22 @@ function TestWrapper({
 }) {
   return (
     <MemoryRouter initialEntries={url ? [url] : undefined}>
-      <SocketContext.Provider
-        value={{
-          socket: socket ?? null,
-          connected: false,
-          sendMessage: vi.fn(),
-          deleteMessage: vi.fn(),
-          joinChat: vi.fn(),
-          leaveChat: vi.fn(),
-          notifyAll: vi.fn(),
-          sendTyping: vi.fn(),
-        }}
-      >
-        {children}
-      </SocketContext.Provider>
+      <QueryClientProvider client={queryClient}>
+        <SocketContext.Provider
+          value={{
+            socket: socket ?? null,
+            connected: false,
+            sendMessage: vi.fn(),
+            deleteMessage: vi.fn(),
+            joinChat: vi.fn(),
+            leaveChat: vi.fn(),
+            notifyAll: vi.fn(),
+            sendTyping: vi.fn(),
+          }}
+        >
+          {children}
+        </SocketContext.Provider>
+      </QueryClientProvider>
     </MemoryRouter>
   )
 }

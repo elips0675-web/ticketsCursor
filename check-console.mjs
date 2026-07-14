@@ -1,6 +1,10 @@
 import { chromium } from 'playwright'
 
-const PAGES = ['/', '/wiki', '/chats', '/tickets', '/employees', '/search']
+const PAGES = [
+  '/', '/wiki', '/chats', '/tickets', '/employees', '/search',
+  '/calendar', '/polls', '/files', '/notifications', '/kanban', '/profile',
+  '/news', '/calculator', '/admin', '/admin/users', '/admin/push',
+]
 const BASE = process.env.BASE_URL || 'http://localhost:5173'
 
 async function main() {

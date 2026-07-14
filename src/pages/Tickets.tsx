@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Search, ArrowUpDown, Filter, Plus, MessageSquare, User, Download, FileText } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useSocket } from '@/context/SocketContext'
 import { useTickets } from '@/context/ticket-context'
@@ -18,6 +19,7 @@ const PER_PAGE = 9
 
 export default function Tickets() {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const statusLabels: Record<string, string> = {
     open: t('tickets.open'),
     in_progress: t('tickets.inProgress'),
@@ -37,9 +39,11 @@ export default function Tickets() {
     if (!socket) return
     const onCreated = (ticket: { title: string }) => {
       toast.success(t('tickets.notifNewTicket'), { description: ticket.title })
+      queryClient.invalidateQueries({ queryKey: ['tickets'] })
     }
     const onUpdated = (data: { id: number }) => {
       toast.info(t('tickets.notifTicketUpdated'), { description: `#${data.id}` })
+      queryClient.invalidateQueries({ queryKey: ['tickets'] })
     }
     socket.on('ticket:created', onCreated)
     socket.on('ticket:updated', onUpdated)

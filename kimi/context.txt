@@ -88,14 +88,17 @@ React 19 · TypeScript 5 · Vite 8 · Tailwind CSS 4 · shadcn/ui · Express 5 �
 - ✅ **ESLint 0/0** — исправлен last warning (queryClient dep) в Tickets.tsx + parsing error в e2e/chats.spec.ts
 - ✅ **WS rate-limit NAT fix** — socket.js: skip rate-limit для внутренних подсетей (10.x, 192.168.x, 172.16-31.x)
 - ✅ **E2E +11 тестов (до 36)** — ldap-login (2), kanban (1), notifications (1), profile (1), calculator (2), admin-audit (2), file-upload (2); всего 36 тестов в 14 файлах
+- ✅ **Audit CSV export** — GET /admin/audit?format=csv — UTF-8 BOM, колонки Date/User/Action/Entity/IP
+- ✅ **WS ticket rooms** — join:ticket/leave:ticket в socket.js + TicketDetail.tsx, room-based ticket:update эмиты
 
 ## Известный техдолг
 
 - Покрытие 71.62% (клиент), 70.97% (сервер) — цель >70% достигнута
 - ESLint: 0 errors, 0 warnings
-- Files.tsx Branch 72.5% — оставшиеся ветки (mapFolder fallback, emoji-иконки, folder/createdAt display)
-- Sentry/APM (не приоритетно)
-- P3: Интеграционные тесты (check-console 17 страниц, E2E 36 → 40+)
+- Server coverage (search.js FULLTEXT fallback, tickets.service.js 500-branches)
+- Admin: email templates с переменными ({{userName}}, {{ticketId}})
+- Notifications: read receipts, offline message queue
+- Files.tsx Branch 72.5% — оставшиеся ветки
 
 ===
 # AGENTS.md

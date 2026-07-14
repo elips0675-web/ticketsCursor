@@ -416,11 +416,11 @@ io.use((socket, next) => {
 ### Комнаты и эмиты
 
 | Комната | Назначение | Эмиты |
-|---|---|---|
+|---|---|---|---|
 | `chat:{id}` | Чат | `message:new`, `message:removed`, `message:reaction` |
-| `ticket:{id}` | Тикет | `ticket:updated`, `ticket:message` |
+| `ticket:{id}` | Тикет (join при открытии) | `ticket:updated`, `ticket:message` |
 | `employee:{id}` | Личные уведомления | `notification:new` |
-| `online` | Онлайн-статус | `user:online`, `user:offline` |
+| `online` | Онлайн-статус | `user:status` |
 
 ### Rate Limiting
 
@@ -1055,10 +1055,12 @@ spec:
 | L | Исправление клиентских тестов (jsdom localStorage) | High | ✅ Выполнено |
 | L | roleUtils.test.js — 7 тестов на иерархию ролей | Medium | ✅ Выполнено |
 | L | API тесты: /auth/me, /system-info, /tickets POST, /wiki POST, /calendar POST, /news POST, messages | Medium | ✅ Выполнено |
-| A | ESLint hooks: 28 warnings → 0 (set-state-in-effect, exhaustive-deps) | High | ✅ 0/0 (финал: queryClient dep, chats.spec.ts parsing) |
-| B | Server coverage: background.js (BullMQ mock), search.js (FULLTEXT/LIKE fallback) | Medium | ❌ Открыто (70.97% — цель >70% достигнута) |
-| D | Интеграционные тесты: check-console.mjs (17 страниц), E2E 36→40+ | Medium | ❌ Открыто |
-| — | Files.tsx Branch 72.5% (mapFolder fallback, emoji-иконки, folder/createdAt display) | Low | ❌ Открыто |
+| A | ESLint hooks — 0/0 | High | ✅ |
+| B | Server coverage (search.js FULLTEXT, background.js BullMQ mock) | Medium | ❌ (70.97% — цель >70% достигнута) |
+| D | E2E 36→40+ | Medium | ❌ |
+| — | Email templates с переменными ({{userName}}, {{ticketId}}) | Low | ❌ |
+| — | Notifications: read receipts, offline message queue | Low | ❌ |
+| — | Files.tsx Branch 72.5% | Low | ❌ |
 
 ---
 

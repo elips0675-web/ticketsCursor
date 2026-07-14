@@ -160,9 +160,17 @@ export async function setupSocket(server) {
       }
     })
 
+    socket.on('join:ticket', (ticketId) => {
+      socket.join(`ticket:${ticketId}`)
+    })
+
+    socket.on('leave:ticket', (ticketId) => {
+      socket.leave(`ticket:${ticketId}`)
+    })
+
     socket.on('ticket:update', (ticketId) => {
       if (!wsRateLimit(socket)) return socket.emit('rate:limited', { event: 'ticket:update' })
-      io.emit('ticket:updated', ticketId)
+      io.to(`ticket:${ticketId}`).emit('ticket:updated', ticketId)
     })
 
     socket.on('notify:all', (data) => {

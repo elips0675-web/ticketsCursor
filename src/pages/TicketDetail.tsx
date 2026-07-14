@@ -125,6 +125,7 @@ export default function TicketDetail() {
 
   useEffect(() => {
     if (!socket || !ticket) return
+    socket.emit('join:ticket', ticket.id)
     const onMessage = (data: { ticketId: number; message: { senderName: string } }) => {
       if (data.ticketId === ticket.id) {
         toast.info(t('tickets.newMessageFrom', { name: data.message.senderName }))
@@ -133,6 +134,7 @@ export default function TicketDetail() {
     socket.on('ticket:message', onMessage)
     return () => {
       socket.off('ticket:message', onMessage)
+      socket.emit('leave:ticket', ticket.id)
     }
   }, [socket, ticket, t])
 

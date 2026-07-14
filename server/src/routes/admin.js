@@ -104,17 +104,31 @@ router.put('/users/:id', async (req, res) => {
 })
 
 router.get('/audit', async (req, res) => {
-  const { entityType, entityId, limit = 50, offset = 0 } = req.query
+  const { entityType, entityId, limit = 50, offset = 0, from, to, format } = req.query
   try {
     const where = {}
     if (entityType) where.entity_type = entityType
     if (entityId) where.entity_id = Number(entityId)
+    if (from || to) {
+      where.created_at = {}
+      if (from) where.created_at.gte = new Date(from)
+      if (to) where.created_at.lte = new Date(to)
+    }
     const rows = await prisma.audit_log.findMany({
       where,
       orderBy: { created_at: 'desc' },
       skip: Number(offset),
-      take: Number(limit),
+      take: format === 'csv' ? undefined : Number(limit),
     })
+    if (format === 'csv') {
+      const header = 'Date,User,Action,Entity,EntityId,IP\n'
+      const csv = rows.map(r =>
+        `"${r.created_at}","${r.user_name || ''}","${r.action}","${r.entity_type || ''}","${r.entity_id || ''}","${r.ip_address || ''}"`
+      ).join('\n')
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+      res.setHeader('Content-Disposition', 'attachment; filename=audit.csv')
+      return res.send('\uFEFF' + header + csv)
+    }
     res.json({ success: true, data: rows })
   } catch (err) {
     logger.error('Audit log error:', err)

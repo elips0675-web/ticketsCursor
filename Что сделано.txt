@@ -358,6 +358,26 @@
 - file-upload.spec.ts (2 теста: рендер, upload area)
 - Всего E2E: 36 тестов в 14 файлах (цель 35 достигнута)
 
+### Этап C.1 — Audit CSV export (завершён)
+- server/src/routes/admin.js: GET /admin/audit?format=csv
+- UTF-8 BOM, колонки: Date, User, Action, Entity, EntityId, IP
+- Фильтры: from, to, entityType, entityId
+
+### Этап E.2 — WS ticket rooms (завершён)
+- server/src/socket.js: join:ticket / leave:ticket события
+- socket.join(`ticket:${ticketId}`) / socket.leave(`ticket:${ticketId}`)
+- ticket:update эмит теперь room-based (io.to(`ticket:${id}`))
+- src/pages/TicketDetail.tsx: socket.emit('join:ticket', id) при монтировании, leave при размонтировании
+
+### Аудит выполненных пунктов Оценка kimi.txt
+- ✅ H — Sentry (client+server — уже было, ничего не требуется)
+- ✅ E — WS online/offline (уже было: socket.js connect/disconnect)
+- ✅ D — Notifications chats/calendar (уже было: socket.js message:send + calendar.js POST)
+- ✅ C — Admin Settings (уже была полная форма: company, email, LDAP, Telegram, SLA)
+- + ✅ Audit CSV export
+- + ✅ WS ticket rooms
+- Остаётся: email templates с переменными
+
 ────────────────────────────────────────────────────────────────────────────
 
 ДОДЕЛАТЬ (из Оценка kimi.txt)
@@ -396,3 +416,10 @@
 - ✅ WS rate-limit NAT fix — skip internal subnets
 - ✅ E2E: 36 тестов (цель 35 достигнута)
 - ✅ ESLint: 0 errors, 0 warnings
+- ✅ Sentry — client (App.tsx: browserTracingIntegration, replayIntegration, SentryRoutes) + server (app.js: requestHandler, errorHandler, beforeSend PII filter)
+- ✅ WS online/offline — socket.js: user:status эмит на connect/disconnect
+- ✅ Chat notifications — socket.js: createNotification для участников чата
+- ✅ Calendar notifications — calendar.js POST: createNotification для создателя
+- ✅ Admin Settings — полная форма (company, email, LDAP, Telegram, SLA)
+- ✅ Audit CSV export — GET /admin/audit?format=csv (UTF-8 BOM)
+- ✅ WS ticket rooms — join:ticket/leave:ticket в socket.js + TicketDetail.tsx

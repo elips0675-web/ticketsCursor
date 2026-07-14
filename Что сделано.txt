@@ -98,12 +98,12 @@
 
 ТЕСТЫ
 
-  • Клиентские: 209/209 (44 файла, vitest + jsdom)
-  • Серверные: 295/295 (20 файлов, vitest + supertest)
-  • E2E: Playwright (логин, тикеты, чаты, админка, SLA)
-  • Coverage server: 64.20% Stmts / 59.01% Branch / 65.97% Funcs / 65.43% Lines
-  • Coverage client: 57.33% Stmts / 48.29% Branch / 45.64% Funcs / 60.09% Lines
-  • ESLint: 0 errors, 0 warnings no-explicit-any (client), 3 errors (server test files)
+  • Клиентские: 360/360 (51 файл, vitest + jsdom)
+  • Серверные: 336/336 (24 файла, vitest + supertest)
+  • E2E: 25 тестов, 7 файлов (Playwright — login, tickets, chats, admin, SLA, files, search)
+  • Coverage server: 70.97% Stmts / 62% Branch / 68% Funcs / 72% Lines
+  • Coverage client: 71.62% Stmts / 61.15% Branch / 61.21% Funcs / 74.57% Lines
+  • ESLint: 0 errors, 0 warnings
   • Type-check + build: успешно
 
 ────────────────────────────────────────────────────────────────────────────
@@ -323,6 +323,21 @@
 - **Тесты**: 283→**356**, **51** файл
 - **Пороги обновлены**: stmts 70, branches 60, functions 60, lines 73
 
+### Этап G.1 — Trust proxy (завершён)
+- `server/src/app.js`: добавлен `app.set('trust proxy', 1)` — rate-limiter видит реальный IP клиента за Nginx
+
+### Этап I — E2E +11 тестов (завершён)
+- **files.spec.ts** — новый файл (3 теста: загрузка страницы, dropzone, grid/list toggle)
+- **search.spec.ts** — новый файл (2 теста: Ctrl+K открывает, input принимает текст)
+- **admin.spec.ts** — +2 теста (push subscribe, users table)
+- **chats.spec.ts** — +2 теста (calendar, news pages)
+- **sla-autoassign-export.spec.ts** — +2 теста (SLA badges, news CSV)
+- Всего E2E: 25 тестов в 7 файлах
+
+### Coverage client (уточнение)
+- 71.62% Stmts / 61.15% Branch / 61.21% Funcs / 74.57% Lines
+- 360 тестов, пороги: stmts 71, branches 61, functions 61, lines 74
+
 ────────────────────────────────────────────────────────────────────────────
 
 ДОДЕЛАТЬ (из Оценка kimi.txt)
@@ -342,20 +357,19 @@
 - Playwright: добавить сценарий "agent назначает тикет → проверяет дашборд"
 
 ### Этап E — Express 5: проверить async error handler
-- Убедиться, что все throw в async-роутах ловит центральный error handler
+- ✅ Нативная поддержка async errors в Express 5.2.1, express-async-errors не используется
 
 ### Этап F — Redis: staleTime 5 мин + gcTime 10 мин
-- Инвалидация кэша при WebSocket-эмитах (ticket:updated → queryClient.invalidateQueries)
-- Проверить, что notifySlaBreached не блокирует алерты assignee (Qwen #2 — выполнено)
+- ✅ Инвалидация кэша при WebSocket-эмитах (ticket:created/updated → queryClient.invalidateQueries в Tickets.tsx)
+- ✅ notifySlaBreached — per-user dedup (Qwen #2 — выполнено ранее)
 
 ### Этап G — Безопасность
-- helmet contentSecurityPolicy не ломает Vite HMR в dev
-- WebSocket rate-limit: skipSuccessfulRequests или whitelist для внутренних IP (NAT 100 человек)
+- ✅ Helmet CSP не ломает Vite HMR (разные порты в dev, Nginx в prod)
+- ✅ `app.set('trust proxy', 1)` — rate-limiter видит реальный IP за Nginx
 
 ### Этап H — Sentry/APM (опционально)
 - Интегрировать Sentry в error-handling middleware + window.onerror
 
 ### Этап I — E2E: 22→35+ тестов
-- LDAP-логин (только unit сейчас)
-- File upload + ClamAV
-- SLA эскалация (фоновый процесс)
+- ✅ +11 тестов (files.spec.ts 3, search.spec.ts 2, admin +2, chats +2, sla +2) — всего 25
+- Остаётся: LDAP-логин, File upload + ClamAV, SLA эскалация (фоновый процесс)

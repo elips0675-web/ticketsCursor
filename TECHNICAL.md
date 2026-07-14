@@ -748,12 +748,12 @@ server/__tests__/
 
 ```json
 {
-  "client": { "statements": 71.68, "branches": 61.15, "functions": 61.21, "lines": 74.63 },
+  "client": { "statements": 71.62, "branches": 61.15, "functions": 61.21, "lines": 74.57 },
   "server": { "statements": 70.97, "branches": 62, "functions": 68, "lines": 72 }
 }
 ```
 
-> **Примечание**: 360 клиентских / 336 серверных тестов. Пороги заданы в `vitest.client.config.ts` и `server/vitest.config.ts`.
+> **Примечание**: 360 клиентских / 336 серверных / 25 E2E тестов. Пороги заданы в `vitest.client.config.ts` и `server/vitest.config.ts`.
 
 ---
 
@@ -815,6 +815,14 @@ Sentry.init({
 ---
 
 ## Инфраструктура
+
+### Trust Proxy (Nginx)
+
+В production за reverse proxy (Nginx) `req.ip` видит IP прокси, а не клиента. В `server/src/app.js` добавлено:
+
+```javascript
+app.set('trust proxy', 1); // rate-limiter видит реальный IP за Nginx
+```
 
 ### Docker Compose (Production)
 
@@ -1046,7 +1054,7 @@ spec:
 | L | API тесты: /auth/me, /system-info, /tickets POST, /wiki POST, /calendar POST, /news POST, messages | Medium | ✅ Выполнено |
 | A | ESLint hooks: 28 warnings → 0 (set-state-in-effect, exhaustive-deps) | High | ❌ Открыто |
 | B | Server coverage: background.js (BullMQ mock), search.js (FULLTEXT/LIKE fallback) | Medium | ❌ Открыто |
-| D | Интеграционные тесты: check-console.mjs (6→12 страниц), Playwright (22→35) | Medium | ❌ Открыто |
+| D | Интеграционные тесты: check-console.mjs (17 страниц), Playwright (25→35) | Medium | ❌ Открыто |
 | — | Files.tsx Branch 72.5% (mapFolder fallback, emoji-иконки, folder/createdAt display) | Low | ❌ Открыто |
 
 ---

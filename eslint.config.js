@@ -30,11 +30,12 @@ export default tseslint.config(
   {
     files: ['server/**/*.{js,mjs}'],
     languageOptions: {
-      globals: { ...globals.node },
+      globals: { ...globals.node, ...globals.jest },
     },
     rules: {
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'no-empty': ['warn', { allowEmptyCatch: true }],
     },
   },
   prettier,

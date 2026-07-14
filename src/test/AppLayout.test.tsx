@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -12,6 +13,12 @@ vi.mock('react-i18next', () => ({
     t: (k: string) => k,
     i18n: { language: 'ru', changeLanguage: vi.fn() },
   }),
+}))
+
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
+  useNavigate: () => mockNavigate,
 }))
 
 function TestProviders({ children }: { children: React.ReactNode }) {
@@ -86,5 +93,11 @@ describe('AppLayout', () => {
     render(<AppLayout />, { wrapper: TestProviders })
     const menuBtns = screen.getAllByLabelText('Меню')
     expect(menuBtns.length).toBeGreaterThan(0)
+  })
+
+  it('navigates to search on Ctrl+K', () => {
+    render(<AppLayout />, { wrapper: TestProviders })
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
+    expect(mockNavigate).toHaveBeenCalledWith('/search')
   })
 })

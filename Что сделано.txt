@@ -330,8 +330,10 @@
 - background.js: мок BullMQ, проверить setInterval fallback
 - search.js: FULLTEXT fallback, LIKE fallback, SQL-injection guard
 
-### Этап C — Client coverage 58.5%→65% (текущий 64.97%, почти выполнено)
-- News.tsx (43%), Polls.tsx (44%), Files.tsx (46%), AdminPush.tsx (38%)
+### Этап C — Client coverage 58.5%→70% (выполнено)
+- News.tsx 43%→80%, Polls.tsx 44%→74%, Files.tsx 46%→52%, AdminPush.tsx 38%→92%
+- ForgotPassword.tsx 46%→~85%, ResetPassword.tsx 33%→~85%, pwa-install-prompt 45%→100%
+- +65 тестов (283→348), +4 файла (47→51), порог: stmts 69
 
 ### Этап D — Интеграционные тесты
 - check-console.mjs: расширить до 12+ страниц (/admin, /calendar, /polls, /wiki, /chats, /employees, /search, /files, /profile, /kanban, /notifications, /register)

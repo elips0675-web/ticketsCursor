@@ -196,7 +196,6 @@ describe('Calendar page', () => {
   })
 
   it('hides edit/delete when cannot manage', async () => {
-    const user = userEvent.setup()
     render(<Calendar />, { wrapper: makeWrapper() })
     await screen.findByText('Пн')
     await clickDay(6)
@@ -207,7 +206,6 @@ describe('Calendar page', () => {
 
   it('shows edit/delete when can manage', async () => {
     mockAuth.canManage = true
-    const user = userEvent.setup()
     render(<Calendar />, { wrapper: makeWrapper() })
     await screen.findByText('Пн')
     await clickDay(6)

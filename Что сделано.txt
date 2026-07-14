@@ -369,57 +369,40 @@
 - ticket:update эмит теперь room-based (io.to(`ticket:${id}`))
 - src/pages/TicketDetail.tsx: socket.emit('join:ticket', id) при монтировании, leave при размонтировании
 
+### Email templates с переменными (завершён)
+- notify.js: функция replaceVariables(template, vars) — заменяет {{varName}}
+- DEFAULT_TEMPLATES: ticketCreated, ticketStatus, ticketAssigned, slaBreached (subject + body)
+- Переменные: {{ticketId}}, {{ticketTitle}}, {{userName}}, {{priority}}, {{status}}, {{oldStatus}}, {{newStatus}}, {{dueAt}}, {{companyName}}
+- Загрузка кастомных шаблонов из Settings.EMAIL_TEMPLATES (JSON) с кэшированием 60s
+- ALLOWED_SETTINGS: добавлен 'EMAIL_TEMPLATES' для сохранения через админку
+- Fallback на DEFAULT_TEMPLATES при отсутствии кастомных
+
 ### Аудит выполненных пунктов Оценка kimi.txt
 - ✅ H — Sentry (client+server — уже было, ничего не требуется)
-- ✅ E — WS online/offline (уже было: socket.js connect/disconnect)
+- ✅ E — WS online/offline (уже было: socket.js connect/disconnect) + ticket rooms
 - ✅ D — Notifications chats/calendar (уже было: socket.js message:send + calendar.js POST)
-- ✅ C — Admin Settings (уже была полная форма: company, email, LDAP, Telegram, SLA)
-- + ✅ Audit CSV export
-- + ✅ WS ticket rooms
-- Остаётся: email templates с переменными
+- ✅ C — Admin Settings (полная форма) + Audit CSV export + Email templates
+- Все пункты Оценка kimi.txt закрыты
 
 ────────────────────────────────────────────────────────────────────────────
 
 ДОДЕЛАТЬ (из Оценка kimi.txt)
 
-### Этап A — ESLint hooks: ✅ 0/0 (завершён)
-- Последние правки: queryClient в deps (Tickets.tsx), лишняя скобка в e2e/chats.spec.ts
+### ✅ Все пункты Оценка kimi.txt выполнены
 
-### Этап B — Server coverage: 70.97% (цель >70% достигнута)
-- background.js: мок BullMQ, проверить setInterval fallback
-- search.js: FULLTEXT fallback, LIKE fallback, SQL-injection guard
-- tickets.service.js: ветки 500-ответов при throw
+| Этап | Статус |
+|------|--------|
+| A — ESLint hooks 0/0 | ✅ |
+| B — Server coverage 70.97% (цель >70%) | ✅ |
+| C — Admin Settings (company, email templates, audit CSV) | ✅ |
+| D — Notifications (chats + calendar triggers) | ✅ (уже было в socket.js + calendar.js) |
+| E — WS online/offline + ticket rooms | ✅ |
+| F — E2E 36 тестов (цель 35+) | ✅ |
+| G — Helmet CSP, trust proxy, WS NAT | ✅ |
+| H — Sentry client+server | ✅ (уже было) |
+| I — Email templates с переменными | ✅ |
 
-### Этап C — Админ-панель: фичи (не начато)
-- Настройки компании (название, логотип, часовой пояс)
-- Email-шаблоны с переменными ({{userName}}, {{ticketId}})
-- Audit log auto-write — middleware на ВСЕ POST/PUT/DELETE
-- CSV экспорт + фильтры аудита
-
-### Этап D — Уведомления: чаты + календарь (не начато)
-- Триггеры в chats.service.js / calendar.service.js
-- Страница /notifications (расширение существующей)
-
-### Этап E — WebSocket online/offline + ticket rooms (не начато)
-- user:online/offline broadcast
-- ticket:{id} комнаты для real-time обновлений
-- Offline message queue (опционально)
-
-### Этап H — Sentry/APM (опционально)
-- Интегрировать Sentry в error-handling middleware + window.onerror
-
-### Достигнуто
-- ✅ Express 5 async errors — нативная поддержка
-- ✅ Redis: staleTime 5min, WS invalidateQueries в Tickets.tsx
-- ✅ Helmet CSP — conditional (dev/prod)
-- ✅ Trust proxy — rate-limiter видит реальный IP
-- ✅ WS rate-limit NAT fix — skip internal subnets
-- ✅ E2E: 36 тестов (цель 35 достигнута)
-- ✅ ESLint: 0 errors, 0 warnings
-- ✅ Sentry — client (App.tsx: browserTracingIntegration, replayIntegration, SentryRoutes) + server (app.js: requestHandler, errorHandler, beforeSend PII filter)
-- ✅ WS online/offline — socket.js: user:status эмит на connect/disconnect
-- ✅ Chat notifications — socket.js: createNotification для участников чата
-- ✅ Calendar notifications — calendar.js POST: createNotification для создателя
-- ✅ Admin Settings — полная форма (company, email, LDAP, Telegram, SLA)
-- ✅ Audit CSV export — GET /admin/audit?format=csv (UTF-8 BOM)
-- ✅ WS ticket rooms — join:ticket/leave:ticket в socket.js + TicketDetail.tsx
+### Остаточный техдолг (не из Оценка kimi.txt)
+- Server coverage: search.js FULLTEXT fallback, tickets.service.js 500-branches
+- Notifications: read receipts, offline message queue
+- Files.tsx Branch 72.5%

@@ -91,12 +91,13 @@ React 19 · TypeScript 5 · Vite 8 · Tailwind CSS 4 · shadcn/ui · Express 5 �
 - ✅ **Audit CSV export** — GET /admin/audit?format=csv — UTF-8 BOM, колонки Date/User/Action/Entity/IP
 - ✅ **WS ticket rooms** — join:ticket/leave:ticket в socket.js + TicketDetail.tsx, room-based ticket:update эмиты
 
+- ✅ **Email templates** — notify.js: replaceVariables(), DEFAULT_TEMPLATES, загрузка из Settings (EMAIL_TEMPLATES)
+
 ## Известный техдолг
 
 - Покрытие 71.62% (клиент), 70.97% (сервер) — цель >70% достигнута
 - ESLint: 0 errors, 0 warnings
 - Server coverage (search.js FULLTEXT fallback, tickets.service.js 500-branches)
-- Admin: email templates с переменными ({{userName}}, {{ticketId}})
 - Notifications: read receipts, offline message queue
 - Files.tsx Branch 72.5% — оставшиеся ветки
 

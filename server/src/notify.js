@@ -2,10 +2,56 @@ import prisma from './prisma.js'
 import { sendTicketNotification } from './email.js'
 import { sendTelegramNotification } from './telegram.js'
 import { createNotification } from './routes/notifications.js'
+import { getSettings } from './settings.js'
 import logger from './logger.js'
 
 const STATUS_LABELS = { open: 'Открыт', in_progress: 'В работе', resolved: 'Решён', closed: 'Закрыт' }
 const PRIORITY_LABELS = { low: 'Низкий', medium: 'Средний', high: 'Высокий', critical: 'Критичный' }
+
+const DEFAULT_TEMPLATES = {
+  ticketCreatedSubject: 'Тикет #{{ticketId}} создан: {{ticketTitle}}',
+  ticketCreatedBody: 'Ваш тикет "{{ticketTitle}}" (#{{ticketId}}) создан.\nСтатус: Открыт\nПриоритет: {{priority}}\n\n{{companyName}}',
+  ticketStatusSubject: 'Статус тикета #{{ticketId}}: {{newStatus}}',
+  ticketStatusBody: 'Тикет "{{ticketTitle}}" (#{{ticketId}})\nСтатус: {{oldStatus}} → {{newStatus}}\n\n{{companyName}}',
+  ticketAssignedSubject: 'Тикет #{{ticketId}} назначен на вас: {{ticketTitle}}',
+  ticketAssignedBody: 'Тикет "{{ticketTitle}}" (#{{ticketId}}) назначен на вас.\nСтатус: {{status}}\nПриоритет: {{priority}}\n\n{{companyName}}',
+  slaBreachedSubject: 'SLA просрочка: тикет #{{ticketId}}',
+  slaBreachedBody: 'Тикет "{{ticketTitle}}" (#{{ticketId}}) просрочен по SLA.\nСрок реакции истёк: {{dueAt}}\n\n{{companyName}}',
+}
+
+function replaceVariables(template, vars) {
+  let result = template
+  for (const [key, val] of Object.entries(vars)) {
+    result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val ?? '')
+  }
+  return result
+}
+
+let templateCache = null
+let templateCacheTime = 0
+
+async function getTemplates() {
+  if (templateCache && Date.now() - templateCacheTime < 60000) return templateCache
+  try {
+    const settings = await getSettings()
+    const stored = settings.EMAIL_TEMPLATES ? JSON.parse(settings.EMAIL_TEMPLATES) : {}
+    templateCache = { ...DEFAULT_TEMPLATES, ...stored }
+    templateCacheTime = Date.now()
+  } catch {
+    templateCache = { ...DEFAULT_TEMPLATES }
+  }
+  return templateCache
+}
+
+async function companyName() {
+  const settings = await getSettings()
+  return settings.COMPANY_NAME || 'Service Desk'
+}
+
+function formatDate(d) {
+  if (!d) return ''
+  return new Date(d).toLocaleString('ru-RU')
+}
 
 async function retryWithBackoff(fn, maxAttempts = 3) {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -75,8 +121,12 @@ export async function notifyTicketCreated(ticketId, _actorName) {
   }))
   sendTelegramNotification(`🆕 Новый тикет ${tag}\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\nКатегория: ${t.category}`)
   if (t.creatorEmail) {
-    sendEmail(t.creatorEmail, `Тикет #${ticketId} создан: ${t.title}`,
-      `Ваш тикет "${t.title}" (#${ticketId}) создан.\nСтатус: Открыт\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\n\nService Desk`)
+    const templates = await getTemplates()
+    const cn = await companyName()
+    const vars = { ticketId: String(ticketId), ticketTitle: t.title, priority: PRIORITY_LABELS[t.priority] || t.priority, companyName: cn, userName: t.creatorName || '' }
+    sendEmail(t.creatorEmail,
+      replaceVariables(templates.ticketCreatedSubject, vars),
+      replaceVariables(templates.ticketCreatedBody, vars))
   }
 }
 
@@ -103,9 +153,13 @@ export async function notifyStatusChanged(ticketId, oldStatus, newStatus, actorN
   const emailTargets = []
   if (t.creatorEmail && !emailTargets.includes(t.creatorId)) emailTargets.push({ email: t.creatorEmail, name: t.creatorName })
   if (t.assigneeEmail && t.assigneeId !== t.creatorId) emailTargets.push({ email: t.assigneeEmail, name: t.assigneeName })
+  const templates = await getTemplates()
+  const cn = await companyName()
   for (const et of emailTargets) {
-    sendEmail(et.email, `Статус тикета ${tag}: ${newLabel}`,
-      `Тикет "${t.title}" (#${ticketId})\nСтатус: ${oldLabel} → ${newLabel}\n\nService Desk`)
+    const vars = { ticketId: String(ticketId), ticketTitle: t.title, oldStatus: oldLabel, newStatus: newLabel, companyName: cn, userName: et.name || '' }
+    sendEmail(et.email,
+      replaceVariables(templates.ticketStatusSubject, vars),
+      replaceVariables(templates.ticketStatusBody, vars))
   }
 }
 
@@ -131,8 +185,12 @@ export async function notifyTicketAssigned(ticketId, assigneeId, assignedByName)
   sendTelegramNotification(`👤 Тикет #${ticketId} назначен на пользователя\n"${t.title}"\nНазначил: ${assignedByName}`)
 
   if (t.assigneeEmail) {
-    sendEmail(t.assigneeEmail, `Тикет #${ticketId} назначен на вас: ${t.title}`,
-      `Тикет "${t.title}" (#${ticketId}) назначен на вас.\nСтатус: ${STATUS_LABELS[t.status] || t.status}\nПриоритет: ${PRIORITY_LABELS[t.priority] || t.priority}\n\nService Desk`)
+    const templates = await getTemplates()
+    const cn = await companyName()
+    const vars = { ticketId: String(ticketId), ticketTitle: t.title, status: STATUS_LABELS[t.status] || t.status, priority: PRIORITY_LABELS[t.priority] || t.priority, companyName: cn, userName: t.assigneeName || '' }
+    sendEmail(t.assigneeEmail,
+      replaceVariables(templates.ticketAssignedSubject, vars),
+      replaceVariables(templates.ticketAssignedBody, vars))
   }
 }
 
@@ -199,9 +257,13 @@ export async function notifySlaBreached(ticketId) {
   const adminEmails = admins
     .map(a => a.email)
     .filter(Boolean)
+  const templates = await getTemplates()
+  const cn = await companyName()
   for (const email of adminEmails) {
-    sendEmail(email, `SLA просрочка: тикет #${ticketId}`,
-      `Тикет "${t.title}" (#${ticketId}) просрочен по SLA.\nСрок реакции истёк: ${new Date(t.due_at).toLocaleString('ru-RU')}\n\nService Desk`)
+    const vars = { ticketId: String(ticketId), ticketTitle: t.title, dueAt: formatDate(t.due_at), companyName: cn }
+    sendEmail(email,
+      replaceVariables(templates.slaBreachedSubject, vars),
+      replaceVariables(templates.slaBreachedBody, vars))
   }
 
   sendTelegramNotification(`🚨 SLA просрочка\nТикет #${ticketId}: ${t.title}\nСрок реакции истёк: ${new Date(t.due_at).toLocaleString('ru-RU')}`)

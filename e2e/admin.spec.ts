@@ -25,4 +25,14 @@ test.describe('Admin panel', () => {
     await page.goto('/admin/settings')
     await expect(page.locator('h1, h2').first()).toBeVisible()
   })
+
+  test('push page has subscribe text', async ({ page }) => {
+    await page.goto('/admin/push')
+    await expect(page.getByText(/push|уведомлен|подпис/i).first()).toBeVisible()
+  })
+
+  test('users page has table or list', async ({ page }) => {
+    await page.goto('/admin/users')
+    await expect(page.locator('table, [role="grid"], [role="listbox"]').first()).toBeVisible()
+  })
 })

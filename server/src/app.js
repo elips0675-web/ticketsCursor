@@ -56,6 +56,7 @@ import { JWT_SECRET, authenticateToken } from './middleware.js'
 import { cacheMiddleware } from './cache.js'
 
 const app = express()
+app.set('trust proxy', 1)
 const server = createServer(app)
 
 const rateLimitConfig = { windowMs: 60_000, skip: () => process.env.NODE_ENV === 'test' }

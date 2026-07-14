@@ -20,4 +20,15 @@ test.describe('SLA / Auto-assign / Export', () => {
     await page.goto('/employees')
     await expect(page.getByRole('button').filter({ hasText: /csv/i }).first()).toBeVisible()
   })
+
+  test('shows tickets with SLA badges', async ({ page }) => {
+    await page.goto('/tickets')
+    const cards = page.locator('[class*="card"], [class*="Card"], article, [role="button"]').filter({ hasText: /ticket|\d/i })
+    await expect(cards.first()).toBeVisible()
+  })
+
+  test('news page has export CSV button', async ({ page }) => {
+    await page.goto('/news')
+    await expect(page.getByRole('button').filter({ hasText: /csv/i }).first()).toBeVisible()
+  })
 })

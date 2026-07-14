@@ -9,5 +9,5 @@
 🛠️ План доработки
 ✅ P0 — Документация: README.md + TECHNICAL.md обновлены
 ✅ P1 — ESLint: 0 errors, 0 warnings (настроено через globals.jest)
-🟡 P2 — React hooks warnings: 28 warnings (set-state-in-effect, exhaustive-deps)
+✅ P2 — React hooks: 0 warnings (исправлены в предыдущих этапах)
 🟢 P3 — Оставшиеся пункты "Доделать" (Server coverage 70% ✅, остальные открыты)

@@ -5,6 +5,21 @@
 
 ---
 
+## [1.2.0] — 2026-07-17
+
+### 🚀 Admin Operations
+
+- **Redis** — страница `/admin/settings` показывает статус Redis, позволяет ввести/изменить `REDIS_URL`
+- **Backup** — кнопка "Сделать бэкап" запускает `scripts/backup-mysql.ps1` (mysqldump + retention 7 дней)
+- **Seed** — кнопка "Запустить db:seed" генерирует тестовые данные из админки
+- **Geo / Migration** — кнопка для запуска FULLTEXT миграции
+- **API** — `POST /admin/settings/backup`, `POST /admin/settings/seed`, `GET/PUT /admin/settings/redis-status`, `GET/PUT /admin/settings/redis`
+- **i18n** — добавлены переводы для 4 операций (ru/en)
+
+### 🔧 Технический долг
+
+- i18n: добавлен `common.add` (ru/en)
+
 ## [1.1.0] — 2026-07-17
 
 ### 🚀 Добавлено (merge from ticketscursordom)

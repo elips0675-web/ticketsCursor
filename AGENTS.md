@@ -321,3 +321,10 @@ docker compose up -d --build
 - **Null guards**: ticket-context.tsx (`if (!raw) return`), Employees.tsx (`if (chat) navigate(...)`)
 - **schema.prisma**: добавлено `last_active` в модель employees
 - **Документация**: README, context.txt, CHANGELOG, AGENTS.md обновлены
+
+### Этап 27 — Admin Operations (Redis, Backup, Seed, Geo)
+- **Backend**: 4 новых роута в `admin.js` — backup (exec powershell), seed (npm run db:seed), redis-status (ping), redis (upsert URL)
+- **Frontend**: блок "Операции" в AdminSettings.tsx — 4 карточки с ActionButton + RedisStatus компонент
+- **Script**: `scripts/backup-mysql.ps1` — mysqldump + retention 7 дней
+- **i18n**: 20 новых ключей в `admin.*` (ru/en), добавлен `common.add`
+- **check-console**: 17/17 ALL OK

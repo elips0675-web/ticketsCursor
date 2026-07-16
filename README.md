@@ -32,6 +32,7 @@
 | **Load Testing** | k6 сценарии в `k6/` для тикетов, чатов, поиска |
 | **Grafana** | Дашборд с метриками API, WS, Redis, бизнес-показателями |
 | **Bundle-size check** | CI проверка размера сборки (лимит 2MB) |
+| **Admin Operations** | Redis статус, mysqldump backup, db:seed, геопоиск — из `/admin/settings` |
 
 ---
 

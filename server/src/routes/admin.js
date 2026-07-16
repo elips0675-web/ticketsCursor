@@ -1,9 +1,15 @@
 import { Router } from 'express'
+import { exec } from 'child_process'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import prisma from '../prisma.js'
 import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { invalidateCache as invalidateSettingsCache } from '../settings.js'
 import logger from '../logger.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const projectRoot = path.resolve(__dirname, '..', '..')
 
 const router = Router()
 router.use(authenticateToken, requireRole('admin'))
@@ -134,6 +140,74 @@ router.get('/audit', async (req, res) => {
   } catch (err) {
     logger.error('Audit log error:', err)
     res.status(500).json({ success: false, message: 'Failed to fetch audit log' })
+  }
+})
+
+router.post('/settings/backup', async (req, res) => {
+  try {
+    const script = path.join(projectRoot, 'scripts', 'backup-mysql.ps1')
+    exec(`powershell -File "${script}"`, { timeout: 60000 }, (err, stdout, stderr) => {
+      if (err) {
+        logger.error('Backup error:', err.message)
+        return res.status(500).json({ success: false, message: stderr || err.message })
+      }
+      res.json({ success: true, data: { output: stdout.trim() } })
+    })
+  } catch (err) {
+    logger.error('Backup route error:', err)
+    res.status(500).json({ success: false, message: err.message })
+  }
+})
+
+router.post('/settings/seed', async (req, res) => {
+  try {
+    exec('npm run db:seed', { cwd: path.join(projectRoot, 'server'), timeout: 120000 }, (err, stdout, stderr) => {
+      if (err) {
+        logger.error('Seed error:', err.message)
+        return res.status(500).json({ success: false, message: stderr || err.message })
+      }
+      res.json({ success: true, data: { output: stdout.trim() } })
+    })
+  } catch (err) {
+    logger.error('Seed route error:', err)
+    res.status(500).json({ success: false, message: err.message })
+  }
+})
+
+router.get('/settings/redis-status', async (req, res) => {
+  try {
+    const row = await prisma.admin_settings.findUnique({ where: { key: 'REDIS_URL' } })
+    const redisUrl = row?.value || ''
+    let connected = false
+    if (redisUrl) {
+      try {
+        const { createClient } = await import('redis')
+        const client = createClient({ url: redisUrl })
+        await client.connect()
+        await client.ping()
+        await client.quit()
+        connected = true
+      } catch { }
+    }
+    res.json({ success: true, data: { url: redisUrl, connected } })
+  } catch (err) {
+    logger.error('Redis status error:', err)
+    res.status(500).json({ success: false, message: err.message })
+  }
+})
+
+router.put('/settings/redis', async (req, res) => {
+  try {
+    const { url } = req.body
+    await prisma.admin_settings.upsert({
+      where: { key: 'REDIS_URL' },
+      update: { value: url || '', updated_at: new Date() },
+      create: { key: 'REDIS_URL', value: url || '', updated_at: new Date() },
+    })
+    res.json({ success: true, data: { updated: true } })
+  } catch (err) {
+    logger.error('Redis settings error:', err)
+    res.status(500).json({ success: false, message: err.message })
   }
 })
 

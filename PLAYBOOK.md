@@ -200,50 +200,56 @@ E2E (critical flows):     14 Playwright spec'ов
 
 ```js
 // server/src/middleware/idempotency.js
-import { createClient } from 'redis'
+import { cache } from '../cache.js'
 
-const REDIS_URL = process.env.REDIS_URL
+const TTL = 86400
 
-export function idempotent(fn) {
-  return async (req, res) => {
-    const key = req.headers['idempotency-key']
-    if (!key) return fn(req, res)
+export function idempotent(req, res, next) {
+  const key = req.headers['idempotency-key']
+  if (!key) return next()
 
-    const cache = createClient({ url: REDIS_URL })
-    await cache.connect()
-    const existing = await cache.get(`idemp:${key}`)
-    if (existing) {
-      await cache.disconnect()
-      return res.json(JSON.parse(existing))
-    }
+  const cacheKey = `idempotency:${req.user?.userId || 'anon'}:${key}`
+
+  cache.get(cacheKey).then(cached => {
+    if (cached) return res.json(cached)
 
     const originalJson = res.json.bind(res)
     res.json = (body) => {
-      cache.setEx(`idemp:${key}`, 86400, JSON.stringify(body)).catch(() => {})
-      cache.disconnect()
-      return originalJson(body)
+      cache.set(cacheKey, body, TTL).catch(() => {})
+      originalJson(body)
     }
-
-    return fn(req, res)
-  }
+    next()
+  }).catch(() => next())
 }
 ```
 
-Использовать на `POST /chats/:id/messages`, `POST /tickets`, `POST /tickets/:id/messages`.
+Middleware добавлена на: `POST /api/chats/:id/messages`, `POST /api/tickets/`, `POST /api/tickets/:id/messages`.
 
 ---
 
 ## 🔧 Soft Deletes — реализация
 
-```sql
--- Миграция: 002_add_soft_delete.sql
-ALTER TABLE tickets ADD COLUMN deleted_at TIMESTAMP NULL AFTER updated_at;
-ALTER TABLE chat_messages ADD COLUMN deleted_at TIMESTAMP NULL AFTER updated_at;
-ALTER TABLE files ADD COLUMN deleted_at TIMESTAMP NULL AFTER created_at;
+```js
+// server/migrations/20260716_add_soft_delete.js
+export function up(knex) {
+  return knex.schema
+    .alterTable('tickets', table => {
+      table.timestamp('deleted_at').nullable()
+    })
+    .alterTable('chat_messages', table => {
+      table.timestamp('deleted_at').nullable()
+    })
+    .alterTable('files', table => {
+      table.timestamp('deleted_at').nullable()
+    })
+}
 
-CREATE INDEX idx_tickets_deleted ON tickets(deleted_at);
-CREATE INDEX idx_chat_messages_deleted ON chat_messages(deleted_at);
-CREATE INDEX idx_files_deleted ON files(deleted_at);
+export function down(knex) {
+  return knex.schema
+    .alterTable('tickets', table => table.dropColumn('deleted_at'))
+    .alterTable('chat_messages', table => table.dropColumn('deleted_at'))
+    .alterTable('files', table => table.dropColumn('deleted_at'))
+}
 ```
 
 Сервисы обновить: все `findMany`/`count` с `where: { deleted_at: null }`.

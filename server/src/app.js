@@ -83,7 +83,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "blob:"],
       fontSrc: ["'self'"],
-      connectSrc: ["'self'", "ws://localhost:*", "wss://localhost:*"],
+      connectSrc: ["'self'", "http://localhost:*", "ws://localhost:*", "wss://localhost:*"],
       frameAncestors: ["'none'"],
       formAction: ["'self'"],
       baseUri: ["'self'"],

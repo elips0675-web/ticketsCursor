@@ -55,8 +55,8 @@ export default function Employees() {
 
   const openChat = async (userId: number) => {
     try {
-      const chat = await api.post(`/chats/personal/${userId}`)
-      navigate(`/chats/${chat.id}`)
+      const chat = await api.post<{ id: number }>(`/chats/personal/${userId}`)
+      if (chat) navigate(`/chats/${chat.id}`)
     } catch {
       /* toast handled by api client */
     }

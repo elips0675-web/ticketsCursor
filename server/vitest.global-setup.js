@@ -24,6 +24,8 @@ export async function setup() {
   process.env.DIRECT_DATABASE_URL = `mysql://root:@localhost:3306/${dbName}`
   process.env.DB_NAME = dbName
   process.env.NODE_ENV = 'test'
+  process.env.VAPID_PUBLIC_KEY = 'BKvM9b1p0vP3Q8j5tL7mW9nC4rX6yZ2aB8dE0gI3kO5sU7wY1cF4hJ6lN8pR2tV'
+  process.env.VAPID_PRIVATE_KEY = 'z9x8c7v6b5n4m3l2k1j0h9g8f7d6s5a4'
 }
 
 export async function teardown() {

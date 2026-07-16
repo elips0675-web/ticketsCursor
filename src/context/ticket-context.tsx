@@ -339,6 +339,7 @@ export function TicketProvider({ children }: { children: ReactNode }) {
       if (ctx?.prev) queryClient.setQueryData(['tickets'], ctx.prev)
     },
     onSuccess: (raw) => {
+      if (!raw) return
       const created = mapTicket(raw)
       queryClient.setQueryData<Ticket[]>(['tickets'], (old) => old?.map((t) => (t.id < 0 ? created : t)))
     },

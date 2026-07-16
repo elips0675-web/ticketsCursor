@@ -149,7 +149,7 @@ npm run test:e2e
 ## 📊 Метрики проекта
 
 | Показатель | Значение | Статус |
-|---|---|---|---|
+|---|---|---|
 | Клиентские тесты | 366 тестов, 51 файл | ✅ Пройдены |
 | Серверные тесты | 346 тестов, 25 файлов | ✅ Пройдены |
 | E2E тесты (Playwright) | 14 spec'ов, 17 страниц (`check-console.mjs`) | ✅ ALL OK |
@@ -161,8 +161,6 @@ npm run test:e2e
 | API endpoints | 60+ (Swagger + k6 metrics + Health probes) | ✅ |
 | React Query | useQuery/useMutation, optimistic updates, staleTime 5min | ✅ |
 | Request timing metrics | Prometheus-формат, гистограммы (50–5000ms) | ✅ |
-| Моделей Prisma | 17 | ✅ |
-| API endpoints | 50+ (Swagger + /api/metrics) | ✅ |
 | Docker образы | Multi-stage, non-root | ✅ |
 | CI/CD pipeline | Lint → Type-check → Test → Build | ✅ |
 

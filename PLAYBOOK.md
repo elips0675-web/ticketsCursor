@@ -29,14 +29,20 @@
 ```
 First Contentful Paint: < 1.5s
 Lighthouse Performance:  > 85
-Initial JS bundle:       < 400 KB gzip (текущий: 350 KB)
-Total JS bundle:         < 700 KB gzip (текущий: 640 KB)
+Initial JS bundle:       < 200 KB gzip (текущий: 1.2 MB raw / ~350 KB gzip)
+Total JS bundle:         < 500 KB gzip (текущий: 640 KB gzip)
 API response time (p95): < 500ms
 ```
-✅ **CI проверка**: `node scripts/check-bundle-size.js` в CI после `vite build` — пайплайн падает при превышении.
-✅ Code splitting (React.lazy) на всех страницах
+✅ **CI проверка**: `node scripts/check-bundle-size.js` в CI после `vite build`
+✅ Code splitting (React.lazy) на части страниц
 ✅ Virtual scrolling (`@tanstack/react-virtual`) в чатах и сообщениях тикетов
-⚠️ Bundle 350 KB gzip — высокий. Требуется code-splitting по роутам (React.lazy уже есть, но не все страницы вынесены).
+⚠️ **index chunk 1.2 MB raw** — главная проблема производительности. План:
+```js
+// 1. Вынести React, ReactDOM, react-router-dom в vendor chunk (manualChunks)
+// 2. Убедиться, что ВСЕ страницы — React.lazy (сейчас не все)
+// 3. Крупные libs (html2canvas, jspdf) — динамический импорт только на страницах экспорта
+// 4. Проверить recharts — возможно tree-shake не работает
+```
 
 ### 28. PWA
 ✅ `vite-plugin-pwa` + `public/sw.js` (Workbox)
@@ -205,6 +211,13 @@ E2E (critical flows):     14 Playwright spec'ов
 | 53 | Grafana Dashboard | ✅ Реализовано | — | 6 панелей: rate, duration, memory, CPU, event loop |
 | 4 | Strict CSP | ✅ Реализовано | — | Helmet с кастомными директивами |
 | 48 | Outbox Pattern | ✅ Реализовано | — | enqueueEvent + worker (100ms poll) |
+| 27a | Bundle size (1.2 MB index chunk) | 🔴 | 2ч | FCP с 1.5s → < 1s |
+| 49 | Bull Queue (background jobs) | 🔴 | 3ч | Надёжные ретраи SLA |
+| — | N+1 Query Audit | 🟠 | 1ч | Стабильность API под нагрузкой |
+| — | Index Audit + FULLTEXT | 🟠 | 1ч | Скорость поиска |
+| — | Feature Flags | 🟡 | 4ч | Безопасный rollout |
+| 52 | API Versioning | 🟢 | 2ч | Безопасные breaking changes |
+| — | prefers-reduced-motion | 🟢 | 15мин | a11y |
 
 ---
 
@@ -382,6 +395,95 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 3. **Diagnose** — найти root cause (логи + трейсы + метрики)
 4. **Fix** — deploy + verify
 5. **Post-mortem** — что произошло, почему, что делаем, чтобы не повторилось
+
+---
+
+---
+
+## ⚙️ Feature Flags
+
+❌ **Не реализовано.** Нужно для включения/выключения фич без деплоя.
+
+```js
+// server/src/routes/features.js — GET /api/admin/features
+// Хранить в таблице feature_flags (key, enabled, updated_at)
+// Кэшировать в Redis на 30s
+
+// Клиентский хук:
+function useFeature(key: string): boolean {
+  const { data } = useQuery({
+    queryKey: ['features', key],
+    queryFn: () => api.get(`/admin/features/${key}`),
+    staleTime: 30_000,
+  })
+  return data?.enabled ?? false
+}
+```
+
+| Фича | Зачем |
+|------|-------|
+| `new_ticket_form` | Постепенный rollout новой формы |
+| `kanban_view` | A/B тест Kanban vs список |
+| `dark_theme` | Включить тёмную тему (если решат вернуть) |
+
+---
+
+## 🔄 API Versioning
+
+⚠️ **Не реализовано.** Пока все роуты на `/api/` без префикса версии.
+
+```js
+// server/src/app.js
+app.use('/api/v1', v1Routes)
+// app.use('/api/v2', v2Routes) // когда breaking change
+
+// Текущий mount() переименовать в mountV1()
+```
+
+Зачем: мобильное приложение (Android через Tauri/Capacitor) не обновляется мгновенно.
+Старые клиенты должны работать 3-6 месяцев после breaking change.
+
+---
+
+## 🔍 N+1 Query Audit
+
+⚠️ **Нужна ревизия.** PLAYBOOK утверждает что N+1 отсутствует (`Prisma include / _count`), но:
+
+```sql
+-- Потенциальные проблемы:
+-- 1. tickets.service.js getLeastLoadedAssignee — два отдельных count запроса
+-- 2. api.test.js — GET /api/tickets может дёргать messages_count отдельно
+-- 3. Каждый вызов mapTicket() на фронте — если API не включил include
+```
+
+**Проверка**: включить логирование всех Prisma запросов и искать повторяющиеся `SELECT`:
+
+```js
+// prisma.js — включить логирование на staging
+log: process.env.NODE_ENV === 'staging' ? ['query', 'info', 'warn'] : ['warn']
+```
+
+---
+
+## 📊 Index Audit
+
+✅ 15 индексов в `seed.sql`.
+
+**Что проверить:**
+```sql
+-- 1. FULLTEXT на search-таблицах (для поиска):
+ALTER TABLE tickets ADD FULLTEXT INDEX idx_tickets_ft (title, description);
+ALTER TABLE wiki ADD FULLTEXT INDEX idx_wiki_ft (title, content);
+ALTER TABLE news ADD FULLTEXT INDEX idx_news_ft (title, content);
+
+-- 2. Composite на частые WHERE (статус + приоритет):
+CREATE INDEX idx_tickets_status_priority ON tickets(status, priority);
+
+-- 3. user_id на notifications (для колокольчика):
+CREATE INDEX idx_notifications_user_id ON notifications(user_id, created_at DESC);
+```
+
+⚠️ **Сейчас FULLTEXT может отсутствовать** — в тестах search.js падал на LIKE fallback вместо FULLTEXT.
 
 ---
 

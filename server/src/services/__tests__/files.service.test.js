@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 vi.mock('../../prisma.js', () => ({
   default: {
     file_folders: { findMany: vi.fn(), create: vi.fn() },
-    files: { create: vi.fn(), delete: vi.fn(), count: vi.fn() },
+    files: { create: vi.fn(), update: vi.fn(), count: vi.fn() },
   },
 }))
 
@@ -55,9 +55,9 @@ describe('createFile', () => {
 })
 
 describe('deleteFile', () => {
-  it('deletes file by id', async () => {
-    prisma.files.delete.mockResolvedValue({})
+  it('soft-deletes file by id', async () => {
+    prisma.files.update.mockResolvedValue({})
     await deleteFile(1)
-    expect(prisma.files.delete).toHaveBeenCalledWith({ where: { id: 1 } })
+    expect(prisma.files.update).toHaveBeenCalledWith({ where: { id: 1 }, data: { deleted_at: expect.any(Date) } })
   })
 })

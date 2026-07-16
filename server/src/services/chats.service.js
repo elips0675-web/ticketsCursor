@@ -28,12 +28,12 @@ export async function getChatById(id, page = 1, limit = 50) {
   const skip = (page - 1) * limit
   const [messages, total] = await Promise.all([
     prisma.chat_messages.findMany({
-      where: { chat_id: id },
+      where: { chat_id: id, deleted_at: null },
       orderBy: { created_at: 'asc' },
       take: limit,
       skip,
     }),
-    prisma.chat_messages.count({ where: { chat_id: id } }),
+    prisma.chat_messages.count({ where: { chat_id: id, deleted_at: null } }),
   ])
   return { ...chat, messages, total, page, totalPages: Math.ceil(total / limit) }
 }

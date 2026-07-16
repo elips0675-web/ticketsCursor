@@ -73,7 +73,10 @@ API response time (p95): < 500ms
 ✅ Пагинация offset-based (админка) + cursor-based (чаты)
 
 ### 33. Soft Deletes
-❌ **Не реализовано**. Все DELETE — физические.
+✅ **Реализовано**: `deleted_at` на tickets, ticket_messages, chat_messages, files.
+- `prisma.delete` → `prisma.update({ data: { deleted_at: new Date() } })`
+- Все SELECT с `where: { deleted_at: null }`
+- Админы могут найти удалённые записи по ID (findUnique без фильтра)
 ➡️ Для production нужно:
 ```sql
 ALTER TABLE tickets ADD COLUMN deleted_at TIMESTAMP NULL;
@@ -189,7 +192,7 @@ E2E (critical flows):     14 Playwright spec'ов
 
 | # | Паттерн | Приоритет | Усилия | Эффект |
 |---|---------|-----------|--------|--------|
-| 33 | Soft Deletes | 🟠 Средний | 4 часа | Безопасность данных, восстановление после ошибок |
+| 33 | Soft Deletes | ✅ Реализовано | — | Tickets, ticket_messages, chat_messages, files |
 | 30 | a11y: skip-link, aria-live | 🟠 Средний | 1 час | Доступность для screen reader |
 | 27 | Performance Budget в CI | 🟡 Низкий | 1 час | Контроль bundle size в PR |
 | 4 | Strict CSP | 🟡 Низкий | 2 часа | Защита от XSS |

@@ -77,7 +77,7 @@ async function fullSync() {
   }
   _syncing = true
   try {
-    const tickets = await prisma.tickets.findMany({ select: { id: true, title: true, description: true, status: true, priority: true, category: true } })
+    const tickets = await prisma.tickets.findMany({ where: { deleted_at: null }, select: { id: true, title: true, description: true, status: true, priority: true, category: true } })
     if (tickets.length) await c.index('tickets').addDocuments(tickets.map(t => ({ ...t, description: t.description || '' })))
 
     const employees = await prisma.employees.findMany({ select: { id: true, name: true, email: true, department: true } })

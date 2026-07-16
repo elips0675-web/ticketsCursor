@@ -182,7 +182,7 @@ export async function setupSocket(server) {
         if (!msg) return
         const isAdmin = hasRole(socket.userRole, 'senior_agent')
         if (!isAdmin && msg.sender_id !== socket.userId) return
-        await prisma.chat_messages.delete({ where: { id: msgId } })
+        await prisma.chat_messages.update({ where: { id: msgId }, data: { deleted_at: new Date() } })
         io.to(`chat:${chatId}`).emit('message:removed', msgId)
       } catch (err) {
         logger.error('WS delete error:', err)

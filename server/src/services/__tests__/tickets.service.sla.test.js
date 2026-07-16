@@ -156,7 +156,7 @@ describe('listTickets', () => {
     const result = await listTickets({ page: 1, limit: 20, userId: 5, role: 'requester' })
     expect(result.data).toHaveLength(1)
     expect(result.total).toBe(1)
-    expect(prisma.tickets.count).toHaveBeenCalledWith(expect.objectContaining({ where: { created_by: 5 } }))
+    expect(prisma.tickets.count).toHaveBeenCalledWith(expect.objectContaining({ where: { deleted_at: null, created_by: 5 } }))
   })
 
   it('filters by agent role', async () => {
@@ -164,7 +164,7 @@ describe('listTickets', () => {
     prisma.tickets.findMany.mockResolvedValue([])
     await listTickets({ page: 1, limit: 20, userId: 5, role: 'agent' })
     expect(prisma.tickets.count).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { OR: [{ assigned_to: 5 }, { assigned_to: null }] } }),
+      expect.objectContaining({ where: { deleted_at: null, OR: [{ assigned_to: 5 }, { assigned_to: null }] } }),
     )
   })
 
@@ -172,7 +172,7 @@ describe('listTickets', () => {
     prisma.tickets.count.mockResolvedValue(0)
     prisma.tickets.findMany.mockResolvedValue([])
     await listTickets({ page: 1, limit: 20, userId: 1, role: 'super_admin' })
-    expect(prisma.tickets.count).toHaveBeenCalledWith(expect.objectContaining({ where: {} }))
+    expect(prisma.tickets.count).toHaveBeenCalledWith(expect.objectContaining({ where: { deleted_at: null } }))
   })
 })
 

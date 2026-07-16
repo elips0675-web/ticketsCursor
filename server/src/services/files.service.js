@@ -17,13 +17,16 @@ export async function getFolders(userId, page, limit) {
       ],
     },
     include: {
-      files: { orderBy: { created_at: 'desc' }, take: limit, skip: offset },
+      files: {
+        where: { deleted_at: null },
+        orderBy: { created_at: 'desc' }, take: limit, skip: offset,
+      },
     },
     orderBy: { name: 'asc' },
   })
   for (const f of folders) {
     f.files = f.files.map(mapFile)
-    f.totalFiles = await prisma.files.count({ where: { folder_id: f.id } })
+    f.totalFiles = await prisma.files.count({ where: { folder_id: f.id, deleted_at: null } })
   }
   return folders
 }
@@ -39,5 +42,8 @@ export async function createFile({ name, size, type, folderId, path, userId }) {
 }
 
 export async function deleteFile(id) {
-  await prisma.files.delete({ where: { id: Number(id) } })
+  await prisma.files.update({
+    where: { id: Number(id) },
+    data: { deleted_at: new Date() },
+  })
 }

@@ -310,7 +310,7 @@ router.delete('/:id/messages/:msgId', async (req, res) => {
     const isAdmin = hasRole(req.user.role, 'senior_agent')
     const isOwner = msg.sender_id === req.user.userId
     if (!isAdmin && !isOwner) return res.status(403).json({ success: false, message: 'Forbidden' })
-    await prisma.ticket_messages.delete({ where: { id: Number(req.params.msgId) } })
+    await prisma.ticket_messages.update({ where: { id: Number(req.params.msgId) }, data: { deleted_at: new Date() } })
     const io = getIO()
     if (io) {
       io.emit('ticket:message-removed', { ticketId: Number(req.params.id), msgId: Number(req.params.msgId) })

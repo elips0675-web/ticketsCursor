@@ -102,7 +102,7 @@ async function getTicketWithUsers(ticketId) {
 
 async function getTicketParticipants(ticketId, excludeUserId) {
   const rows = await prisma.ticket_messages.findMany({
-    where: { ticket_id: ticketId, sender_id: { not: excludeUserId } },
+    where: { ticket_id: ticketId, sender_id: { not: excludeUserId }, deleted_at: null },
     distinct: ['sender_id'],
     select: { sender_id: true },
   })

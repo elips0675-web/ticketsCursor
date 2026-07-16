@@ -85,6 +85,7 @@ async function runSlaCheck(prisma) {
       where: {
         status: { in: ['open', 'in_progress'] },
         due_at: { lt: new Date() },
+        deleted_at: null,
       },
       select: { id: true },
       take: 200,

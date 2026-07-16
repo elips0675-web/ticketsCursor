@@ -51,7 +51,7 @@ export async function getLeastLoadedAssignee() {
       _count: {
         select: {
           assigned_tickets: {
-            where: { status: { in: ['open', 'in_progress'] } },
+            where: { status: { in: ['open', 'in_progress'] }, deleted_at: null },
           },
         },
       },
@@ -63,7 +63,7 @@ export async function getLeastLoadedAssignee() {
 }
 
 export async function listTickets({ page, limit, userId, role }) {
-  const where = {}
+  const where = { deleted_at: null }
   if (role === 'requester') {
     where.created_by = userId
   } else if (role === 'agent') {
@@ -84,7 +84,7 @@ export async function listTickets({ page, limit, userId, role }) {
         select: { name: true, email: true, avatar: true },
       },
       _count: {
-        select: { ticket_messages: true },
+        select: { ticket_messages: { where: { deleted_at: null } } },
       },
     },
   })
@@ -107,6 +107,7 @@ export async function listOverdueSlaTickets(limit) {
     where: {
       status: { in: ['open', 'in_progress'] },
       due_at: { lt: new Date() },
+      deleted_at: null,
     },
     orderBy: { due_at: 'asc' },
     take: limit,
@@ -119,10 +120,11 @@ export async function listOverdueSlaTickets(limit) {
 
 export async function getSlaStats() {
   const now = new Date()
-  const total = await prisma.tickets.count({ where: { status: { in: ['open', 'in_progress', 'resolved', 'closed'] } } })
-  const overdue = await prisma.tickets.count({ where: { status: { in: ['open', 'in_progress'] }, due_at: { lt: now, not: null } } })
-  const onTime = await prisma.tickets.count({ where: { status: { in: ['resolved', 'closed'] }, due_at: { gte: now } } })
-  const noSla = await prisma.tickets.count({ where: { due_at: null } })
+  const baseWhere = { deleted_at: null }
+  const total = await prisma.tickets.count({ where: { ...baseWhere, status: { in: ['open', 'in_progress', 'resolved', 'closed'] } } })
+  const overdue = await prisma.tickets.count({ where: { ...baseWhere, status: { in: ['open', 'in_progress'] }, due_at: { lt: now, not: null } } })
+  const onTime = await prisma.tickets.count({ where: { ...baseWhere, status: { in: ['resolved', 'closed'] }, due_at: { gte: now } } })
+  const noSla = await prisma.tickets.count({ where: { ...baseWhere, due_at: null } })
   return { total, overdue, onTime, noSla }
 }
 
@@ -134,6 +136,7 @@ export async function getTicketById(id, messagePage = 1, messageLimit = 50) {
         select: { name: true, email: true, avatar: true },
       },
       ticket_messages: {
+        where: { deleted_at: null },
         orderBy: { created_at: 'asc' },
         take: messageLimit,
         skip: (messagePage - 1) * messageLimit,
@@ -148,12 +151,12 @@ export async function getTicketMessages(id, page = 1, limit = 50) {
   const offset = (page - 1) * limit
   const [rows, total] = await Promise.all([
     prisma.ticket_messages.findMany({
-      where: { ticket_id: id },
+      where: { ticket_id: id, deleted_at: null },
       orderBy: { created_at: 'asc' },
       take: limit,
       skip: offset,
     }),
-    prisma.ticket_messages.count({ where: { ticket_id: id } }),
+    prisma.ticket_messages.count({ where: { ticket_id: id, deleted_at: null } }),
   ])
   return { data: rows, total, page, totalPages: Math.ceil(total / limit) }
 }

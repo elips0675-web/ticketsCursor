@@ -54,6 +54,7 @@ model tickets {
   resolved_at DateTime?
   created_at  DateTime? @default(now())
   updated_at  DateTime? @default(now())
+  deleted_at  DateTime?
 
   created_by_employee  employees?      @relation("tickets_created_by", fields: [created_by], references: [id])
   assigned_to_employee employees?      @relation("tickets_assigned_to", fields: [assigned_to], references: [id])
@@ -70,6 +71,7 @@ model ticket_messages {
   attachments   Json?
   is_internal   Boolean?  @default(false)
   created_at    DateTime? @default(now())
+  deleted_at    DateTime?
 
   ticket   tickets?   @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
   employee employees? @relation(fields: [sender_id], references: [id], onDelete: Cascade)
@@ -146,6 +148,7 @@ model files {
   path      String?   @db.VarChar(500)
   user_id   Int
   created_at DateTime? @default(now())
+  deleted_at DateTime?
 
   folder file_folders? @relation(fields: [folder_id], references: [id], onDelete: Cascade)
   user   employees?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -168,6 +171,7 @@ model chat_messages {
   sender_name String    @db.VarChar(255)
   text        String    @db.Text
   created_at  DateTime? @default(now())
+  deleted_at  DateTime?
 
   chat   chat_rooms? @relation(fields: [chat_id], references: [id], onDelete: Cascade)
   sender employees?  @relation(fields: [sender_id], references: [id], onDelete: Cascade)

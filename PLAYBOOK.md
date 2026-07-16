@@ -101,7 +101,7 @@ ALTER TABLE files ADD COLUMN deleted_at TIMESTAMP NULL;
 ### 4. CSP / Helmet
 ✅ Helmet 8 со стандартными заголовками
 ⚠️ CSP не кастомизирован (default-src 'self' от Helmet)
-➡️ Для production нужен strict CSP:
+✅ **Strict CSP настроен** в Helmet:
 ```
 default-src 'self';
 script-src 'self' 'nonce-{random}';
@@ -203,7 +203,7 @@ E2E (critical flows):     14 Playwright spec'ов
 | 55 | Load Testing (k6) | 🟡 Низкий | 2 часа | Знать предел нагрузки |
 | 27 | Performance Budget в CI | ✅ Реализовано | — | `scripts/check-bundle-size.js` в CI |
 | 53 | Grafana Dashboard | ✅ Реализовано | — | 6 панелей: rate, duration, memory, CPU, event loop |
-| 4 | Strict CSP | 🟡 Низкий | 2 часа | Защита от XSS |
+| 4 | Strict CSP | ✅ Реализовано | — | Helmet с кастомными директивами |
 
 ---
 

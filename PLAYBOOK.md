@@ -257,11 +257,82 @@ export function down(knex) {
 
 ---
 
+## 🔩 Reliability Patterns
+
+### 48. Outbox Pattern (events reliability)
+
+При падении сервера между `prisma.create` и `io.emit()` — событие теряется. Решение:
+
+```js
+// Вместо прямого вызова io.emit() в HTTP-хендлере:
+// 1. INSERT в outbox_table (event_type, payload, created_at)
+// 2. Отдельный worker (setInterval каждые 100ms) читает outbox и отправляет WS
+// 3. После подтверждения — DELETE или пометить sent_at
+
+CREATE TABLE event_outbox (
+  id SERIAL PRIMARY KEY,
+  event_type VARCHAR(50) NOT NULL,
+  payload JSON NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sent_at TIMESTAMP NULL
+);
+```
+
+⚠️ **Не реализовано.** Сейчас WS-эмиты делаются прямо в хендлерах — при перезапуске между записью в БД и `io.emit()` событие теряется.
+
+### 49. Dead Letter Queue (background jobs)
+
+Фоновые задачи (`background.js`) не имеют ретраев и DLQ:
+
+```js
+// Идеал: Bull Queue
+// - 3 попытки с exponential backoff + jitter (1s, 4s, 16s)
+// - После 3х неудач → DLQ (отдельная очередь)
+// - Алерт при > 10 сообщений в DLQ за час
+```
+
+⚠️ **Не реализовано.** Сейчас `sendTicketNotification` падает с `.catch(() => {})` — ошибки игнорируются.
+
+### 50. Backup Verification
+
+Бэкапы есть (`scripts/backup-mysql.ps1`), но проверяются ли?
+
+```bash
+# После каждого backup:
+# 1. Создать тестовую БД: CREATE DATABASE servicedesk_verify;
+# 2. Восстановить: mysql ... servicedesk_verify < backup.sql
+# 3. Проверить: SELECT COUNT(*) FROM tickets > 0
+# 4. Удалить: DROP DATABASE servicedesk_verify;
+```
+
+❌ Автоматическая верификация не реализована.
+
+### 51. Secrets Rotation Playbook
+
+```bash
+# 1. Сгенерировать новый JWT_SECRET:
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# 2. Деплой с поддержкой 2 ключей (verify: [old, new], sign: new)
+# 3. Ждать 7d (TTL токена)
+# 4. Убрать old key
+# 5. Аналогично для DB password, SMTP, VAPID keys
+```
+
+### 52. Incident Post-Mortem Process
+
+1. **Обнаружение** — Sentry / Grafana / пользователь
+2. **Contain** — откат фичи / блокировка / read-only
+3. **Diagnose** — найти root cause (логи + трейсы + метрики)
+4. **Fix** — deploy + verify
+5. **Post-mortem** — что произошло, почему, что делаем, чтобы не повторилось
+
+---
+
 ## 📋 Быстрый старт для нового разработчика
 
 ```bash
 # 1. Требования
-node >= 20.11.0
+node = 20.11.0 (см. .nvmrc)
 npm  >= 10.2.0
 MySQL >= 8.0
 Redis (опционально)
@@ -270,6 +341,7 @@ Redis (опционально)
 git clone https://github.com/elips0675-web/ticketscursor.git
 cd ticketscursor
 cp server/.env.example server/.env
+nvm use                      # авто-смена версии Node
 
 # 3. База данных (MySQL localhost:3306)
 cd server && npm run migrate && npm run seed
@@ -284,6 +356,23 @@ cd server && npm test       # 346 backend tests
 npx playwright test         # 14 E2E tests
 ```
 
+### Seeding (тестовые данные)
+
+```bash
+npm run seed                # в server/ — заполняет MySQL тестовыми данными
+```
+Набор: админ, агенты, 50+ тикетов, чаты, сообщения, файлы, уведомления.
+`npm run setup` = migrate + seed одной командой.
+
+### Окружение
+
+```bash
+# .nvmrc — фиксированная версия Node
+nvm use                     # → 20.11.0
+# Проверка:
+node -e "console.log(process.version)"  # v20.11.0
+```
+
 ---
 
-*Актуально на июль 2026. Coverage: frontend 71% stmts, backend 71% stmts.*
+*Актуально на июль 2026. Coverage: frontend 71% stmts, backend 71% stmts. Сервер: Prisma + Knex (migrations).*

@@ -189,7 +189,6 @@ E2E (critical flows):     14 Playwright spec'ов
 
 | # | Паттерн | Приоритет | Усилия | Эффект |
 |---|---------|-----------|--------|--------|
-| 34 | Idempotency Keys | 🔴 Высокий | 2 часа | Исключает дубли сообщений/тикетов при network error |
 | 33 | Soft Deletes | 🟠 Средний | 4 часа | Безопасность данных, восстановление после ошибок |
 | 30 | a11y: skip-link, aria-live | 🟠 Средний | 1 час | Доступность для screen reader |
 | 27 | Performance Budget в CI | 🟡 Низкий | 1 час | Контроль bundle size в PR |

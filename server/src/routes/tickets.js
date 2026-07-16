@@ -16,6 +16,7 @@ import {
 } from '../notify.js'
 import { createTicketValidation, updateStatusValidation, updatePriorityValidation, assignTicketValidation, addMessageValidation } from '../validate.js'
 import logger from '../logger.js'
+import { idempotent } from '../middleware/idempotency.js'
 import { validateUpload } from '../middleware/validateUpload.js'
 import {
   listTickets,
@@ -108,7 +109,7 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.post('/', createTicketValidation, async (req, res) => {
+router.post('/', idempotent, createTicketValidation, async (req, res) => {
   const { title, description, priority, category } = req.body
   try {
     const { ticket, dueAt, autoAssignedTo } = await createTicket({
@@ -247,7 +248,7 @@ router.post('/upload', upload.single('file'), validateUpload, (req, res) => {
   })
 })
 
-router.post('/:id/messages', addMessageValidation, async (req, res) => {
+router.post('/:id/messages', idempotent, addMessageValidation, async (req, res) => {
   const ticketId = Number(req.params.id)
   const { text, isInternal, attachments } = req.body
   try {

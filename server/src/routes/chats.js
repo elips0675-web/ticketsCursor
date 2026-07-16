@@ -3,6 +3,7 @@ import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { getIO } from '../socket.js'
 import logger from '../logger.js'
+import { idempotent } from '../middleware/idempotency.js'
 import { getChats, getChatById, createMessage, getChatParticipants, markRead, findOrCreatePersonalChat } from '../services/chats.service.js'
 
 const router = Router()
@@ -33,7 +34,7 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.post('/:id/messages', async (req, res) => {
+router.post('/:id/messages', idempotent, async (req, res) => {
   const { text } = req.body
   if (!text?.trim()) return res.status(400).json({ message: 'Text required' })
   if (text.length > 2000) return res.status(400).json({ message: 'Text too long (max 2000 chars)' })

@@ -69,6 +69,8 @@ if (process.env.REDIS_URL) {
   })()
 }
 
+export { cache }
+
 export function cacheMiddleware(ttl = 300) {
   return async (req, res, next) => {
     if (req.method !== 'GET') return next()

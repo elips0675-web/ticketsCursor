@@ -1,0 +1,70 @@
+{
+  "title": "Service Desk API",
+  "tags": ["api", "nodejs"],
+  "schemaVersion": 39,
+  "version": 1,
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": { "refresh_intervals": ["10s", "30s", "1m", "5m", "15m"] },
+  "panels": [
+    {
+      "title": "Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "targets": [{
+        "expr": "rate(http_request_duration_ms_count[1m])",
+        "legendFormat": "{{route}}",
+        "interval": "15s"
+      }]
+    },
+    {
+      "title": "Avg Response Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "targets": [{
+        "expr": "http_request_duration_ms_avg",
+        "legendFormat": "{{route}}",
+        "interval": "15s"
+      }]
+    },
+    {
+      "title": "P95 Response Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket[1m])) by (le, route))",
+        "legendFormat": "{{route}}",
+        "interval": "15s"
+      }]
+    },
+    {
+      "title": "Memory Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "process_resident_memory_bytes / 1024 / 1024", "legendFormat": "RSS (MB)" },
+        { "expr": "process_heap_bytes / 1024 / 1024", "legendFormat": "Heap (MB)" }
+      ],
+      "unit": "bytes"
+    },
+    {
+      "title": "CPU Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "targets": [{
+        "expr": "rate(process_cpu_seconds_total[1m])",
+        "legendFormat": "CPU"
+      }],
+      "unit": "percent"
+    },
+    {
+      "title": "Event Loop Lag",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "targets": [{
+        "expr": "nodejs_eventloop_lag_seconds",
+        "legendFormat": "Lag"
+      }],
+      "unit": "s"
+    }
+  ]
+}

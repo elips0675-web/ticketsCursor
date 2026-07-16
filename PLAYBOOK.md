@@ -202,7 +202,7 @@ E2E (critical flows):     14 Playwright spec'ов
 | 30 | a11y: skip-link, aria-live | ✅ Реализовано | — | skip-link + aria-live + aria-label на nav |
 | 55 | Load Testing (k6) | 🟡 Низкий | 2 часа | Знать предел нагрузки |
 | 27 | Performance Budget в CI | ✅ Реализовано | — | `scripts/check-bundle-size.js` в CI |
-| 53 | Grafana Dashboard | 🟡 Низкий | 1 час | Визуализация метрик |
+| 53 | Grafana Dashboard | ✅ Реализовано | — | 6 панелей: rate, duration, memory, CPU, event loop |
 | 4 | Strict CSP | 🟡 Низкий | 2 часа | Защита от XSS |
 
 ---
@@ -285,7 +285,10 @@ grafana:
 
 **Метрики**: `GET /api/metrics` (Prometheus format) — request duration, memory, event loop lag.
 **Дашборды**: Grafana на localhost:3000, admin/admin.
-⚠️ Дашборды не настроены — нужно импортировать JSON-дашборд для Node.js + MySQL.
+✅ **Дашборд создан**: `monitoring/grafana/dashboards/api-metrics.json` — 6 панелей:
+- Request Rate (by route), Avg Response Time, P95 Response Time
+- Memory (RSS + Heap), CPU, Event Loop Lag
+- Автопровайдинг при старте Grafana через docker-compose.
 
 ### 54. Readiness Probe (/health/ready)
 

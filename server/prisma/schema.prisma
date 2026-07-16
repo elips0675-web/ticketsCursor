@@ -259,3 +259,15 @@ model password_resets {
   expires_at DateTime
   created_at DateTime? @default(now())
 }
+
+model event_outbox {
+  id         Int       @id @default(autoincrement())
+  event_type String    @db.VarChar(50)
+  room       String?   @db.VarChar(100)
+  payload    String    @db.Text
+  created_at DateTime? @default(now())
+  sent_at    DateTime?
+
+  @@index([sent_at, created_at])
+  @@map("event_outbox")
+}

@@ -2,8 +2,8 @@ import { Router } from 'express'
 import prisma from '../prisma.js'
 import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken } from '../middleware.js'
-import { getIO } from '../socket.js'
 import logger from '../logger.js'
+import { enqueueEvent } from '../outbox.js'
 
 const router = Router()
 router.use(authenticateToken)
@@ -15,7 +15,7 @@ export async function createNotification({ userId, type, title, body, link }) {
     const notif = await prisma.notifications.create({
       data: { user_id: userId, type, title, body, link },
     })
-    getIO()?.emit(`notification:${userId}`, notif)
+    enqueueEvent(`notification:${userId}`, null, notif)
   } catch (err) {
     logger.error('Notification create error:', err)
   }

@@ -204,6 +204,7 @@ E2E (critical flows):     14 Playwright spec'ов
 | 27 | Performance Budget в CI | ✅ Реализовано | — | `scripts/check-bundle-size.js` в CI |
 | 53 | Grafana Dashboard | ✅ Реализовано | — | 6 панелей: rate, duration, memory, CPU, event loop |
 | 4 | Strict CSP | ✅ Реализовано | — | Helmet с кастомными директивами |
+| 48 | Outbox Pattern | ✅ Реализовано | — | enqueueEvent + worker (100ms poll) |
 
 ---
 
@@ -325,22 +326,16 @@ app.get('/api/health/ready', async (req, res) => {
 
 При падении сервера между `prisma.create` и `io.emit()` — событие теряется. Решение:
 
-```js
-// Вместо прямого вызова io.emit() в HTTP-хендлере:
-// 1. INSERT в outbox_table (event_type, payload, created_at)
-// 2. Отдельный worker (setInterval каждые 100ms) читает outbox и отправляет WS
-// 3. После подтверждения — DELETE или пометить sent_at
-
-CREATE TABLE event_outbox (
-  id SERIAL PRIMARY KEY,
-  event_type VARCHAR(50) NOT NULL,
-  payload JSON NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sent_at TIMESTAMP NULL
-);
+```sql
+-- model event_outbox в schema.prisma
 ```
 
-⚠️ **Не реализовано.** Сейчас WS-эмиты делаются прямо в хендлерах — при перезапуске между записью в БД и `io.emit()` событие теряется.
+✅ **Реализовано:**
+- `server/src/outbox.js` — `enqueueEvent()` пишет в `event_outbox` вместо прямого `io.emit()`
+- `server/src/outbox-worker.js` — poll-воркер (100ms) читает, отправляет через WS, помечает `sent_at`
+- Все HTTP-роуты (tickets, chats, notifications) используют `enqueueEvent()` вместо `getIO().emit()`
+- Worker стартует в `index.js`, graceful stop на SIGTERM/SIGINT
+- Таблица через Knex-миграцию `migrations/20260716_add_event_outbox.js`
 
 ### 49. Dead Letter Queue (background jobs)
 

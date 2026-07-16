@@ -7,8 +7,8 @@ import prisma from '../prisma.js'
 import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { hasRole } from '../utils/roleUtils.js'
-import { getIO } from '../socket.js'
 import { invalidateCache } from '../cache.js'
+import { enqueueEvent } from '../outbox.js'
 import { logAudit } from '../audit.js'
 import {
   notifyTicketCreated, notifyStatusChanged, notifyPriorityChanged,
@@ -127,12 +127,7 @@ router.post('/', idempotent, createTicketValidation, async (req, res) => {
         text: description,
       },
     })
-    const io = getIO()
-    if (io) {
-      io.emit('ticket:created', { ...ticket, messages: [] })
-    } else {
-      logger.warn('Socket.io not available, ticket:created not emitted')
-    }
+    enqueueEvent('ticket:created', null, { ...ticket, messages: [] })
     logAudit({
       userId: req.user.userId,
       userName: req.user.name,
@@ -163,12 +158,7 @@ router.put('/:id/status', requireRole('admin', 'senior_agent'), updateStatusVali
   try {
     const old = await updateTicketStatus(ticketId, status)
     if (!old) return res.status(404).json({ success: false, message: 'Ticket not found' })
-    const io = getIO()
-    if (io) {
-      io.emit('ticket:updated', { id: ticketId, status, updatedBy: req.user.userId })
-    } else {
-      logger.warn('Socket.io not available, ticket:updated not emitted')
-    }
+    enqueueEvent('ticket:updated', null, { id: ticketId, status, updatedBy: req.user.userId })
     logAudit({ userId: req.user.userId, userName: req.user.name, action: 'status_changed', entityType: 'ticket', entityId: ticketId, details: { from: old.status, to: status } })
     try {
       await notifyStatusChanged(ticketId, old.status, status, req.user.name)
@@ -192,12 +182,7 @@ router.put('/:id/priority', requireRole('admin', 'senior_agent'), updatePriority
   try {
     const result = await updateTicketPriority(ticketId, priority)
     if (!result) return res.status(404).json({ success: false, message: 'Ticket not found' })
-    const io = getIO()
-    if (io) {
-      io.emit('ticket:updated', { id: ticketId, priority, updatedBy: req.user.userId })
-    } else {
-      logger.warn('Socket.io not available, ticket:updated not emitted')
-    }
+    enqueueEvent('ticket:updated', null, { id: ticketId, priority, updatedBy: req.user.userId })
     logAudit({ userId: req.user.userId, userName: req.user.name, action: 'priority_changed', entityType: 'ticket', entityId: ticketId, details: { from: result.oldPriority, to: priority } })
     try {
       await notifyPriorityChanged(ticketId, result.oldPriority, priority, req.user.name)
@@ -218,12 +203,7 @@ router.put('/:id/assign', requireRole('admin', 'senior_agent'), assignTicketVali
   try {
     const result = await updateTicketAssignee(ticketId, employeeId)
     if (!result) return res.status(404).json({ success: false, message: 'Ticket or employee not found' })
-    const io = getIO()
-    if (io) {
-      io.emit('ticket:updated', { id: ticketId, assignedTo: employeeId, updatedBy: req.user.userId })
-    } else {
-      logger.warn('Socket.io not available, ticket:updated not emitted')
-    }
+    enqueueEvent('ticket:updated', null, { id: ticketId, assignedTo: employeeId, updatedBy: req.user.userId })
     logAudit({ userId: req.user.userId, userName: req.user.name, action: 'assigned', entityType: 'ticket', entityId: ticketId, details: { assignedTo: employeeId || null, assignedName: result.employeeName } })
     try {
       await notifyTicketAssigned(ticketId, employeeId, req.user.name)
@@ -272,12 +252,7 @@ router.post('/:id/messages', idempotent, addMessageValidation, async (req, res) 
       },
     })
     await prisma.tickets.update({ where: { id: ticketId }, data: { updated_at: new Date() } })
-    const io = getIO()
-    if (io) {
-      io.emit('ticket:message', { ticketId, message: msg })
-    } else {
-      logger.warn('Socket.io not available, ticket:message not emitted')
-    }
+    enqueueEvent('ticket:message', null, { ticketId, message: msg })
     try {
       await notifyTicketMessage(ticketId, req.user.userId, req.user.name, text)
     } catch (notifyErr) {
@@ -311,12 +286,7 @@ router.delete('/:id/messages/:msgId', async (req, res) => {
     const isOwner = msg.sender_id === req.user.userId
     if (!isAdmin && !isOwner) return res.status(403).json({ success: false, message: 'Forbidden' })
     await prisma.ticket_messages.update({ where: { id: Number(req.params.msgId) }, data: { deleted_at: new Date() } })
-    const io = getIO()
-    if (io) {
-      io.emit('ticket:message-removed', { ticketId: Number(req.params.id), msgId: Number(req.params.msgId) })
-    } else {
-      logger.warn('Socket.io not available, ticket:message-removed not emitted')
-    }
+    enqueueEvent('ticket:message-removed', null, { ticketId: Number(req.params.id), msgId: Number(req.params.msgId) })
     res.json({ success: true, data: { msgId: Number(req.params.msgId) } })
   } catch (err) {
     logger.error('Delete message error:', err)

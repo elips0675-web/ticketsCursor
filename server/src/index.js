@@ -6,6 +6,7 @@ import { setupSocket } from './socket.js'
 import { initTelegram } from './telegram.js'
 import logger from './logger.js'
 import { setupBackgroundJobs } from './background.js'
+import { startOutboxWorker, stopOutboxWorker } from './outbox-worker.js'
 
 if (!process.env.JWT_SECRET) {
   logger.error('FATAL: JWT_SECRET environment variable is required')
@@ -37,6 +38,8 @@ initSearchSync()
 import prisma from './prisma.js'
 import { stopBackgroundJobs } from './background.js'
 setupBackgroundJobs(prisma)
+import { getIO } from './socket.js'
+startOutboxWorker(getIO)
 
 server.listen(PORT, () => {
   console.log(`Service Desk API running on port ${PORT}`)
@@ -46,6 +49,7 @@ server.listen(PORT, () => {
 async function shutdown(signal) {
   console.log(`\nReceived ${signal}, shutting down gracefully...`)
   stopBackgroundJobs()
+  stopOutboxWorker()
   server.close(() => {
     console.log('HTTP server closed')
   })

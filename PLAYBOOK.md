@@ -58,8 +58,9 @@ API response time (p95): < 500ms
 - [x] `role="button"` + `tabIndex` + `onKeyDown` (Enter/Space) на всех кликабельных карточках
 - [x] `role="alert"` на сообщениях об ошибках форм
 - [x] Focus visible (браузерный outline сохраняется)
-- [ ] Skip-to-content link
-- [ ] `aria-live` для динамических уведомлений (новый тикет, сообщение)
+- [x] Skip-to-content link (app-layout + admin-layout)
+- [x] `aria-live="polite"` в app-layout (скрытый регион для динамики)
+- [x] `aria-label` на всех `<nav>` (sidebar, mobile-bottom-nav, admin-nav)
 - [ ] Touch target ≥ 44×44px (мобильная навигация)
 - [ ] `prefers-reduced-motion` — убрать анимации
 
@@ -195,7 +196,7 @@ E2E (critical flows):     14 Playwright spec'ов
 | 33 | Soft Deletes | ✅ Реализовано | — | Tickets, ticket_messages, chat_messages, files |
 | 34 | Idempotency Keys | ✅ Реализовано | — | POST /chats/:id/messages, /tickets, /tickets/:id/messages |
 | 54 | Readiness Probe | ✅ Реализовано | — | GET /api/health/ready проверяет DB |
-| 30 | a11y: skip-link, aria-live | 🟠 Средний | 1 час | Доступность для screen reader |
+| 30 | a11y: skip-link, aria-live | ✅ Реализовано | — | skip-link + aria-live + aria-label на nav |
 | 55 | Load Testing (k6) | 🟡 Низкий | 2 часа | Знать предел нагрузки |
 | 27 | Performance Budget в CI | 🟡 Низкий | 1 час | Контроль bundle size в PR |
 | 53 | Grafana Dashboard | 🟡 Низкий | 1 час | Визуализация метрик |

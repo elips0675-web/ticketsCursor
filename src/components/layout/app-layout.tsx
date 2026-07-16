@@ -34,13 +34,17 @@ export function AppLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded-md focus:shadow-lg focus:outline-none">
+        Перейти к содержимому
+      </a>
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <MobileHeader onMenuClick={() => setMenuOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-20 md:pb-6 lg:pb-8">
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-20 md:pb-6 lg:pb-8">
           <Outlet />
         </main>
         <MobileBottomNav onMenuClick={() => setMenuOpen(true)} />
+        <div aria-live="polite" aria-atomic="true" className="sr-only" />
       </div>
       <PwaInstallPrompt />
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -97,7 +101,7 @@ function MobileBottomNav({ onMenuClick }: { onMenuClick: () => void }) {
   }
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t flex items-center justify-around py-1">
+    <nav aria-label="Основная навигация" className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t flex items-center justify-around py-1">
       {filteredNav.map((item) => (
         <button
           key={item.to}

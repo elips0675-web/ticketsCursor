@@ -117,7 +117,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1">
+      <nav aria-label="Боковая навигация" className="flex-1 p-3 space-y-1">
         {filterByRole(navItems).map((item) => (
           <NavLink
             key={item.to}

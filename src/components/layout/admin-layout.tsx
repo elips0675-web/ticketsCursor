@@ -39,6 +39,9 @@ export function AdminLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
+      <a href="#admin-main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded-md focus:shadow-lg focus:outline-none">
+        Перейти к содержимому
+      </a>
       <aside className="w-56 flex-col bg-sidebar text-sidebar-foreground shrink-0 hidden md:flex">
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-2">
@@ -51,7 +54,7 @@ export function AdminLayout() {
             </div>
           </div>
         </div>
-        <nav className="flex-1 p-2 space-y-0.5">
+        <nav aria-label="Навигация админки" className="flex-1 p-2 space-y-0.5">
           {adminNavItems.map((item) => (
             <NavLink
               key={item.to}
@@ -91,7 +94,7 @@ export function AdminLayout() {
       </aside>
       <div className="flex flex-col flex-1 min-w-0">
         <MobileAdminHeader />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8"><Outlet /></main>
+        <main id="admin-main-content" className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8"><Outlet /></main>
       </div>
     </div>
   )

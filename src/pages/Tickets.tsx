@@ -41,7 +41,8 @@ export default function Tickets() {
       toast.success(t('tickets.notifNewTicket'), { description: ticket.title })
       queryClient.invalidateQueries({ queryKey: ['tickets'] })
     }
-    const onUpdated = (data: { id: number }) => {
+    const onUpdated = (data: { id: number } | null) => {
+      if (!data) return
       toast.info(t('tickets.notifTicketUpdated'), { description: `#${data.id}` })
       queryClient.invalidateQueries({ queryKey: ['tickets'] })
     }

@@ -1,5 +1,10 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.3.0/workbox-sw.js')
 
+workbox.routing.registerRoute(
+  ({ url }) => url.pathname.startsWith('/api/') || url.pathname.startsWith('/socket.io/'),
+  new workbox.strategies.NetworkOnly()
+)
+
 workbox.precaching.precacheAndRoute(self.__WB_MANIFEST || [])
 
 self.addEventListener('push', (event) => {

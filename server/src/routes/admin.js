@@ -9,7 +9,7 @@ import { invalidateCache as invalidateSettingsCache } from '../settings.js'
 import logger from '../logger.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const projectRoot = path.resolve(__dirname, '..', '..')
+const projectRoot = path.resolve(__dirname, '..', '..', '..')
 
 const router = Router()
 router.use(authenticateToken, requireRole('admin'))
@@ -146,7 +146,7 @@ router.get('/audit', async (req, res) => {
 router.post('/settings/backup', async (req, res) => {
   try {
     const script = path.join(projectRoot, 'scripts', 'backup-mysql.ps1')
-    exec(`powershell -File "${script}"`, { timeout: 60000 }, (err, stdout, stderr) => {
+    exec(`"${process.env.ComSpec || 'cmd.exe'}" /c powershell -File "${script}"`, { timeout: 60000 }, (err, stdout, stderr) => {
       if (err) {
         logger.error('Backup error:', err.message)
         return res.status(500).json({ success: false, message: stderr || err.message })
@@ -161,7 +161,8 @@ router.post('/settings/backup', async (req, res) => {
 
 router.post('/settings/seed', async (req, res) => {
   try {
-    exec('npm run db:seed', { cwd: path.join(projectRoot, 'server'), timeout: 120000 }, (err, stdout, stderr) => {
+    const serverDir = path.join(projectRoot, 'server')
+    exec('npm.cmd run seed', { cwd: serverDir, timeout: 120000, shell: process.env.ComSpec || 'cmd.exe' }, (err, stdout, stderr) => {
       if (err) {
         logger.error('Seed error:', err.message)
         return res.status(500).json({ success: false, message: stderr || err.message })

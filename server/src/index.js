@@ -8,6 +8,13 @@ import logger from './logger.js'
 import { setupBackgroundJobs } from './background.js'
 import { startOutboxWorker, stopOutboxWorker } from './outbox-worker.js'
 
+process.on('unhandledRejection', (err) => {
+  logger.error('Unhandled rejection:', err)
+})
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught exception:', err)
+})
+
 if (!process.env.JWT_SECRET) {
   logger.error('FATAL: JWT_SECRET environment variable is required')
   logger.error('Generate one: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"')

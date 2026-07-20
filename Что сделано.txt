@@ -98,11 +98,11 @@
 
 ТЕСТЫ
 
-  • Клиентские: 360/360 (51 файл, vitest + jsdom)
-  • Серверные: 336/336 (24 файла, vitest + supertest)
-  • E2E: 36 тестов, 14 файлов (Playwright — login, tickets, chats, admin, SLA, files, search, ldap, kanban, notifications, profile, calculator, audit, file-upload)
-  • Coverage server: 70.97% Stmts / 62% Branch / 68% Funcs / 72% Lines
-  • Coverage client: 71.62% Stmts / 61.15% Branch / 61.21% Funcs / 74.57% Lines
+   • Клиентские: 372/372 (52 файла, vitest + jsdom)
+   • Серверные: 352/352 (25 файлов, vitest + supertest)
+   • E2E: 36 тестов, 14 файлов (Playwright — login, tickets, chats, admin, SLA, files, search, ldap, kanban, notifications, profile, calculator, audit, file-upload)
+   • ESLint: 0 errors, 0 warnings
+   • Type-check + build: успешно
   • ESLint: 0 errors, 0 warnings
   • Type-check + build: успешно
 
@@ -376,6 +376,16 @@
 - Загрузка кастомных шаблонов из Settings.EMAIL_TEMPLATES (JSON) с кэшированием 60s
 - ALLOWED_SETTINGS: добавлен 'EMAIL_TEMPLATES' для сохранения через админку
 - Fallback на DEFAULT_TEMPLATES при отсутствии кастомных
+
+### v1.4.0 — Email Notification System (завершён)
+- **Email Templates UI**: AdminSettings.tsx — 8 шаблонов (create/status/priority/assign/message/SLA breach × subject/body)
+- **Validation**: PUT /admin/settings проверяет EMAIL_TEMPLATES на JSON + наличие 8 ключей
+- **SMTP from DB**: email.js читает SMTP_HOST/USER/PASS из admin_settings (БД), fallback на process.env; пересоздаёт транспортер при смене конфига
+- **Startup warning**: если SMTP не настроен — logger.warn при старте сервера
+- **notifyPriorityChanged**: email + in-app (раньше только Telegram)
+- **notifyTicketMessage**: email создателю + исполнителю (раньше только in-app + Telegram)
+- **Geo route**: POST /admin/settings/geo — FULLTEXT index на tickets (title, description)
+- **Тесты**: сервер 352/352, клиент 372/372
 
 ### Аудит выполненных пунктов Оценка kimi.txt
 - ✅ H — Sentry (client+server — уже было, ничего не требуется)

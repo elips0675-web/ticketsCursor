@@ -98,10 +98,11 @@ describe('notifyStatusChanged', () => {
 })
 
 describe('notifyPriorityChanged', () => {
-  it('sends telegram only', async () => {
+  it('sends telegram, in-app and email notifications', async () => {
     await notifyPriorityChanged(1, 'low', 'critical', 'Admin')
     expect(sendTelegramNotification).toHaveBeenCalled()
-    expect(createNotification).not.toHaveBeenCalled()
+    expect(createNotification).toHaveBeenCalled()
+    expect(sendTicketNotification).toHaveBeenCalled()
   })
 })
 

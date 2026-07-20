@@ -163,12 +163,39 @@ export async function notifyStatusChanged(ticketId, oldStatus, newStatus, actorN
   }
 }
 
+const PRIORITY_BODY_TEMPLATE = 'Приоритет тикета "{{ticketTitle}}" (#{{ticketId}}) изменён.\n{{oldPriority}} → {{newPriority}}\n\n{{companyName}}'
+const PRIORITY_SUBJECT_TEMPLATE = 'Приоритет #{{ticketId}}: {{newPriority}}'
+
 export async function notifyPriorityChanged(ticketId, oldPriority, newPriority, _actorName) {
   const t = await getTicketWithUsers(ticketId)
   if (!t) return
 
+  const oldLabel = PRIORITY_LABELS[oldPriority] || oldPriority
+  const newLabel = PRIORITY_LABELS[newPriority] || newPriority
   const tag = `#${ticketId}: ${t.title}`
-  sendTelegramNotification(`⚡ Приоритет тикета ${tag}\n${PRIORITY_LABELS[oldPriority] || oldPriority} → ${PRIORITY_LABELS[newPriority] || newPriority}`)
+
+  const targets = [t.creatorId]
+  if (t.assigneeId && !targets.includes(t.assigneeId)) targets.push(t.assigneeId)
+  for (const userId of targets) {
+    safeNotify(createNotification({
+      userId, type: 'ticket_priority',
+      title: `Приоритет изменён: ${newLabel}`,
+      body: t.title,
+      link: `/tickets/${ticketId}`,
+    }))
+  }
+  sendTelegramNotification(`⚡ Приоритет тикета ${tag}\n${oldLabel} → ${newLabel}`)
+
+  const emailTargets = []
+  if (t.creatorEmail && !emailTargets.includes(t.creatorId)) emailTargets.push({ email: t.creatorEmail, name: t.creatorName })
+  if (t.assigneeEmail && t.assigneeId !== t.creatorId) emailTargets.push({ email: t.assigneeEmail, name: t.assigneeName })
+  const cn = await companyName()
+  for (const et of emailTargets) {
+    const vars = { ticketId: String(ticketId), ticketTitle: t.title, oldPriority: oldLabel, newPriority: newLabel, companyName: cn }
+    sendEmail(et.email,
+      replaceVariables(PRIORITY_SUBJECT_TEMPLATE, vars),
+      replaceVariables(PRIORITY_BODY_TEMPLATE, vars))
+  }
 }
 
 export async function notifyTicketAssigned(ticketId, assigneeId, assignedByName) {
@@ -194,6 +221,9 @@ export async function notifyTicketAssigned(ticketId, assigneeId, assignedByName)
   }
 }
 
+const MESSAGE_SUBJECT_TEMPLATE = 'Новое сообщение в тикете #{{ticketId}}: {{ticketTitle}}'
+const MESSAGE_BODY_TEMPLATE = '{{senderName}} написал в тикете "{{ticketTitle}}" (#{{ticketId}}):\n\n{{messageText}}\n\n{{companyName}}'
+
 export async function notifyTicketMessage(ticketId, senderId, senderName, text) {
   const t = await getTicketWithUsers(ticketId)
   if (!t) return
@@ -201,8 +231,10 @@ export async function notifyTicketMessage(ticketId, senderId, senderName, text) 
   const participantIds = await getTicketParticipants(ticketId, senderId)
   const targets = new Set([t.creatorId, t.assigneeId, ...participantIds].filter(Boolean))
 
+  const toNotify = []
   for (const userId of targets) {
     if (userId === senderId) continue
+    toNotify.push(userId)
     safeNotify(createNotification({
       userId, type: 'ticket_message',
       title: senderName || 'Пользователь',
@@ -212,6 +244,23 @@ export async function notifyTicketMessage(ticketId, senderId, senderName, text) 
   }
 
   sendTelegramNotification(`💬 Новое сообщение в тикете #${ticketId}: ${t.title}\n${senderName}: ${text.slice(0, 200)}`)
+
+  const emailRecipients = []
+  if (t.creatorEmail && t.creatorId !== senderId && toNotify.includes(t.creatorId)) {
+    emailRecipients.push({ email: t.creatorEmail, name: t.creatorName })
+  }
+  if (t.assigneeEmail && t.assigneeId !== senderId && t.assigneeId && toNotify.includes(t.assigneeId)) {
+    emailRecipients.push({ email: t.assigneeEmail, name: t.assigneeName })
+  }
+  if (emailRecipients.length > 0) {
+    const cn = await companyName()
+    for (const et of emailRecipients) {
+      const vars = { ticketId: String(ticketId), ticketTitle: t.title, senderName: senderName || 'Пользователь', messageText: text, companyName: cn }
+      sendEmail(et.email,
+        replaceVariables(MESSAGE_SUBJECT_TEMPLATE, vars),
+        replaceVariables(MESSAGE_BODY_TEMPLATE, vars))
+    }
+  }
 }
 
 export async function notifySlaBreached(ticketId) {

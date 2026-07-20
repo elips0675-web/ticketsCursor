@@ -36,10 +36,29 @@ router.get('/settings', async (req, res) => {
   }
 })
 
+const EXPECTED_TEMPLATE_KEYS = [
+  'ticketCreatedSubject', 'ticketCreatedBody',
+  'ticketStatusSubject', 'ticketStatusBody',
+  'ticketAssignedSubject', 'ticketAssignedBody',
+  'slaBreachedSubject', 'slaBreachedBody',
+]
+
 router.put('/settings', async (req, res) => {
   try {
     for (const [key, value] of Object.entries(req.body)) {
       if (!ALLOWED_SETTINGS.includes(key)) continue
+      if (key === 'EMAIL_TEMPLATES') {
+        try {
+          const parsed = JSON.parse(String(value))
+          const keys = Object.keys(parsed)
+          const missing = EXPECTED_TEMPLATE_KEYS.filter(k => !keys.includes(k))
+          if (missing.length > 0) {
+            return res.status(400).json({ success: false, message: `EMAIL_TEMPLATES missing keys: ${missing.join(', ')}` })
+          }
+        } catch {
+          return res.status(400).json({ success: false, message: 'EMAIL_TEMPLATES must be valid JSON' })
+        }
+      }
       await prisma.admin_settings.upsert({
         where: { key },
         update: { value: String(value), updated_at: new Date() },

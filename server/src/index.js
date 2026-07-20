@@ -21,6 +21,11 @@ if (!process.env.JWT_SECRET) {
   process.exit(1)
 }
 
+if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  logger.warn('SMTP not configured — email notifications will be silently skipped')
+  logger.warn('Set SMTP_HOST, SMTP_USER, SMTP_PASS in .env to enable email delivery')
+}
+
 const PORT = process.env.PORT || 4000
 
 setupSocket(server)

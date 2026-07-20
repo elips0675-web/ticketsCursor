@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
-import { Save, Loader2, Eye, EyeOff, Database, Server, FileText, Search, RefreshCw, Flag, ToggleLeft } from 'lucide-react'
+import { Save, Loader2, Eye, EyeOff, Database, Server, FileText, Search, RefreshCw, Flag, ToggleLeft, Mail } from 'lucide-react'
 import { api } from '@/lib/api'
 
 const FIELDS = [
@@ -178,6 +178,8 @@ export default function AdminSettings() {
 
       <FeatureFlagsSection />
 
+      <EmailTemplatesSection />
+
       <Button onClick={save} disabled={saving} className="gap-2">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
         {saving ? t('common.loading') : t('common.save')}
@@ -246,6 +248,149 @@ function RedisStatus() {
         </>
       )}
     </div>
+  )
+}
+
+const EMAIL_TEMPLATE_KEYS = [
+  { key: 'ticketCreatedSubject', label: 'Тема (создание тикета)', variables: ['ticketId', 'ticketTitle', 'priority', 'companyName', 'userName'] },
+  { key: 'ticketCreatedBody', label: 'Тело (создание тикета)', variables: ['ticketId', 'ticketTitle', 'priority', 'companyName', 'userName'], multiline: true },
+  { key: 'ticketStatusSubject', label: 'Тема (изменение статуса)', variables: ['ticketId', 'ticketTitle', 'oldStatus', 'newStatus', 'companyName', 'userName'] },
+  { key: 'ticketStatusBody', label: 'Тело (изменение статуса)', variables: ['ticketId', 'ticketTitle', 'oldStatus', 'newStatus', 'companyName', 'userName'], multiline: true },
+  { key: 'ticketAssignedSubject', label: 'Тема (назначение тикета)', variables: ['ticketId', 'ticketTitle', 'status', 'priority', 'companyName', 'userName'] },
+  { key: 'ticketAssignedBody', label: 'Тело (назначение тикета)', variables: ['ticketId', 'ticketTitle', 'status', 'priority', 'companyName', 'userName'], multiline: true },
+  { key: 'slaBreachedSubject', label: 'Тема (просрочка SLA)', variables: ['ticketId', 'ticketTitle', 'dueAt', 'companyName'] },
+  { key: 'slaBreachedBody', label: 'Тело (просрочка SLA)', variables: ['ticketId', 'ticketTitle', 'dueAt', 'companyName'], multiline: true },
+]
+
+const DEFAULT_EMAIL_TEMPLATES: Record<string, string> = {
+  ticketCreatedSubject: 'Тикет #{{ticketId}} создан: {{ticketTitle}}',
+  ticketCreatedBody: 'Ваш тикет "{{ticketTitle}}" (#{{ticketId}}) создан.\nСтатус: Открыт\nПриоритет: {{priority}}\n\n{{companyName}}',
+  ticketStatusSubject: 'Статус тикета #{{ticketId}}: {{newStatus}}',
+  ticketStatusBody: 'Тикет "{{ticketTitle}}" (#{{ticketId}})\nСтатус: {{oldStatus}} → {{newStatus}}\n\n{{companyName}}',
+  ticketAssignedSubject: 'Тикет #{{ticketId}} назначен на вас: {{ticketTitle}}',
+  ticketAssignedBody: 'Тикет "{{ticketTitle}}" (#{{ticketId}}) назначен на вас.\nСтатус: {{status}}\nПриоритет: {{priority}}\n\n{{companyName}}',
+  slaBreachedSubject: 'SLA просрочка: тикет #{{ticketId}}',
+  slaBreachedBody: 'Тикет "{{ticketTitle}}" (#{{ticketId}}) просрочен по SLA.\nСрок реакции истёк: {{dueAt}}\n\n{{companyName}}',
+}
+
+function EmailTemplatesSection() {
+  const { t } = useTranslation()
+  const [templates, setTemplates] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    api
+      .get('/admin/settings')
+      .then((data: any) => {
+        if (data?.EMAIL_TEMPLATES) {
+          try {
+            setTemplates({ ...DEFAULT_EMAIL_TEMPLATES, ...JSON.parse(data.EMAIL_TEMPLATES) })
+          } catch {
+            setTemplates({ ...DEFAULT_EMAIL_TEMPLATES })
+          }
+        } else {
+          setTemplates({ ...DEFAULT_EMAIL_TEMPLATES })
+        }
+        setLoading(false)
+      })
+      .catch(() => {
+        setTemplates({ ...DEFAULT_EMAIL_TEMPLATES })
+        setLoading(false)
+      })
+  }, [])
+
+  const update = (key: string, value: string) => {
+    setTemplates(prev => ({ ...prev, [key]: value }))
+  }
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      const payload: Record<string, string> = {}
+      for (const { key } of EMAIL_TEMPLATE_KEYS) {
+        payload[key] = templates[key] || ''
+      }
+      await api.put('/admin/settings', { EMAIL_TEMPLATES: JSON.stringify(payload) })
+      toast.success(t('admin.saveSuccess'))
+    } catch { }
+    setSaving(false)
+  }
+
+  const resetDefaults = async () => {
+    setTemplates({ ...DEFAULT_EMAIL_TEMPLATES })
+    try {
+      await api.put('/admin/settings', { EMAIL_TEMPLATES: JSON.stringify(DEFAULT_EMAIL_TEMPLATES) })
+      toast.success(t('admin.saveSuccess'))
+    } catch { }
+  }
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Mail className="w-4 h-4 text-primary" />
+            {t('admin.emailTemplates')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Mail className="w-4 h-4 text-primary" />
+          {t('admin.emailTemplates')}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-xs text-muted-foreground">{t('admin.emailTemplatesSubtitle')}</p>
+        {EMAIL_TEMPLATE_KEYS.map(({ key, label, variables, multiline }) => (
+          <div key={key}>
+            <label htmlFor={`et-${key}`} className="text-xs font-bold block mb-1">{label}</label>
+            <div className="flex flex-wrap gap-1 mb-1">
+              {variables.map(v => (
+                <code key={v} className="text-[10px] bg-muted px-1 rounded text-muted-foreground">{'{{' + v + '}}'}</code>
+              ))}
+            </div>
+            {multiline ? (
+              <textarea
+                id={`et-${key}`}
+                value={templates[key] || ''}
+                onChange={e => update(key, e.target.value)}
+                className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[60px] resize-y"
+              />
+            ) : (
+              <input
+                id={`et-${key}`}
+                type="text"
+                value={templates[key] || ''}
+                onChange={e => update(key, e.target.value)}
+                className="flex w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            )}
+          </div>
+        ))}
+        <div className="flex gap-2 pt-2">
+          <Button size="sm" onClick={save} disabled={saving} className="gap-1.5">
+            {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+            {t('common.save')}
+          </Button>
+          <Button size="sm" variant="outline" onClick={resetDefaults} className="gap-1.5">
+            <RefreshCw className="w-3 h-3" />
+            {t('common.reset')}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

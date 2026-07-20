@@ -24,6 +24,7 @@ const mockQueue = vi.hoisted(() => ({ upsertJobScheduler: vi.fn().mockResolvedVa
 const bullMqMock = vi.hoisted(() => ({
   Queue: vi.fn(function() { return mockQueue }),
   Worker: vi.fn(function() { return {} }),
+  QueueScheduler: vi.fn(function() { return {} }),
 }))
 const ioredisMock = vi.hoisted(() => ({ default: vi.fn() }))
 

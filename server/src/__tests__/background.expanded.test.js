@@ -15,6 +15,7 @@ const prismaMock = vi.hoisted(() => ({
   notifications: { deleteMany: vi.fn().mockResolvedValue({ count: 5 }) },
   tickets: { findMany: vi.fn().mockResolvedValue([]) },
   employees: { findMany: vi.fn().mockResolvedValue([]) },
+  event_outbox: { create: vi.fn().mockResolvedValue({ id: 1 }), count: vi.fn().mockResolvedValue(0) },
 }))
 const emailMock = vi.hoisted(() => ({ sendTicketNotification: vi.fn().mockResolvedValue() }))
 const notifyMock = vi.hoisted(() => ({ notifySlaBreached: vi.fn() }))
@@ -90,8 +91,8 @@ describe('background.js — no Redis path', () => {
     prismaMock.notifications.deleteMany.mockRejectedValue(new Error('cleanup error'))
     const { setupBackgroundJobs, stopBackgroundJobs } = await import('../background.js')
     await setupBackgroundJobs(prismaMock)
-    await vi.advanceTimersByTimeAsync(6000)
-    expect(loggerMock.default.error).toHaveBeenLastCalledWith('Notification cleanup error:', 'cleanup error')
+    await vi.advanceTimersByTimeAsync(20000)
+    expect(loggerMock.default.error).toHaveBeenCalledWith(expect.stringContaining('notification-cleanup failed'), expect.stringContaining('cleanup error'))
     stopBackgroundJobs()
   })
 
@@ -111,8 +112,8 @@ describe('background.js — no Redis path', () => {
     prismaMock.tickets.findMany.mockRejectedValue(new Error('sla error'))
     const { setupBackgroundJobs, stopBackgroundJobs } = await import('../background.js')
     await setupBackgroundJobs(prismaMock)
-    await vi.advanceTimersByTimeAsync(6000)
-    expect(loggerMock.default.error).toHaveBeenLastCalledWith('SLA overdue check error:', 'sla error')
+    await vi.advanceTimersByTimeAsync(20000)
+    expect(loggerMock.default.error).toHaveBeenCalledWith(expect.stringContaining('sla-overdue-check failed'), expect.stringContaining('sla error'))
     stopBackgroundJobs()
   })
 })
@@ -133,10 +134,10 @@ describe('background.js — Redis path', () => {
     const { setupBackgroundJobs, stopBackgroundJobs } = await import('../background.js')
     await setupBackgroundJobs(prismaMock)
     expect(ioredisMock.default).toHaveBeenCalledWith('redis://localhost:6379', { maxRetriesPerRequest: null })
-    expect(bullMqMock.Queue).toHaveBeenCalledTimes(2)
-    expect(bullMqMock.Worker).toHaveBeenCalledTimes(2)
+    expect(bullMqMock.Queue).toHaveBeenCalledTimes(3)
+    expect(bullMqMock.Worker).toHaveBeenCalledTimes(3)
     expect(mockQueue.upsertJobScheduler).toHaveBeenCalledTimes(2)
-    expect(loggerMock.default.info).toHaveBeenCalledWith('Background jobs using BullMQ (Redis)')
+    expect(loggerMock.default.info).toHaveBeenCalledWith('Background jobs using BullMQ (Redis) with retry + DLQ')
     expect(loggerMock.default.warn).not.toHaveBeenCalled()
     stopBackgroundJobs()
   })

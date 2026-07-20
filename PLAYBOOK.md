@@ -211,8 +211,9 @@ E2E (critical flows):     14 Playwright spec'ов
 | 53 | Grafana Dashboard | ✅ Реализовано | — | 6 панелей: rate, duration, memory, CPU, event loop |
 | 4 | Strict CSP | ✅ Реализовано | — | Helmet с кастомными директивами |
 | 48 | Outbox Pattern | ✅ Реализовано | — | enqueueEvent + worker (100ms poll) |
+| 49 | Dead Letter Queue | ✅ Реализовано | — | BullMQ retry+DLQ + in-memory withRetry+DLQ |
 | 27a | Bundle size (1.2 MB index chunk) | 🔴 | 2ч | FCP с 1.5s → < 1s |
-| 49 | Bull Queue (background jobs) | 🔴 | 3ч | Надёжные ретраи SLA |
+| — | Bull Queue (background jobs) | 🔴 | 3ч | Надёжные ретраи SLA |
 | — | N+1 Query Audit | 🟠 | 1ч | Стабильность API под нагрузкой |
 | — | Index Audit + FULLTEXT | 🟠 | 1ч | Скорость поиска |
 | — | Feature Flags | 🟡 | 4ч | Безопасный rollout |
@@ -352,16 +353,18 @@ app.get('/api/health/ready', async (req, res) => {
 
 ### 49. Dead Letter Queue (background jobs)
 
-Фоновые задачи (`background.js`) не имеют ретраев и DLQ:
+✅ **Реализовано** в `server/src/background.js`:
 
-```js
-// Идеал: Bull Queue
-// - 3 попытки с exponential backoff + jitter (1s, 4s, 16s)
-// - После 3х неудач → DLQ (отдельная очередь)
-// - Алерт при > 10 сообщений в DLQ за час
-```
+**С Redis (BullMQ):**
+- `defaultJobOptions.attempts = 3`, `backoff.type = exponential`, `delay = 2000`
+- При исчерпании попыток — job остаётся в failed (не удаляется)
+- `service-desk-dlq` очередь — DLQ-воркер логирует каждый failed job
+- `checkDlqAlert()` — при > 10 DLQ-задач за час шлёт email админам
 
-⚠️ **Не реализовано.** Сейчас `sendTicketNotification` падает с `.catch(() => {})` — ошибки игнорируются.
+**Без Redis (setInterval):**
+- `withRetry()` — 3 попытки с exponential backoff + jitter (2s, 4s, 8s + random 0–500ms)
+- После 3х неудач — запись в `event_outbox` с event_type `dlq:<taskName>`
+- `checkDlqAlert()` проверяет количество dlq-записей каждый час
 
 ### 50. Backup Verification
 

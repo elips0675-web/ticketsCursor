@@ -167,7 +167,7 @@ async function shutdown(signal) {
 
 ### 42. Testing Pyramid
 ```
-Unit (business logic):    366 frontend + 346 backend = 712 tests
+Unit (business logic):    372 frontend + 352 backend = 724 tests
 Integration (API routes): покрыто в api.test.js (145 тестов)
 E2E (critical flows):     14 Playwright spec'ов
 ```
@@ -213,12 +213,20 @@ E2E (critical flows):     14 Playwright spec'ов
 | 48 | Outbox Pattern | ✅ Реализовано | — | enqueueEvent + worker (100ms poll) |
 | 49 | Dead Letter Queue | ✅ Реализовано | — | BullMQ retry+DLQ + in-memory withRetry+DLQ |
 | 27a | Bundle size (1.2 MB index chunk) | 🔴 | 2ч | FCP с 1.5s → < 1s |
-| — | Bull Queue (background jobs) | 🔴 | 3ч | Надёжные ретраи SLA |
+| 49 | Bull Queue (background jobs) | ✅ DLQ | — | BullMQ retry+DLQ + in-memory withRetry+DLQ |
 | — | N+1 Query Audit | 🟠 | 1ч | Стабильность API под нагрузкой |
 | — | Index Audit + FULLTEXT | 🟠 | 1ч | Скорость поиска |
-| — | Feature Flags | 🟡 | 4ч | Безопасный rollout |
+| 29 | Feature Flags | ✅ | — | useFeature() hook + admin UI + 30s cache |
 | 52 | API Versioning | 🟢 | 2ч | Безопасные breaking changes |
+| — | Email-шаблоны в админке | 🟡 | 3ч | Настраиваемость системы |
+| — | Audit log CSV экспорт | 🟡 | 1ч | Compliance/безопасность |
+| — | WebSocket комнаты ticket:{id} | 🟡 | 2ч | Реалтайм-обновления тикета |
+| — | Bulk actions | 🟡 | 2ч | UX массовых операций |
+| — | Canned responses | 🟡 | 2ч | Скорость ответа агентов |
 | — | prefers-reduced-motion | 🟢 | 15мин | a11y |
+| — | Tags/labels на тикетах | 🟢 | 2ч | Категоризация |
+| — | Mentions (@username) | 🟢 | 1ч | Удобство коммуникации |
+| — | Time tracking | 🟢 | 2ч | Учёт трудозатрат |
 
 ---
 
@@ -405,29 +413,28 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ## ⚙️ Feature Flags
 
-❌ **Не реализовано.** Нужно для включения/выключения фич без деплоя.
+✅ **Реализовано (Этап 29).**
 
-```js
-// server/src/routes/features.js — GET /api/admin/features
-// Хранить в таблице feature_flags (key, enabled, updated_at)
-// Кэшировать в Redis на 30s
+**Таблица:** `feature_flags` (key VARCHAR PK, enabled BOOLEAN, description VARCHAR, updated_at TIMESTAMP)
 
-// Клиентский хук:
-function useFeature(key: string): boolean {
-  const { data } = useQuery({
-    queryKey: ['features', key],
-    queryFn: () => api.get(`/admin/features/${key}`),
-    staleTime: 30_000,
-  })
-  return data?.enabled ?? false
-}
+**API** (`GET/PUT /api/admin/features`):
+- GET возвращает массив `[{ key, enabled, description }]`, кэшируется 30с через `cacheMiddleware`
+- PUT принимает `[{ key, enabled }]`, upsert + инвалидация кэша
+
+**Клиент** (`src/hooks/useFeature.ts`):
+```ts
+// Возвращает true по умолчанию (если нет данных или флаг не найден)
+function useFeature(key: string): boolean
+function useAllFeatures(): { data: FeatureFlag[] }
 ```
+- React Query со `staleTime: 30_000` (совпадает с серверным кэшем)
 
-| Фича | Зачем |
-|------|-------|
-| `new_ticket_form` | Постепенный rollout новой формы |
-| `kanban_view` | A/B тест Kanban vs список |
-| `dark_theme` | Включить тёмную тему (если решат вернуть) |
+**Admin UI** — `FeatureFlagsSection` в `AdminSettings.tsx`:
+- Toggle-переключатели для каждого флага
+- Save/Reset кнопки (появляются после изменений)
+- `data-testid="feature-{key}"` для тестов
+
+**Флаги по умолчанию:** `new_ticket_form`, `kanban_view`, `dark_theme` (все true).
 
 ---
 

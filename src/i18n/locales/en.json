@@ -33,7 +33,8 @@
     "confirm": "Confirm",
     "confirmDelete": "Are you sure?",
     "all": "All",
-    "error": "Error"
+    "error": "Error",
+    "reset": "Reset"
   },
   "auth": {
     "login": "Login",
@@ -427,6 +428,8 @@
     "geoDesc": "Migration for fulltext search on 6 tables",
     "geoBtn": "Run migration",
     "geoRunning": "Migrating…",
-    "geoDone": "Fulltext search enabled"
+    "geoDone": "Fulltext search enabled",
+    "features": "Feature Flags",
+    "featuresSubtitle": "Enable/disable features without deployment"
   }
 }

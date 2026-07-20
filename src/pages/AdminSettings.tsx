@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
-import { Save, Loader2, Eye, EyeOff, Database, Server, FileText, Search, RefreshCw } from 'lucide-react'
+import { Save, Loader2, Eye, EyeOff, Database, Server, FileText, Search, RefreshCw, Flag, ToggleLeft } from 'lucide-react'
 import { api } from '@/lib/api'
 
 const FIELDS = [
@@ -176,6 +176,8 @@ export default function AdminSettings() {
         </CardContent>
       </Card>
 
+      <FeatureFlagsSection />
+
       <Button onClick={save} disabled={saving} className="gap-2">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
         {saving ? t('common.loading') : t('common.save')}
@@ -244,6 +246,120 @@ function RedisStatus() {
         </>
       )}
     </div>
+  )
+}
+
+interface FeatureFlag {
+  key: string
+  enabled: boolean
+  description: string
+}
+
+function FeatureFlagsSection() {
+  const { t } = useTranslation()
+  const [flags, setFlags] = useState<FeatureFlag[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [changed, setChanged] = useState(false)
+
+  useEffect(() => {
+    api
+      .get('/admin/features')
+      .then((data: any) => {
+        if (data) setFlags(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  const toggle = (key: string) => {
+    setFlags(prev => prev.map(f => f.key === key ? { ...f, enabled: !f.enabled } : f))
+    setChanged(true)
+  }
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      await api.put('/admin/features', flags)
+      toast.success(t('common.saveSuccess'))
+      setChanged(false)
+    } catch { }
+    setSaving(false)
+  }
+
+  const reset = async () => {
+    setLoading(true)
+    try {
+      const data = await api.get('/admin/features')
+      if (data) setFlags(data)
+      setChanged(false)
+    } catch { }
+    setLoading(false)
+  }
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Flag className="w-4 h-4 text-primary" />
+            {t('admin.features')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Flag className="w-4 h-4 text-primary" />
+          {t('admin.features')}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {flags.map((f) => (
+          <div key={f.key} className="flex items-center justify-between rounded-lg border px-4 py-3">
+            <div className="flex items-start gap-3">
+              <ToggleLeft className={`w-5 h-5 mt-0.5 ${f.enabled ? 'text-primary' : 'text-muted-foreground'}`} />
+              <div>
+                <p className="text-sm font-medium">{f.key}</p>
+                <p className="text-xs text-muted-foreground">{f.description}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={f.enabled}
+              aria-label={f.key}
+              data-testid={`feature-${f.key}`}
+              onClick={() => toggle(f.key)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${f.enabled ? 'bg-primary' : 'bg-input'}`}
+            >
+              <span className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${f.enabled ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
+            </button>
+          </div>
+        ))}
+        {changed && (
+          <div className="flex gap-2 pt-2">
+            <Button size="sm" onClick={save} disabled={saving} className="gap-1.5">
+              {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+              {t('common.save')}
+            </Button>
+            <Button size="sm" variant="outline" onClick={reset} className="gap-1.5">
+              <RefreshCw className="w-3 h-3" />
+              {t('common.reset')}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

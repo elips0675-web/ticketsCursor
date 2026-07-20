@@ -5,6 +5,35 @@
 
 ---
 
+## [1.3.0] — 2026-07-20
+
+### 🚀 Dead Letter Queue + Background Jobs Reliability
+
+- **BullMQ DLQ** — `background.js`: `defaultJobOptions.attempts = 3`, exponential backoff (2s, 4s, 8s + jitter), failed jobs остаются для анализа
+- **In-memory DLQ** (без Redis): `withRetry()` — 3 попытки + jitter, после исчерпания — запись в `event_outbox` с типом `dlq:<taskName>`
+- **DLQ Alerting** — `checkDlqAlert()`: при > 10 DLQ-задач за час — email админам
+- **QueueScheduler** — добавлен в bullMqMock для совместимости тестов
+
+### 🗄️ Миграции
+
+- **Idempotent polls migration** (`20260710_polls_enhance.js`) — проверяет существование колонок `ends_at`, `show_results` перед ALTER TABLE
+- **last_active migration** (`20260720_add_last_active.js`) — добавляет `last_active TIMESTAMP NULL` в `employees` (для отслеживания онлайн-статуса)
+- **Prisma Client** — регенерирован после миграций (19 моделей, +feature_flags)
+
+### 🐛 Исправлено
+
+- **VAPID try-catch** — `push.js` обёрнут `webpush.setVapidDetails()` в try-catch; без VAPID ключей — тихий fallback, не падает 500
+- **QueueScheduler mock** — `background.expanded.test.js` добавлен `QueueScheduler` в bullMqMock (падал ReferenceError при тестах BullMQ)
+- **Polls migration idempotent** — не падает при повторном запуске (column already exists)
+
+### 🔧 Технический долг
+
+- Bull Queue (background jobs) — ✅ DLQ реализован (см. PLAYBOOK.md #49)
+- Добавлен `last_active` в Prisma schema employees model
+- **Feature Flags (19-я модель Prisma)**: таблица `feature_flags`, `GET/PUT /api/admin/features`, хук `useFeature(key)`, UI в AdminSettings с toggle-переключателями, кэш 30с
+- **Тесты**: +5 серверных (feature flags API), +5 клиентских (useFeature hook + AdminSettings toggles)
+- **Кими-аудит**: зафиксированы оставшиеся gaps (email-шаблоны, WebSocket комнаты, bulk actions) — внесены в context.txt
+
 ## [1.2.0] — 2026-07-17
 
 ### 🚀 Admin Operations

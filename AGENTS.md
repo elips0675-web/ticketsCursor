@@ -328,3 +328,25 @@ docker compose up -d --build
 - **Script**: `scripts/backup-mysql.ps1` — mysqldump + retention 7 дней
 - **i18n**: 20 новых ключей в `admin.*` (ru/en), добавлен `common.add`
 - **check-console**: 17/17 ALL OK
+
+### Этап 29 — Feature Flags
+- **Migration**: `20260720_feature_flags.js` — таблица `feature_flags` (key PK, enabled, description, updated_at)
+- **Backend**: `GET/PUT /api/admin/features` в admin.js, кэш 30с (`cacheMiddleware`), инвалидация на PUT
+- **Prisma**: модель `feature_flags` в `schema.prisma`
+- **Hook**: `src/hooks/useFeature.ts` — `useFeature(key)` (React Query, default true), `useAllFeatures()`
+- **Admin UI**: `FeatureFlagsSection` в `AdminSettings.tsx` — toggle switches + Save/Reset
+- **i18n**: `admin.features`, `admin.featuresSubtitle`, `common.reset`
+- **Тесты**: +5 серверных (api.test.js), +5 клиентских (useFeature.test.tsx, AdminSettings.test.tsx)
+- **MSW handler**: `/admin/features` GET + PUT mock
+- **Итог**: фронт 52 файла / 372 теста, сервер 25 файлов / 352 теста, Vite build ✅
+
+### Этап 28 — Sync, DLQ, идемпотентные миграции, last_active
+- **Sync из nout/repo**: git pull origin/main (9 коммитов: admin operations, CSP, SW bypass, UnhandledRejection, doc updates)
+- **PLAYBOOK merge conflict resolved**: DLQ row + new priority rows
+- **Dead Letter Queue** (background.js): BullMQ 3 retries + exponential backoff + DLQ-воркер; in-memory `withRetry()` + `event_outbox` fallback
+- **Idempotent migration**: `20260710_polls_enhance.js` — проверяет колонки перед ALTER
+- **last_active**: `20260720_add_last_active.js` — добавляет колонку в employees + Prisma schema
+- **VAPID try-catch**: push.js не падает без VAPID ключей
+- **QueueScheduler mock**: добавлен в bullMqMock для тестов
+- **Тесты**: сервер 346/346, клиент 366/366, Vite build ✅
+- **Документация**: CHANGELOG, AGENTS, context, PLAYBOOK, README обновлены

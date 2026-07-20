@@ -261,6 +261,15 @@ model password_resets {
   created_at DateTime? @default(now())
 }
 
+model feature_flags {
+  key         String    @id @db.VarChar(100)
+  enabled     Boolean   @default(true)
+  description String?   @default("") @db.VarChar(500)
+  updated_at  DateTime? @default(now())
+
+  @@map("feature_flags")
+}
+
 model event_outbox {
   id         Int       @id @default(autoincrement())
   event_type String    @db.VarChar(50)

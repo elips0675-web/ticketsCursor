@@ -7,6 +7,7 @@ import { auditLogMiddleware } from '../audit.js'
 import { authenticateToken, requireRole } from '../middleware.js'
 import { invalidateCache as invalidateSettingsCache } from '../settings.js'
 import logger from '../logger.js'
+import { cacheMiddleware, invalidateCache } from '../cache.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..', '..', '..')
@@ -209,6 +210,46 @@ router.put('/settings/redis', async (req, res) => {
   } catch (err) {
     logger.error('Redis settings error:', err)
     res.status(500).json({ success: false, message: err.message })
+  }
+})
+
+const DEFAULT_FEATURES = [
+  { key: 'new_ticket_form', enabled: true, description: 'Новая форма создания тикета' },
+  { key: 'kanban_view', enabled: true, description: 'Kanban-доска вместо списка' },
+  { key: 'dark_theme', enabled: true, description: 'Тёмная тема интерфейса' },
+]
+
+router.get('/features', cacheMiddleware(30), async (req, res) => {
+  try {
+    const rows = await prisma.feature_flags.findMany({ orderBy: { key: 'asc' } })
+    if (rows.length === 0) {
+      return res.json({ success: true, data: DEFAULT_FEATURES })
+    }
+    res.json({ success: true, data: rows.map(r => ({ key: r.key, enabled: r.enabled, description: r.description })) })
+  } catch (err) {
+    logger.error('Features get error:', err)
+    res.status(500).json({ success: false, message: 'Failed to fetch features' })
+  }
+})
+
+router.put('/features', async (req, res) => {
+  try {
+    const flags = req.body
+    if (!Array.isArray(flags)) {
+      return res.status(400).json({ success: false, message: 'Expected array of { key, enabled }' })
+    }
+    for (const f of flags) {
+      await prisma.feature_flags.upsert({
+        where: { key: f.key },
+        update: { enabled: Boolean(f.enabled), updated_at: new Date() },
+        create: { key: f.key, enabled: Boolean(f.enabled), description: f.description || '', updated_at: new Date() },
+      })
+    }
+    await invalidateCache('cache:*')
+    res.json({ success: true, data: { updated: true } })
+  } catch (err) {
+    logger.error('Features update error:', err)
+    res.status(500).json({ success: false, message: 'Failed to update features' })
   }
 })
 

@@ -54,6 +54,7 @@ describe('Protected routes — 401 without token', () => {
     { method: 'get', path: '/api/search?q=test' },
     { method: 'get', path: '/api/admin/users' },
     { method: 'get', path: '/api/admin/settings' },
+    { method: 'get', path: '/api/admin/features' },
     { method: 'get', path: '/api/notifications' },
     { method: 'get', path: '/api/push/vapid-key' },
     { method: 'get', path: '/api/push/subscription' },
@@ -1241,5 +1242,53 @@ describe('Admin — update settings', () => {
       .set('Authorization', `Bearer ${devToken}`)
       .send({ COMPANY_NAME: 'Test Corp', AUTO_ASSIGN: 'true' })
     expect([200, 500]).toContain(res.status)
+  })
+})
+
+describe('Admin — feature flags', () => {
+  it('GET /api/admin/features returns defaults when empty', async () => {
+    const res = await request(app)
+      .get('/api/admin/features')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect(res.status).toBe(200)
+    expect(res.body.success).toBe(true)
+    expect(Array.isArray(res.body.data)).toBe(true)
+    expect(res.body.data.length).toBeGreaterThan(0)
+    expect(res.body.data[0]).toHaveProperty('key')
+    expect(res.body.data[0]).toHaveProperty('enabled')
+  })
+
+  it('PUT /api/admin/features updates flags', async () => {
+    const res = await request(app)
+      .put('/api/admin/features')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send([{ key: 'kanban_view', enabled: false, description: 'Kanban test' }])
+    expect(res.status).toBe(200)
+    expect(res.body.success).toBe(true)
+  })
+
+  it('GET returns updated values after PUT', async () => {
+    const res = await request(app)
+      .get('/api/admin/features')
+      .set('Authorization', `Bearer ${devToken}`)
+    expect(res.status).toBe(200)
+    const kanban = res.body.data.find((f) => f.key === 'kanban_view')
+    expect(kanban).toBeDefined()
+    expect(kanban.enabled).toBe(false)
+  })
+
+  it('rejects non-admin from features', async () => {
+    const res = await request(app)
+      .get('/api/admin/features')
+      .set('Authorization', `Bearer ${agentToken}`)
+    expect(res.status).toBe(403)
+  })
+
+  it('PUT with invalid body returns 400', async () => {
+    const res = await request(app)
+      .put('/api/admin/features')
+      .set('Authorization', `Bearer ${devToken}`)
+      .send({ key: 'test' })
+    expect(res.status).toBe(400)
   })
 })

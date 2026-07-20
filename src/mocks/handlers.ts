@@ -488,6 +488,22 @@ export const handlers = [
     })
   }),
 
+  // ── Feature Flags ──
+  http.get(`${API}/admin/features`, () => {
+    return HttpResponse.json({
+      success: true,
+      data: [
+        { key: 'new_ticket_form', enabled: true, description: 'New ticket form' },
+        { key: 'kanban_view', enabled: false, description: 'Kanban view' },
+        { key: 'dark_theme', enabled: true, description: 'Dark theme' },
+      ],
+    })
+  }),
+  http.put(`${API}/admin/features`, async ({ request }) => {
+    const body = await request.json()
+    return HttpResponse.json({ success: true, data: { updated: true } })
+  }),
+
   http.get(`${API}/admin/users`, () => {
     return HttpResponse.json([
       { id: 1, name: 'Admin', email: 'admin@test.com', role: 'admin', isBlocked: false, createdAt: '2026-01-01' },

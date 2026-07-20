@@ -27,6 +27,8 @@
 | **Аудит** | Логирование всех действий |
 | **Soft Delete** | `deleted_at` на tickets, ticket_messages, files, chat_messages |
 | **Outbox Pattern** | `event_outbox` таблица + Worker для гарантированной доставки событий |
+| **Dead Letter Queue** | BullMQ retry+DLQ + in-memory `withRetry()` fallback, алерты при >10 failed задач/час |
+| **Feature Flags** | `useFeature()` hook, toggle UI в админке, кэш Redis 30с |
 | **SLA** | Мониторинг + оповещения о просрочках, пересчёт при смене приоритета |
 | **Health / Readiness** | Probes для K8s — liveness + readiness endpoints |
 | **Load Testing** | k6 сценарии в `k6/` для тикетов, чатов, поиска |
@@ -139,7 +141,7 @@ npm run test:e2e
 | Prometheus/Grafana | Нет | ✅ Настроены |
 | Роль requester | Нет | ✅ Реализована |
 | API versioning | Нет | ✅ unit-префикс (`/api/`) |
-| BullMQ вместо setInterval | setInterval | ✅ Реализовано |
+| BullMQ вместо setInterval | setInterval | ✅ DLQ + retry + in-memory fallback |
 
 #### Итоговый вывод
 
@@ -151,14 +153,14 @@ npm run test:e2e
 
 | Показатель | Значение | Статус |
 |---|---|---|
-| Клиентские тесты | 366 тестов, 51 файл | ✅ Пройдены |
-| Серверные тесты | 346 тестов, 25 файлов | ✅ Пройдены |
+| Клиентские тесты | 372 тестов, 52 файла | ✅ Пройдены |
+| Серверные тесты | 352 тестов, 25 файлов | ✅ Пройдены |
 | E2E тесты (Playwright) | 14 spec'ов, 17 страниц (`check-console.mjs`) | ✅ ALL OK |
-| Покрытие кода (клиент) | 71.02% stmts, 60.76% branch, 60.55% funcs (порог: 70/60/60) | ✅ Стабильно |
-| Покрытие кода (сервер) | 70.97% stmts, 64% branch (порог: 64/55) | ✅ Стабильно |
+| Покрытие кода (клиент) | 71.02% stmts, 60.76% branch, 60.55% funcs, 73.96% lines (порог: 70/60/60/73) | ✅ Стабильно |
+| Покрытие кода (сервер) | 70.97% stmts, 64% branch, 72% funcs, 73% lines (порог: 64/55/62/63) | ✅ Стабильно |
 | ESLint | 0 errors, 0 warnings | ✅ Чисто |
 | check-console (E2E) | 17/17 страниц без ошибок, русский текст | ✅ Пройден |
-| Prisma моделей | 18 (добавлен event_outbox) | ✅ |
+| Prisma моделей | 19 (добавлен event_outbox, feature_flags) | ✅ |
 | API endpoints | 60+ (Swagger + k6 metrics + Health probes) | ✅ |
 | React Query | useQuery/useMutation, optimistic updates, staleTime 5min | ✅ |
 | Request timing metrics | Prometheus-формат, гистограммы (50–5000ms) | ✅ |

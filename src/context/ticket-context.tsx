@@ -71,6 +71,9 @@ function mapTicket(raw: Record<string, unknown>): Ticket {
     messages_count: raw.messages_count || (Array.isArray(raw.messages) ? raw.messages.length : 0),
     createdAt: raw.created_at,
     updatedAt: raw.updated_at,
+    dueAt: raw.due_at || undefined,
+    escalationLevel: raw.escalation_level || 0,
+    escalatedAt: raw.escalated_at || undefined,
   }
 }
 

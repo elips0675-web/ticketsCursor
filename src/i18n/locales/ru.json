@@ -144,7 +144,8 @@
     "assignedNotify": "Назначен",
     "messageDeleted": "Сообщение удалено",
     "closedStatus": "Тикет закрыт",
-    "createdAt": "Создан {{{date}}}"
+    "createdAt": "Создан {{{date}}}",
+    "escalated": "Эскалация ур. {{{level}}}"
   },
   "dashboard": {
     "title": "Дашборд",
@@ -396,6 +397,8 @@
     "ticketSettings": "Настройки тикетов",
     "autoAssign": "Авто-назначение (on/off)",
     "slaResponseHours": "SLA время ответа (часы)",
+    "slaEscalationEnabled": "Эскалация SLA (true/false)",
+    "slaEscalationHours": "Шаг эскалации (часы)",
     "slaTitle": "SLA соблюдение",
     "slaOverdue": "Просрочено",
     "slaOnTime": "В срок",
@@ -427,6 +430,11 @@
     "geoDesc": "Миграция для полнотекстового поиска по 6 таблицам",
     "geoBtn": "Запустить миграцию",
     "geoRunning": "Миграция…",
-    "geoDone": "Геопоиск включён"
+    "geoDone": "Геопоиск включён",
+    "cannedResponses": "Шаблоны ответов",
+    "cannedTitle": "Название шаблона",
+    "cannedCategory": "Категория",
+    "cannedText": "Текст шаблона",
+    "cannedEmpty": "Нет шаблонов ответов"
   }
 }

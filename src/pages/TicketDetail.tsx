@@ -27,6 +27,7 @@ import {
   ImageIcon,
   FileText,
   Loader2,
+  AlertTriangle,
 } from 'lucide-react'
 import type { TicketStatus, TicketPriority } from '@/types'
 import { API_URL } from '@/lib/api'
@@ -223,6 +224,12 @@ export default function TicketDetail() {
                     <Badge className={`text-[10px] priority-${ticket.priority}`}>
                       {priorityLabel[ticket.priority]}
                     </Badge>
+                    {(ticket.escalationLevel || 0) > 0 && (
+                      <Badge variant="destructive" className="text-[10px] gap-1">
+                        <AlertTriangle className="w-3 h-3" />
+                        {t('tickets.escalated', { level: ticket.escalationLevel })}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {t('tickets.createdAt', { date: formatDate(ticket.createdAt) })}

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate, Outlet } from "react-router-dom"
-import { Shield, LayoutDashboard, Users, Bell, Settings, History, ArrowLeft, LogOut } from "lucide-react"
+import { Shield, LayoutDashboard, Users, Bell, Settings, History, MessageSquare, ArrowLeft, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
@@ -12,6 +12,7 @@ const adminNavItems = [
   { to: "/admin/push", icon: Bell, labelKey: "admin.push" },
   { to: "/admin/settings", icon: Settings, labelKey: "admin.settings" },
   { to: "/admin/audit", icon: History, labelKey: "admin.audit" },
+  { to: "/admin/canned-responses", icon: MessageSquare, labelKey: "admin.cannedResponses" },
 ]
 
 export function AdminLayout() {

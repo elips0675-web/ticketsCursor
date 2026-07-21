@@ -412,6 +412,14 @@
 | H — Sentry client+server | ✅ (уже было) |
 | I — Email templates с переменными | ✅ |
 
+### v1.5.0 — SLA Escalation + Canned Responses
+- ✅ Canned Responses — Prisma модель, API CRUD, админ UI, миграция 20260720
+- ✅ SLA Escalation — авто-повышение приоритета при просрочке (low→medium→high→critical)
+  - `escalated_at` + `escalation_level` в tickets, миграция 20260721
+  - `runSlaCheck` в background.js — эскалация по интервалам
+  - `notifySlaEscalated` в notify.js — WS эмит, аудит, уведомления
+  - UI бадж в TicketDetail.tsx + настройки в AdminSettings.tsx
+
 ### Остаточный техдолг (не из Оценка kimi.txt)
 - Server coverage: search.js FULLTEXT fallback, tickets.service.js 500-branches
 - Notifications: read receipts, offline message queue

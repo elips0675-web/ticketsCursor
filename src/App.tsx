@@ -37,6 +37,7 @@ const AdminUsers = lazy(() => import('@/pages/AdminUsers'))
 const AdminPush = lazy(() => import('@/pages/AdminPush'))
 const AdminSettings = lazy(() => import('@/pages/AdminSettings'))
 const AdminAudit = lazy(() => import('@/pages/AdminAudit'))
+const AdminCannedResponses = lazy(() => import('@/pages/AdminCannedResponses'))
 const WikiPage = lazy(() => import('@/pages/Wiki'))
 const SearchPage = lazy(() => import('@/pages/Search'))
 const FilesPage = lazy(() => import('@/pages/Files'))
@@ -171,6 +172,14 @@ export default function App() {
                         element={
                           <Page>
                             <AdminAudit />
+                          </Page>
+                        }
+                      />
+                      <Route
+                        path="canned-responses"
+                        element={
+                          <Page>
+                            <AdminCannedResponses />
                           </Page>
                         }
                       />

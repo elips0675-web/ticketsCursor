@@ -18,7 +18,7 @@ const prismaMock = vi.hoisted(() => ({
   event_outbox: { create: vi.fn().mockResolvedValue({ id: 1 }), count: vi.fn().mockResolvedValue(0) },
 }))
 const emailMock = vi.hoisted(() => ({ sendTicketNotification: vi.fn().mockResolvedValue() }))
-const notifyMock = vi.hoisted(() => ({ notifySlaBreached: vi.fn() }))
+const notifyMock = vi.hoisted(() => ({ notifySlaBreached: vi.fn(), notifySlaEscalated: vi.fn() }))
 const loggerMock = vi.hoisted(() => ({ default: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }))
 const mockQueue = vi.hoisted(() => ({ upsertJobScheduler: vi.fn().mockResolvedValue() }))
 const bullMqMock = vi.hoisted(() => ({
@@ -31,6 +31,7 @@ const ioredisMock = vi.hoisted(() => ({ default: vi.fn() }))
 vi.mock('../prisma.js', () => ({ default: prismaMock }))
 vi.mock('../email.js', () => emailMock)
 vi.mock('../notify.js', () => notifyMock)
+vi.mock('../settings.js', () => ({ getSettings: vi.fn().mockResolvedValue({ SLA_ESCALATION_ENABLED: 'false', SLA_ESCALATION_HOURS: '4', SLA_RESPONSE_HOURS: '4' }) }))
 vi.mock('../logger.js', () => loggerMock)
 vi.mock('bullmq', () => bullMqMock)
 vi.mock('ioredis', () => ioredisMock)

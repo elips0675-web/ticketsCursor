@@ -53,6 +53,8 @@ model tickets {
   due_at      DateTime?
   first_response_at DateTime?
   resolved_at DateTime?
+  escalated_at DateTime?
+  escalation_level Int       @default(0)
   created_at  DateTime? @default(now())
   updated_at  DateTime? @default(now())
   deleted_at  DateTime?
@@ -268,6 +270,18 @@ model feature_flags {
   updated_at  DateTime? @default(now())
 
   @@map("feature_flags")
+}
+
+model canned_responses {
+  id         Int       @id @default(autoincrement())
+  title      String    @db.VarChar(255)
+  text       String    @db.Text
+  category   String?   @default("") @db.VarChar(100)
+  created_by Int
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  @@map("canned_responses")
 }
 
 model event_outbox {

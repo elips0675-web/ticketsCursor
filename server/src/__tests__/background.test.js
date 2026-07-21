@@ -15,7 +15,8 @@ vi.mock('../prisma.js', () => ({
 }))
 
 vi.mock('../email.js', () => ({ sendTicketNotification: vi.fn().mockResolvedValue() }))
-vi.mock('../notify.js', () => ({ notifySlaBreached: vi.fn() }))
+vi.mock('../notify.js', () => ({ notifySlaBreached: vi.fn(), notifySlaEscalated: vi.fn() }))
+vi.mock('../settings.js', () => ({ getSettings: vi.fn().mockResolvedValue({ SLA_ESCALATION_ENABLED: 'false', SLA_ESCALATION_HOURS: '4', SLA_RESPONSE_HOURS: '4' }) }))
 vi.mock('../logger.js', () => ({ default: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }))
 
 describe('background.js (no Redis)', () => {

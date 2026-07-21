@@ -15,6 +15,8 @@ const FIELDS = [
   { key: 'DEFAULT_LANGUAGE', label: 'defaultLanguage', type: 'text', section: 'companySettings' },
   { key: 'AUTO_ASSIGN', label: 'autoAssign', type: 'text', section: 'ticketSettings' },
   { key: 'SLA_RESPONSE_HOURS', label: 'slaResponseHours', type: 'text', section: 'ticketSettings' },
+  { key: 'SLA_ESCALATION_ENABLED', label: 'slaEscalationEnabled', type: 'text', section: 'ticketSettings' },
+  { key: 'SLA_ESCALATION_HOURS', label: 'slaEscalationHours', type: 'text', section: 'ticketSettings' },
   { key: 'TELEGRAM_BOT_TOKEN', label: 'telegramToken', type: 'password', section: 'telegramSettings' },
   { key: 'SMTP_HOST', label: 'smtpHost', type: 'text', section: 'emailSettings' },
   { key: 'SMTP_PORT', label: 'smtpPort', type: 'text', section: 'emailSettings' },

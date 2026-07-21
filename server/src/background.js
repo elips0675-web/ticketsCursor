@@ -1,6 +1,7 @@
 import logger from './logger.js'
 import { sendTicketNotification } from './email.js'
-import { notifySlaBreached } from './notify.js'
+import { notifySlaBreached, notifySlaEscalated } from './notify.js'
+import { getSettings } from './settings.js'
 
 const CLEANUP_INTERVAL = 6 * 60 * 60 * 1000
 const SLA_CHECK_INTERVAL = 15 * 60 * 1000
@@ -173,6 +174,8 @@ async function runCleanup(prisma) {
   if (r.count > 0) logger.info(`Cleaned ${r.count} old notifications`)
 }
 
+const PRIORITY_ORDER = ['low', 'medium', 'high', 'critical']
+
 async function runSlaCheck(prisma) {
   const overdue = await prisma.tickets.findMany({
     where: {
@@ -180,10 +183,38 @@ async function runSlaCheck(prisma) {
       due_at: { lt: new Date() },
       deleted_at: null,
     },
-    select: { id: true },
+    select: { id: true, priority: true, due_at: true, escalation_level: true, escalated_at: true },
     take: 200,
   })
+  const settings = await getSettings()
+  const escalationEnabled = settings.SLA_ESCALATION_ENABLED !== 'false'
+  const escalationHours = Number(settings.SLA_ESCALATION_HOURS) || Number(settings.SLA_RESPONSE_HOURS) || 4
+
   for (const t of overdue) {
     await notifySlaBreached(t.id)
+    if (!escalationEnabled) continue
+
+    const currentLevel = t.escalation_level || 0
+    const hoursOverdue = (Date.now() - new Date(t.due_at).getTime()) / (1000 * 60 * 60)
+    const nextLevel = currentLevel + 1
+
+    if (hoursOverdue >= escalationHours * nextLevel) {
+      const idx = PRIORITY_ORDER.indexOf(t.priority || 'medium')
+      if (idx < PRIORITY_ORDER.length - 1) {
+        const newPriority = PRIORITY_ORDER[idx + 1]
+        await prisma.tickets.update({
+          where: { id: t.id },
+          data: { priority: newPriority, escalation_level: nextLevel, escalated_at: new Date(), updated_at: new Date() },
+        })
+        await notifySlaEscalated(t.id, t.priority || 'medium', newPriority, nextLevel)
+        logger.info(`SLA escalation #${t.id}: ${t.priority} → ${newPriority} (level ${nextLevel})`)
+      } else {
+        await prisma.tickets.update({
+          where: { id: t.id },
+          data: { escalation_level: nextLevel, escalated_at: new Date(), updated_at: new Date() },
+        })
+        logger.info(`SLA escalation #${t.id}: at critical, escalation level ${nextLevel}`)
+      }
+    }
   }
 }

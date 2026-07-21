@@ -317,3 +317,57 @@ export async function notifySlaBreached(ticketId) {
 
   sendTelegramNotification(`🚨 SLA просрочка\nТикет #${ticketId}: ${t.title}\nСрок реакции истёк: ${new Date(t.due_at).toLocaleString('ru-RU')}`)
 }
+
+const PRIORITY_ORDER = ['low', 'medium', 'high', 'critical']
+
+function getNextPriority(current) {
+  const idx = PRIORITY_ORDER.indexOf(current)
+  if (idx >= PRIORITY_ORDER.length - 1) return null
+  return PRIORITY_ORDER[idx + 1]
+}
+
+export async function notifySlaEscalated(ticketId, fromPriority, toPriority, level) {
+  const t = await getTicketWithUsers(ticketId)
+  if (!t) return
+
+  const title = `Эскалация SLA #${ticketId}: ${PRIORITY_LABELS[fromPriority] || fromPriority} → ${PRIORITY_LABELS[toPriority] || toPriority}`
+  const body = `Тикет "${t.title}" (#${ticketId}) просрочен по SLA. Приоритет повышен с "${PRIORITY_LABELS[fromPriority] || fromPriority}" до "${PRIORITY_LABELS[toPriority] || toPriority}" (уровень эскалации ${level}).`
+
+  const admins = await prisma.employees.findMany({
+    where: { is_active: true, role: { in: ['super_admin', 'admin', 'senior_agent'] } },
+    select: { id: true, email: true },
+  })
+  const targets = new Set([t.creatorId, t.assigneeId].filter(Boolean))
+  for (const a of admins) targets.add(a.id)
+
+  for (const userId of targets) {
+    await createNotification({ userId, type: 'ticket_sla_escalated', title, body, link: `/tickets/${ticketId}` })
+  }
+
+  const cn = await companyName()
+  const vars = { ticketId: String(ticketId), ticketTitle: t.title, fromPriority: PRIORITY_LABELS[fromPriority] || fromPriority, toPriority: PRIORITY_LABELS[toPriority] || toPriority, level: String(level), companyName: cn }
+  const adminEmails = admins.map(a => a.email).filter(Boolean)
+  for (const email of adminEmails) {
+    sendEmail(email,
+      `SLA эскалация #${ticketId}: ${PRIORITY_LABELS[fromPriority] || fromPriority} → ${PRIORITY_LABELS[toPriority] || toPriority}`,
+      replaceVariables('Тикет "{{ticketTitle}}" (#{{ticketId}}) просрочен по SLA.\nПриоритет повышен: {{fromPriority}} → {{toPriority}} (уровень {{level}})\n\n{{companyName}}', vars))
+  }
+
+  sendTelegramNotification(`🚨 Эскалация SLA\nТикет #${ticketId}: ${t.title}\nПриоритет: ${PRIORITY_LABELS[fromPriority] || fromPriority} → ${PRIORITY_LABELS[toPriority] || toPriority}`)
+
+  const { logAudit } = await import('./audit.js')
+  await logAudit({
+    userId: null,
+    userName: 'System',
+    action: 'sla_escalated',
+    entityType: 'ticket',
+    entityId: ticketId,
+    details: { fromPriority, toPriority, escalationLevel: level, ticketTitle: t.title },
+  })
+
+  const { getIO } = await import('./socket.js')
+  const io = getIO()
+  if (io) {
+    io.to(`ticket:${ticketId}`).emit('ticket:sla:escalated', { ticketId, fromPriority, toPriority, level })
+  }
+}

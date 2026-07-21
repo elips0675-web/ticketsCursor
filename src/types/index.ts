@@ -49,6 +49,9 @@ export interface Ticket {
   tags: string[]
   computerName?: string
   userAccount?: string
+  dueAt?: string
+  escalationLevel?: number
+  escalatedAt?: string
 }
 
 export interface TicketStats {
